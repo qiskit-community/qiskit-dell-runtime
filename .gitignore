@@ -1,0 +1,5 @@
+secrets.yaml
+qiskit_emulator_provider.egg-info/
+.eggs/
+**/__pycache__/
+**/.ipynb_checkpoints/

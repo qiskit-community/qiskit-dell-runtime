@@ -18,16 +18,29 @@ jobs:
           repository: {{docker_repo}}
           username: {{repo_username}}
           password: {{repo_password}}
+          insecure_registries: [{{docker_registry}}]
       inputs:
       - name: qiskit-runtime-emulator
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
+  - get: qiskit-runtime-emulator-version
+    trigger: false
+    params: {bump: minor}
+
 
 resources:
 - name: qiskit-runtime-emulator
   type: git
   icon: github-circle
-  source: 
+  source: &github-secrets
     uri: git@eos2git.cec.lab.emc.com:OCTO/qiskit-runtime-emulator.git
     branch: master
-    
+    private_key: {{github_secret}}
+
+- name: qiskit-runtime-emulator-version
+  type: semver
+  icon: update
+  source:
+    <<: *github-secrets
+    driver: git
+    file: ci/version

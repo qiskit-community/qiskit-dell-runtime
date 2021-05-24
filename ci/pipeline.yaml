@@ -24,7 +24,7 @@ jobs:
         path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
 
 resources:
-- name: qiskit-emulator
+- name: qiskit-runtime-emulator
   type: git
   icon: github-circle
   source: 

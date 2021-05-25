@@ -66,5 +66,13 @@ class ProviderTest(unittest.TestCase):
         
         # TODO: add tags dt dtm processor_type later
 
+    # def test_backend_frequency(self):
+    #     provider = EmulatorProvider()
+    #     self.assertEqual(1, len(provider.backends()))
+
+    #     backend = provider.get_backend(name="emulator")
+    #     self.assertIsNotNone(backend)
+
+    #     self.assertIsNone(backend.faulty_gates())
 
         

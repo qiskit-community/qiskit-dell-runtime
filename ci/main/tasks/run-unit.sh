@@ -4,3 +4,4 @@ set -e -x
 cd qiskit-runtime-emulator
 pip3 install . 
 
+python3 -m pytest

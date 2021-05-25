@@ -2,6 +2,7 @@ import unittest
 from qiskit import QuantumCircuit, execute
 from qiskit_emulator import EmulatorProvider
 from qiskit.providers import JobStatus
+from time import sleep
 
 class ProviderTest(unittest.TestCase):
     def test_job_submission(self):
@@ -17,7 +18,15 @@ class ProviderTest(unittest.TestCase):
         qc.measure([0, 1], [0, 1])
         job = backend.run(qc, shots=1) 
         self.assertIsNotNone(job)
-        self.assertTrue(job.status() == JobStatus.DONE)
+        
+        count = 0
+        # 5 second
+        max = 50 
+        while count < max and job.status() != JobStatus.DONE:
+            count += 1
+            sleep(0.1)
+        self.assertEqual(JobStatus.DONE, job.status())
+
 
     def test_execute(self):
         provider = EmulatorProvider()
@@ -32,4 +41,11 @@ class ProviderTest(unittest.TestCase):
         qc.measure([0, 1], [0, 1])
         job = execute(qc, backend, shots=2)
         self.assertIsNotNone(job)
-        self.assertTrue(job.status() == JobStatus.DONE)
+        
+        count = 0
+        # 5 second
+        max = 50 
+        while count < max and job.status() != JobStatus.DONE:
+            count += 1
+            sleep(0.1)
+        self.assertEqual(JobStatus.DONE, job.status())

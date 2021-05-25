@@ -66,8 +66,9 @@ class EmulatorBackend(Backend):
     def _default_options(cls):
         return Options(shots=1, sampler_seed=None)
 
-    def run(self, circuits, **kwargs):
-        job = emulator_job.EmulatorJob(self, None)
+    def run(self, circuit, **kwargs):
+        # TODO: Need Job ID
+        job = emulator_job.EmulatorJob(self, None, circuit=circuit)
         job.submit()
         return job
 

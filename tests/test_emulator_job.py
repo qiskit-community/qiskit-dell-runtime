@@ -18,6 +18,7 @@ class ProviderTest(unittest.TestCase):
         qc.measure([0, 1], [0, 1])
         job = backend.run(qc, shots=1) 
         self.assertIsNotNone(job)
+        # self.assertNotEqual(JobStatus.DONE, job.status())
         
         count = 0
         # 5 second
@@ -26,6 +27,8 @@ class ProviderTest(unittest.TestCase):
             count += 1
             sleep(0.1)
         self.assertEqual(JobStatus.DONE, job.status())
+
+        job.result()
 
 
     def test_execute(self):
@@ -41,7 +44,7 @@ class ProviderTest(unittest.TestCase):
         qc.measure([0, 1], [0, 1])
         job = execute(qc, backend, shots=2)
         self.assertIsNotNone(job)
-        
+
         count = 0
         # 5 second
         max = 50 

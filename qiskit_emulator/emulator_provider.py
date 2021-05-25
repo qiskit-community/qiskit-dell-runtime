@@ -6,14 +6,14 @@ from qiskit.providers.providerutils import filter_backends
 
 logger = logging.getLogger(__name__)
 
-# from . import emulator_backend
+from . import emulator_backend
 
 class EmulatorProvider:
     name = "emulator_provider"
 
     def __init__(self):
         self.backends = BackendService([
-            # emulator_backend.EmulatorBackend(self)
+            emulator_backend.EmulatorBackend(self)
         ])
 
     def get_backend(self, name=None, **kwargs):

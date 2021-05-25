@@ -12,3 +12,7 @@ conda activate qruntime
 cd tests
 python suite.py
 ```
+
+```
+jupyter notebook --ip=0.0.0.0 --port=80
+```

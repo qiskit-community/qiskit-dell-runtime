@@ -5,7 +5,7 @@ from qiskit.providers import Options
 
 from datetime import datetime
 
-# from . import emulator_job
+from . import emulator_job
 
 class EmulatorBackend(Backend):
     def __init__(self, provider):
@@ -67,10 +67,9 @@ class EmulatorBackend(Backend):
         return Options(shots=1, sampler_seed=None)
 
     def run(self, circuits, **kwargs):
-        # job = emulator_job.EmulatorJob(self, None)
-        # job.submit()
-        # return job
-        return None
+        job = emulator_job.EmulatorJob(self, None)
+        job.submit()
+        return job
 
     def status(self):
         # backend_name (str) – The backend’s name

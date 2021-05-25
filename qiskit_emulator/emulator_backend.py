@@ -3,6 +3,8 @@ from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.models.backendstatus import BackendStatus
 from qiskit.providers import Options
 
+from datetime import datetime
+
 # from . import emulator_job
 
 class EmulatorBackend(Backend):
@@ -16,18 +18,43 @@ class EmulatorBackend(Backend):
             'mcr', 'mcswap', 'unitary', 'diagonal', 'multiplexer',
             'initialize', 'delay', 'pauli', 'mcx_gray'
         ])
+        supported_instructions = sorted([
+            'cx',
+            'id',
+            'delay',
+            'measure',
+            'reset',
+            'rz',
+            'sx',
+            'u1',
+            'u2',
+            'u3',
+            'x'])
+
         default_config = { #https://qiskit.org/documentation/stubs/qiskit.providers.models.BackendConfiguration.html#qiskit.providers.models.BackendConfiguration
             'backend_name': 'emulator',
+            'display_name': 'emulator',
+            'description': 'Local Emulator',
             'backend_version': "0.1.0",
+            'sample_name': 'emulator',
             'n_qubits': 29,
+            # TODO: doesn't work for anything other than 1. Need to look at this later
+            'n_registers': 1,
+            'register_map': None,
+
             'url': 'https://github.com/Qiskit/qiskit-aer',
+            'supported_instructions': supported_instructions,
             'simulator': True,
             'local': True,
             'conditional': True,
             'open_pulse': False,
             'memory': True,
+            'configurable': True,
+            'credits_required': False,
+            'online_date': datetime.now(),
+            
             'max_shots': int(1e6),
-            'description': 'A emulator backend',
+            'max_experiments': int(1e6),
             'coupling_map': None,
             'basis_gates': default_basic_gates,
             'gates': []

@@ -1,6 +1,8 @@
 from typing import List, Dict, Optional, Callable, Type, Union, NamedTuple
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
 from qiskit.providers import ProviderV1 as Provider
+import hashlib
+from datetime import datetime 
 
 class ProgramParameter(NamedTuple):
     """Program parameter."""
@@ -18,11 +20,9 @@ class ProgramResult(NamedTuple):
 
 class EmulatorRuntimeService():
 
-    _programs = {}
-
     def __init__(self, provider: Provider) -> None:
         self.provider = provider
-
+        self._programs = {}
 
     def pprint_programs(self):
         return self._programs
@@ -53,13 +53,33 @@ class EmulatorRuntimeService():
             return_values: Optional[List[ProgramResult]] = None,
             interim_results: Optional[List[ProgramResult]] = None
     ) -> str:
-        print("Do nothing")
+        # careful of hash collision
+        program_hash = hex(hash((data, name, version)))[-16:]
+        if name is None:
+            name = program_hash
+        
+        self._programs[program_hash] = RuntimeProgram(
+            program_name = name,
+            program_id = program_hash,
+            description = description, 
+            parameters = parameters,
+            return_values = return_values,
+            interim_results = interim_results,
+            max_execution_time=max_execution_time,
+            version=version,
+            backend_requirements=backend_requirements,
+            creation_date= datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        )
+        return program_hash
 
     def program(self, program_id: str, refresh: bool = False) -> RuntimeProgram:
-        print("Do nothing")
+        if program_id in self._programs:
+            return self._programs[program_id]
+        else:
+            return None
 
     def programs(self, refresh: bool = False) -> List[RuntimeProgram]:
-        return []
+        return self._programs.values()
 
     def run(
             self,

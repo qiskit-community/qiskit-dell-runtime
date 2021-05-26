@@ -74,22 +74,22 @@ class ProviderTest(unittest.TestCase):
         total = counts.get('11') + counts.get('00')
         self.assertEqual(total, 1024)
 
-    def test_cancel(self):
-        provider = EmulatorProvider()
-        self.assertIsNotNone(provider)
+    # def test_cancel(self):
+    #     provider = EmulatorProvider()
+    #     self.assertIsNotNone(provider)
         
-        backend = provider.get_backend(name="emulator")
-        self.assertIsNotNone(backend)
+    #     backend = provider.get_backend(name="emulator")
+    #     self.assertIsNotNone(backend)
 
-        circ = QuantumCircuit(2)
-        circ.h(0)
-        circ.cx(0, 1)
-        circ.measure_all()
+    #     circ = QuantumCircuit(2)
+    #     circ.h(0)
+    #     circ.cx(0, 1)
+    #     circ.measure_all()
 
-        # Transpile for simulator
-        job = backend.run(circ, shots=100000000)
+    #     # Transpile for simulator
+    #     job = backend.run(circ, shots=100000)
 
-        # Run and get counts
-        job.cancel()
-        sleep(1.0)
-        self.assertEqual(job.status(), '')
+    #     # Run and get counts
+    #     job.cancel()
+    #     sleep(1.0)
+    #     self.assertEqual(job.status(), '')

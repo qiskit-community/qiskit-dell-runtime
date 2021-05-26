@@ -1,12 +1,15 @@
+from qiskit_emulator.aerjob import AerJob
 from qiskit.providers import BackendV1 as Backend
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.models.backendstatus import BackendStatus
 from qiskit.providers import Options
 import concurrent.futures
-
+from qiskit.compiler import assemble
+from qiskit import Aer
 from datetime import datetime
 
-from . import emulator_job
+# from . import emulator_job
+from .aerjob import AerJob
 
 class EmulatorBackend(Backend):
     def __init__(self, provider):
@@ -66,14 +69,15 @@ class EmulatorBackend(Backend):
     def _default_options(cls):
         return Options(shots=1, sampler_seed=None)
     
-    def run(self, circuit, **kwargs):
-        # TODO: Need Job ID
-        shots = 1024
-        if "shots" in kwargs:
-            shots = kwargs["shots"]
-        job = emulator_job.EmulatorJob(self, None, circuit, shots)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            executor.submit(job.submit)
+    def run(self, circuit, **run_options):
+        # setting options
+        qobj = assemble(circuit, self)
+        config = qobj.config
+        for key, val in run_options.items():
+            setattr(config, key, val)
+        backend = Aer.get_backend('aer_simulator')
+        job = AerJob(self, None, backend._run, qobj)
+        job.submit()
         return job
 
     def status(self):

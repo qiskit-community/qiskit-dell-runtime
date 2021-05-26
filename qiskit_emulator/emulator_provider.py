@@ -8,14 +8,17 @@ from qiskit.providers import ProviderV1 as Provider
 logger = logging.getLogger(__name__)
 
 from . import emulator_backend
+from . import emulator_runtime_service
 
 class EmulatorProvider(Provider):
     name = "emulator_provider"
 
     def __init__(self):
+        super().__init__()
         self._backend_services = BackendService([
             emulator_backend.EmulatorBackend(self)
         ])
+        self.runtime = emulator_runtime_service.EmulatorRuntimeService()
 
     def get_backend(self, name=None, **kwargs):
         backends = self._backend_services(name, **kwargs)
@@ -28,6 +31,12 @@ class EmulatorProvider(Provider):
 
     def backends(self, name=None, **kwargs):
         return self._backend_services(name=name, **kwargs)
+
+    def has_service(self, service_name):
+        if service_name == 'runtime':
+            return True
+        else:
+            return False
 
 class BackendService:
     def __init__(self, backends):

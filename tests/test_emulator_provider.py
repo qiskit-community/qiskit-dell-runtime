@@ -12,8 +12,17 @@ class ProviderTest(unittest.TestCase):
 
         self.assertEqual(1, len(provider.backends()))
 
-    # def test_runtime_supported(self):
-    #     provider = EmulatorProvider()
-    #     self.assertIsNotNone(provider)
+    def test_runtime_supported(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
 
-    #     self.assertTrue(provider.has_service('runtime'))
+        self.assertTrue(provider.has_service('runtime'))
+        self.assertFalse(provider.has_service('weird_service'))
+
+    def test_has_runtime_attribute(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
+
+        self.assertIsNotNone(provider.runtime)
+
+

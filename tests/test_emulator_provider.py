@@ -25,4 +25,3 @@ class ProviderTest(unittest.TestCase):
 
         self.assertIsNotNone(provider.runtime)
 
-

@@ -18,7 +18,7 @@ class EmulatorProvider(Provider):
         self._backend_services = BackendService([
             emulator_backend.EmulatorBackend(self)
         ])
-        self.runtime = emulator_runtime_service.EmulatorRuntimeService()
+        self.runtime = emulator_runtime_service.EmulatorRuntimeService(self)
 
     def get_backend(self, name=None, **kwargs):
         backends = self._backend_services(name, **kwargs)

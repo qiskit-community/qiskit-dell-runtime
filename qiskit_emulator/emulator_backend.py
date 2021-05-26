@@ -2,6 +2,7 @@ from qiskit.providers import BackendV1 as Backend
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.models.backendstatus import BackendStatus
 from qiskit.providers import Options
+import concurrent.futures
 
 from datetime import datetime
 
@@ -61,15 +62,18 @@ class EmulatorBackend(Backend):
         }
     
         super().__init__(configuration=BackendConfiguration.from_dict(default_config), provider=provider)
-
     @classmethod
     def _default_options(cls):
         return Options(shots=1, sampler_seed=None)
-
+    
     def run(self, circuit, **kwargs):
         # TODO: Need Job ID
-        job = emulator_job.EmulatorJob(self, None, circuit=circuit)
-        job.submit()
+        shots = 1024
+        if "shots" in kwargs:
+            shots = kwargs["shots"]
+        job = emulator_job.EmulatorJob(self, None, circuit, shots)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            executor.submit(job.submit)
         return job
 
     def status(self):

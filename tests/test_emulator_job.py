@@ -1,5 +1,5 @@
 import unittest
-from qiskit import QuantumCircuit, execute
+from qiskit import QuantumCircuit, execute, transpile
 from qiskit_emulator import EmulatorProvider
 from qiskit.providers import JobStatus
 from time import sleep
@@ -52,3 +52,44 @@ class ProviderTest(unittest.TestCase):
             count += 1
             sleep(0.1)
         self.assertEqual(JobStatus.DONE, job.status())
+
+    def test_get_counts(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
+        
+        backend = provider.get_backend(name="emulator")
+        self.assertIsNotNone(backend)
+
+        circ = QuantumCircuit(2)
+        circ.h(0)
+        circ.cx(0, 1)
+        circ.measure_all()
+
+        # Transpile for simulator
+        circ = transpile(circ, backend)
+
+        # Run and get counts
+        result = backend.run(circ).result()
+        counts = result.get_counts(circ)
+        total = counts.get('11') + counts.get('00')
+        self.assertEqual(total, 1024)
+
+    def test_cancel(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
+        
+        backend = provider.get_backend(name="emulator")
+        self.assertIsNotNone(backend)
+
+        circ = QuantumCircuit(2)
+        circ.h(0)
+        circ.cx(0, 1)
+        circ.measure_all()
+
+        # Transpile for simulator
+        job = backend.run(circ, shots=100000000)
+
+        # Run and get counts
+        job.cancel()
+        sleep(1.0)
+        self.assertEqual(job.status(), '')

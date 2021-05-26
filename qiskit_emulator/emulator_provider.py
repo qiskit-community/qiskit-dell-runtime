@@ -3,27 +3,31 @@ import os
 
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.providers.providerutils import filter_backends
+from qiskit.providers import ProviderV1 as Provider
 
 logger = logging.getLogger(__name__)
 
 from . import emulator_backend
 
-class EmulatorProvider:
+class EmulatorProvider(Provider):
     name = "emulator_provider"
 
     def __init__(self):
-        self.backends = BackendService([
+        self._backend_services = BackendService([
             emulator_backend.EmulatorBackend(self)
         ])
 
     def get_backend(self, name=None, **kwargs):
-        backends = self.backends(name, **kwargs)
+        backends = self._backend_services(name, **kwargs)
         if len(backends) > 1:
             raise QiskitBackendNotFoundError("More than one backend matches criteria.")
         if not backends:
             raise QiskitBackendNotFoundError("No backend matches criteria.")
 
         return backends[0]
+
+    def backends(self, name=None, **kwargs):
+        return self._backend_services(name=name, **kwargs)
 
 class BackendService:
     def __init__(self, backends):

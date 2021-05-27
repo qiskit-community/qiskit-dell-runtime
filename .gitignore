@@ -6,4 +6,4 @@ qiskit_emulator_provider.egg-info/
 .vscode/
 get-pip.py
 *.log
-
+.pytest_cache/

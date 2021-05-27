@@ -87,9 +87,7 @@ class ProviderTest(unittest.TestCase):
     #     circ.measure_all()
 
     #     # Transpile for simulator
-    #     job = backend.run(circ, shots=100000)
-
-    #     # Run and get counts
+    #     job = backend.run(circ, shots=1000000)
+    #     sleep(0.001)
     #     job.cancel()
-    #     sleep(1.0)
-    #     self.assertEqual(job.status(), '')
+    #     self.assertEqual(job.status(), "")

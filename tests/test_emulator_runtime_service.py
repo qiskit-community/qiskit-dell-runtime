@@ -18,10 +18,10 @@ def main(backend, user_messenger, **kwargs):
     final_result = kwargs.pop("final_result", {})
     for it in range(iterations):
         qc = prepare_circuits(backend)
-        user_messenger.publish({"iteration": it, "interim_results": interim_results})
+        # user_messenger.publish({"iteration": it, "interim_results": interim_results})
         backend.run(qc).result()
 
-    user_messenger.publish(final_result, final=True)
+    # user_messenger.publish(final_result, final=True)
 """
 
 RUNTIME_PROGRAM_METADATA = {

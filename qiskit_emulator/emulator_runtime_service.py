@@ -3,6 +3,10 @@ from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDeco
 from qiskit.providers import ProviderV1 as Provider
 import hashlib
 from datetime import datetime 
+from pathlib import Path
+import os
+
+from . import emulation_executor
 
 class ProgramParameter(NamedTuple):
     """Program parameter."""
@@ -23,6 +27,7 @@ class EmulatorRuntimeService():
     def __init__(self, provider: Provider) -> None:
         self.provider = provider
         self._programs = {}
+        self._program_data = {}
 
     def pprint_programs(self):
         return self._programs
@@ -58,6 +63,7 @@ class EmulatorRuntimeService():
         if name is None:
             name = program_hash
         
+        self._program_data[program_hash] = data
         self._programs[program_hash] = RuntimeProgram(
             program_name = name,
             program_id = program_hash,
@@ -89,7 +95,22 @@ class EmulatorRuntimeService():
             callback: Optional[Callable] = None,
             result_decoder: Optional[Type[ResultDecoder]] = None
     ) -> RuntimeJob:
-        return None
+        if program_id in self._programs:
+            program = self._programs[program_id]
+            program_data = self._program_data[program_id]
+
+            executor = emulation_executor.EmulationExecutor(program, program_data)
+            executor.run()
+        else:
+            return None
+        # module = self._load_program(program_id=None)
+        # module.main()
+        # return None
+
+    def _load_program(self, program_id: str) -> callable:
+        module_path = os.path.join(Path.home(), ".qiskit_runtime", "abcd")
+        program_module = __import__(module_path)
+        return program_module
 
     def delete_program(self, program_id: str) -> None:
         print("Do Nothing")

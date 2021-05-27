@@ -5,4 +5,5 @@ qiskit_emulator_provider.egg-info/
 **/.ipynb_checkpoints/
 .vscode/
 get-pip.py
+*.log
 

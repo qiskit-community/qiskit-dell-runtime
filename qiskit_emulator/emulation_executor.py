@@ -3,6 +3,7 @@ from typing import Union
 import tempfile
 import shutil
 import os
+import sys
 import logging
 import subprocess
 
@@ -39,7 +40,7 @@ class EmulationExecutor():
 
     def _execute(self):
         executor_path = os.path.join(self._temp_dir, "executor.py")
-        cmd = ["python", executor_path]
+        cmd = [sys.executable, executor_path]
         logger.debug(f"starting {cmd}")
         exec_result = subprocess.run(cmd, capture_output=True, text=True)
         logger.debug(f"finished executing {cmd}")

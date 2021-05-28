@@ -103,15 +103,7 @@ class EmulatorRuntimeService():
             executor.run()
         else:
             return None
-        # module = self._load_program(program_id=None)
-        # module.main()
-        # return None
-
-    def _load_program(self, program_id: str) -> callable:
-        module_path = os.path.join(Path.home(), ".qiskit_runtime", "abcd")
-        program_module = __import__(module_path)
-        return program_module
-
+        
     def delete_program(self, program_id: str) -> None:
         print("Do Nothing")
 

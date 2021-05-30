@@ -35,8 +35,11 @@ def main():
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
     
     runtime_program = provider.runtime.program(program_id)
-    
-    job = provider.runtime.run(program_id, options=None, inputs=None)
+    program_inputs = {
+        "iterations": 10
+    }
+    job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+    # provider.runtime.pprint_programs()
 
 if __name__ == "__main__":
     main()

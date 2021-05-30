@@ -1,5 +1,6 @@
 from typing import Type, Callable, Optional, Dict
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
+from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 
 from typing import Union
 import tempfile
@@ -18,7 +19,7 @@ class EmulationExecutor():
 
     def __init__(self, program: RuntimeProgram, program_data: Union[bytes, str],
             options: Dict = {},
-            inputs: Dict = {}, 
+            inputs: Dict = {},
             callback: Optional[Callable] = None, 
             result_decoder: Optional[Type[ResultDecoder]] = None) -> None:
         self._program = program
@@ -29,19 +30,6 @@ class EmulationExecutor():
         self._user_messenger = LocalUserMessenger()
         
         self._temp_dir = None
-
-    def _save_params(self):
-        params = json.dumps({
-            "options": self._options,
-            "inputs": self._inputs,
-            "messenger": {
-                "port": self._user_messenger.port()
-            }
-        })
-        params_path = os.path.join(self._temp_dir, "params.json")
-        with open(params_path, "w+") as params_file:
-            params_file.write(params)
-            logger.debug('finished writing to ' + params_path)
         
     def _pre_run(self):
         self._temp_dir = tempfile.mkdtemp()
@@ -53,11 +41,11 @@ class EmulationExecutor():
             logger.debug('finished writing to ' + program_path)
 
         executor_path = os.path.join(self._temp_dir, "executor.py")
+        executor_content = EXECUTOR_CODE.format(json.dumps(self._inputs, cls=RuntimeEncoder),self._user_messenger.port())
+        # logger.debug(executor_content)
         with open(executor_path, "w+") as executor_file:
-            executor_file.write(EXECUTOR_CODE)
+            executor_file.write(executor_content)
             logger.debug('finished writing to ' + executor_path)
-
-        self._save_params()
         
     def _post_run(self):
         if self._temp_dir is not None:
@@ -92,18 +80,13 @@ from qiskit_emulator import LocalUserMessengerClient
 from program import main
 import json
 import os
+from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
 
 if __name__ == "__main__":
-    params = None
-    params_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "params.json")
-    with open(params_path, 'r') as params_file:
-        params = json.load(params_file)
 
     backend = Aer.get_backend('aer_simulator')
-    user_messenger = LocalUserMessengerClient(params['messenger']['port'])
-
-    main(backend, user_messenger=user_messenger, **{
-        "iterations": 2
-    })
+    inputs = json.loads('{}', cls=RuntimeDecoder)
+    user_messenger = LocalUserMessengerClient({})
+    main(backend, user_messenger=user_messenger, **inputs)
     print("exit")
 """

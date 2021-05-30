@@ -29,28 +29,6 @@ def main(backend, user_messenger, **kwargs):
 
     user_messenger.publish(final_result, final=True)
 """
-
-EXECUTOR_CODE = """
-from qiskit import Aer
-from qiskit_emulator import LocalUserMessengerClient
-from program import main
-import json
-import os
-
-if __name__ == "__main__":
-    params = None
-    params_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "params.json")
-    with open(params_path, 'r') as params_file:
-        params = json.load(params_file)
-
-    backend = Aer.get_backend('aer_simulator')
-    user_messenger = LocalUserMessengerClient(params['messenger']['port'])
-
-    main(backend, user_messenger=user_messenger, **{
-        "iterations": 2
-    })
-    print("exit")
-"""
 logger = logging.getLogger(__name__)
 
 class EmulationExecutorTest(unittest.TestCase):
@@ -72,35 +50,13 @@ class EmulationExecutorTest(unittest.TestCase):
             executor_path = os.path.join(executor.temp_dir(), "executor.py")
             self.assertTrue(os.path.isfile(executor_path))
 
-            with open(executor_path, "r") as executor_file:
-                executor_text = executor_file.read()
-                self.assertEqual(EXECUTOR_CODE, executor_text)
-
         finally:
             executor._post_run()
             self.assertFalse(os.path.isdir(executor.temp_dir()))
 
-    def test_params(self):
-        try:
-            executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM)
-            self.assertIsNotNone(executor)
-
-            executor._pre_run()
-
-            params_path = os.path.join(executor.temp_dir(), "params.json")
-            self.assertTrue(os.path.isfile(params_path))
-
-            with open(params_path, "r") as params_file:
-                params = json.load(params_file)
-                logger.debug(f"params {params}")
-                self.assertIsNotNone(params['messenger']['port'])
-
-        finally:
-            executor._post_run()
-            self.assertFalse(os.path.isdir(executor.temp_dir()))
         
     def test_run(self):
-        executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM)
+        executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, inputs = { "iterations": 2 })
         self.assertIsNotNone(executor)
 
         executor.run()

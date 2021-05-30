@@ -19,6 +19,9 @@ class EmulatorProvider(Provider):
             emulator_backend.EmulatorBackend(self)
         ])
         self.runtime = emulator_runtime_service.EmulatorRuntimeService(self)
+        self.services = {
+            'runtime': self.runtime,
+        }
 
     def get_backend(self, name=None, **kwargs):
         backends = self._backend_services(name, **kwargs)
@@ -32,11 +35,11 @@ class EmulatorProvider(Provider):
     def backends(self, name=None, **kwargs):
         return self._backend_services(name=name, **kwargs)
 
+    def services(self):
+        return self.services
+
     def has_service(self, service_name):
-        if service_name == 'runtime':
-            return True
-        else:
-            return False
+        return service_name in self.services
 
 class BackendService:
     def __init__(self, backends):

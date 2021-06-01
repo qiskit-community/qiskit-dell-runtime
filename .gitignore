@@ -10,3 +10,4 @@ get-pip.py
 build/
 qiskit_runtime_emulator.egg-info/
 dist/
+**/secrets.*

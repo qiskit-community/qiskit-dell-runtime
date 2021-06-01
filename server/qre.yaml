@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qre
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: qre-orchestrator
+  namespace: qre
+  labels:
+    app: qre-orchestrator
+spec:
+  containers:
+    - name: qre-orchestrator
+      image: harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+  imagePullSecrets:
+    - name: ${image_secret}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: qre-orchestrator
+  namespace: qre
+spec:
+  loadBalancerIP: 100.80.243.207
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: qre-orchestrator
+  type: LoadBalancer
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: qre
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 128Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: qre
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: qre
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: harbor.dell.com/dojo-harbor/qre/mysql:5.6
+        name: mysql
+        env:
+          # Use secret in real usage
+        - name: MYSQL_ROOT_PASSWORD
+          value: "password"
+        - name: "MYSQL_DATABASE"
+          value: "qre"
+        - name: "MYSQL_USER"
+          value: "qre"
+        - name: "MYSQL_PASSWORD"
+          value: "qre"
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc

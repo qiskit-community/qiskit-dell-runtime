@@ -7,6 +7,3 @@ qiskit_emulator_provider.egg-info/
 get-pip.py
 *.log
 .pytest_cache/
-build/
-qiskit_runtime_emulator.egg-info/
-dist/

@@ -21,7 +21,7 @@ class LocalUserMessengerTest(unittest.TestCase):
         self.assertEqual("something", message_log[0])
         # self.assertEqual(bytes("something else", 'utf-8'), message_log[1])
 
-
-        
-
-    
+        self.assertFalse(messenger.isClosed())
+        client.publish("last message", final=True)
+        time.sleep(0.1)
+        self.assertTrue(messenger.isClosed())

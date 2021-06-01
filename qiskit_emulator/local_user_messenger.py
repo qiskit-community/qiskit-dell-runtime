@@ -33,10 +33,15 @@ class LocalUserMessenger():
                     break
                 else:
                     data_obj = json.loads(data.decode("utf-8"))
-                    print(f"MESSENGER RECEIVED: {data_obj}")
-                    self._message_log.append(data_obj)
-                    logging.debug(f"MESSENGER RECEIVED: {data_obj}")
-                
+                    message = data_obj["message"]
+                    print(f"MESSENGER RECEIVED: {message}")
+                    self._message_log.append(message)
+                    logging.debug(f"MESSENGER RECEIVED: {message}")
+
+                    # Close messenger if final publish
+                    if data_obj["isFinal"]:
+                        print(data_obj)
+                        self.close()
 
     def message_log(self):
         return self._message_log
@@ -49,6 +54,10 @@ class LocalUserMessenger():
         self._run = False
         self._sock.close()
 
+    def isClosed(self):
+        if self._sock.fileno() == -1:
+            return True
+        return False
 
 class LocalUserMessengerClient(UserMessenger):
     def __init__(self, port):
@@ -65,5 +74,14 @@ class LocalUserMessengerClient(UserMessenger):
         # TODO: use provided (if any) encoder
         # if encoder is not None:
         #     str_messenge = encoder.dumps()
-        str_message = json.dumps(message)
+
+        jsonMessage = {
+            "message": message,
+            "isFinal": final
+        }
+        str_message = json.dumps(jsonMessage)
         self._sock.sendall(bytes(str_message, 'utf-8'))
+
+        # Close connection if final message
+        if final:
+            self._sock.close()

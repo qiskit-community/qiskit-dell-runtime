@@ -19,8 +19,8 @@ class EmulatorRuntimeService():
         self._programs = {}
         self._program_data = {}
 
-    def pprint_programs(self):
-        return self._programs
+    # def pprint_programs(self):
+    #     return self._programs
 
     # copied from IBMQ Provider
     def pprint_programs(self, refresh: bool = False) -> None:

@@ -29,11 +29,14 @@ class LocalUserMessenger():
             while self._run:
                 # TODO: loop here...
                 data = conn.recv(4096)
-                print(f"received {data}")
-                self._message_log.append(data)
-                logging.debug(f"received {data}")
                 if not data:
                     break
+                else:
+                    data_obj = json.loads(data.decode("utf-8"))
+                    print(f"MESSENGER RECEIVED: {data_obj}")
+                    self._message_log.append(data_obj)
+                    logging.debug(f"MESSENGER RECEIVED: {data_obj}")
+                
 
     def message_log(self):
         return self._message_log

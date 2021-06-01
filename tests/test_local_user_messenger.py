@@ -18,7 +18,7 @@ class LocalUserMessengerTest(unittest.TestCase):
         message_log = messenger.message_log()
         # self.assertEqual(2, len(message_log))
         self.assertEqual(1, len(message_log))
-        self.assertEqual(bytes("\"something\"", 'utf-8'), message_log[0])
+        self.assertEqual("something", message_log[0])
         # self.assertEqual(bytes("something else", 'utf-8'), message_log[1])
 
 

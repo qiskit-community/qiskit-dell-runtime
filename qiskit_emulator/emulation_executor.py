@@ -12,6 +12,7 @@ import subprocess
 import json
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 from .local_user_messenger import LocalUserMessenger
 
@@ -35,14 +36,18 @@ class EmulationExecutor():
         self._temp_dir = tempfile.mkdtemp()
         logger.debug('creating temp directory at ' + self._temp_dir)
 
+        params_path = os.path.join(self._temp_dir, "params.json")
+        with open(params_path, "w+") as params_file:
+            params_file.write(json.dumps(self._inputs, cls=RuntimeEncoder))
+            logger.debug('finished writing to ' + params_path)
+
         program_path = os.path.join(self._temp_dir, "program.py")
         with open(program_path, "w+") as program_file:
             program_file.write(self._program_data)
             logger.debug('finished writing to ' + program_path)
 
         executor_path = os.path.join(self._temp_dir, "executor.py")
-        executor_content = EXECUTOR_CODE.format(json.dumps(self._inputs, cls=RuntimeEncoder),self._user_messenger.port())
-        # logger.debug(executor_content)
+        executor_content = EXECUTOR_CODE.format(params_path, self._user_messenger.port())
         with open(executor_path, "w+") as executor_file:
             executor_file.write(executor_content)
             logger.debug('finished writing to ' + executor_path)
@@ -83,9 +88,13 @@ import os
 from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
 
 if __name__ == "__main__":
-
+    params = None
+    params_path = '{}'	
+    with open(params_path, 'r') as params_file:	
+        params = params_file.read()
+ 
     backend = Aer.get_backend('aer_simulator')
-    inputs = json.loads('{}', cls=RuntimeDecoder)
+    inputs = json.loads(params, cls=RuntimeDecoder)
     user_messenger = LocalUserMessengerClient({})
     main(backend, user_messenger=user_messenger, **inputs)
     print("exit")

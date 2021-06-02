@@ -5,7 +5,7 @@ from logging.config import fileConfig
 
 app = Flask(__name__)
 
-from .models import DBService
+from .models import DBService, RuntimeProgram
 
 db_service = DBService()
 
@@ -14,10 +14,19 @@ logger = logging.getLogger(__name__)
 
 @app.route('/program', methods=['POST'])
 def upload_runtime_program():
-    logger.debug('POST /program')
+
+    
     json_data = flask.request.json
     logger.debug(f'POST /program: {json_data}')
-    # db_service.save_runtime_program()
+    
+    program = RuntimeProgram()
+    program.program_id = json_data['program_id']
+    program.name = json_data['name']
+    if 'description' in json_data:
+        program.description = json_data['description']
+    program.data = bytes(json_data['data'], 'utf-8')
+
+    db_service.save_runtime_program(program)
     return ('', 200)
 
 @app.route('/program', methods=['GET'])

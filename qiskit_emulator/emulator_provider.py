@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 from . import emulator_backend
 from . import emulator_runtime_service
+from .remote_runtime_service import RemoteRuntimeService
 
 class EmulatorProvider(Provider):
     name = "emulator_provider"
@@ -18,10 +19,20 @@ class EmulatorProvider(Provider):
         self._backend_services = BackendService([
             emulator_backend.EmulatorBackend(self)
         ])
-        self.runtime = emulator_runtime_service.EmulatorRuntimeService(self)
+        self.local_runtime = emulator_runtime_service.EmulatorRuntimeService(self)
+        self.runtime = self.local_runtime
         self.services = {
             'runtime': self.runtime,
         }
+
+    # add authentication later
+    def remote(self, host):
+        self.runtime = RemoteRuntimeService(self, host)
+        self.services['runtime'] = self.runtime
+
+    def local(self):
+        self.runtime = self.local_runtime
+        self.services['runtime'] = self.local_runtime
 
     def get_backend(self, name=None, **kwargs):
         backends = self._backend_services(name, **kwargs)

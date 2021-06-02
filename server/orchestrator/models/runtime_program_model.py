@@ -11,5 +11,6 @@ class RuntimeProgram(Base):
 
     id = Column(Integer, primary_key=True)
     program_id = Column(String(64))
+    name = Column(String(64))
     description = Column(String(64))
     data = Column(LargeBinary)

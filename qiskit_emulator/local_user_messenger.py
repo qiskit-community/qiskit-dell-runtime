@@ -79,7 +79,8 @@ class LocalUserMessengerClient(UserMessenger):
             "message": message,
             "isFinal": final
         }
-        str_message = json.dumps(jsonMessage)
+        
+        str_message = json.dumps(jsonMessage, cls=encoder)
         self._sock.sendall(bytes(str_message, 'utf-8'))
 
         # Close connection if final message

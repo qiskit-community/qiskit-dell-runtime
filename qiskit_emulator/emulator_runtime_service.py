@@ -11,7 +11,7 @@ import os
 import json
 
 from . import emulation_executor
-
+from .emulator_runtime_job import EmulatorRuntimeJob
 
 class EmulatorRuntimeService():
     def __init__(self, provider: Provider) -> None:
@@ -88,22 +88,25 @@ class EmulatorRuntimeService():
             inputs: Dict,
             callback: Optional[Callable] = None,
             result_decoder: Optional[Type[ResultDecoder]] = None
-    ) -> RuntimeJob:
+    ) -> EmulatorRuntimeJob:
         if program_id in self._programs:
             program = self._programs[program_id]
             program_data = self._program_data[program_id]
             executor = emulation_executor.EmulationExecutor(program, program_data, options, inputs)
             executor.run()
+            job = EmulatorRuntimeJob()
+            job.user_messenger = executor._user_messenger
+            return job
         else:
             return None
         
     def delete_program(self, program_id: str) -> None:
         print("Do Nothing")
 
-    def job(self, job_id: str) -> RuntimeJob:
+    def job(self, job_id: str) -> EmulatorRuntimeJob:
         print("Do nothing")
 
-    def jobs(self, limit: int = 10, skip: int = 0) -> List[RuntimeJob]:
+    def jobs(self, limit: int = 10, skip: int = 0) -> List[EmulatorRuntimeJob]:
         return []
 
     def delete_job(self, job_id: str) -> None:

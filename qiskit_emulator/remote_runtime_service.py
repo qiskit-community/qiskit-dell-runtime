@@ -14,7 +14,6 @@ class RemoteRuntimeService():
         self.provider = provider
         self.host = host
         self._programs = {}
-        self._program_data = {}
 
     # def pprint_programs(self):
     #     return self._programs
@@ -27,6 +26,27 @@ class RemoteRuntimeService():
         res = (req.status_code, req.reason, req.text)
         logger.debug(f"POST {url} RESPONSE: {res}")
         return res
+    
+    def _get(self, path):
+        url = urljoin(self.host, path)
+        logger.debug(f"GET {url}")
+        req = requests.get(url)
+        res = (req.status_code, req.reason, req.text)
+        logger.debug(f"GET {url} RESPONSE: {res}")
+        return res
+        
+    def programs(self, refresh: bool = False) -> List[RuntimeProgram]:
+        res = self._get('/program')
+        if res[0] != 200:
+            logger.error(f'Cannot fetch programs: {res[0]}')
+        else:
+            return res[2]
+
+    def program(self, program_id: str, refresh: bool = False) -> RuntimeProgram:
+        if program_id in self._programs:
+            return self._programs[program_id]
+        else:
+            return None
 
     # copied from IBMQ Provider
     def pprint_programs(self, refresh: bool = False) -> None:
@@ -66,7 +86,10 @@ class RemoteRuntimeService():
             'description': description
         }
 
-        self._post('/program', req_body)
-        return program_hash
+        res = self._post('/program', req_body)
+        if res[0] != 200:
+            logger.error(f"Received {res[0]} as status code")
+        else:
+            return res[2]
 
 

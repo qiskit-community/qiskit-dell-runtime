@@ -1,6 +1,7 @@
 import flask
-from flask import Flask
+from flask import Flask, Response
 import logging
+import json
 from logging.config import fileConfig
 
 app = Flask(__name__)
@@ -25,10 +26,12 @@ def upload_runtime_program():
     if 'description' in json_data:
         program.description = json_data['description']
     program.data = bytes(json_data['data'], 'utf-8')
-
     db_service.save_runtime_program(program)
-    return ('', 200)
+    return (json_data['program_id'], 200)
 
 @app.route('/program', methods=['GET'])
 def programs():
-    return ([{'test': 'test1'}], 200)
+    result = db_service.fetch_runtime_programs()
+    logger.debug(f"GET /program: {result}")
+    json_result = json.dumps(result)
+    return Response(json_result, status=200, mimetype="application/json")

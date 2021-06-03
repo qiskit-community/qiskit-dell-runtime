@@ -1,7 +1,10 @@
 
 from .base import Session, engine, Base
-
 from .runtime_program_model import RuntimeProgram
+from sqlalchemy.orm import load_only
+import logging
+
+logger = logging.getLogger(__name__)
 
 class DBService():
     def __init__(self):
@@ -14,4 +17,23 @@ class DBService():
             session.commit()
         finally:
             session.close()
+    
+    def fetch_runtime_programs(self):
+        result = []
+        # programs = RuntimeProgram.query.all()
+        try:
+            session = Session()
+            fields = ['program_id', 'name', 'description']
+            programs = session.query(RuntimeProgram).options(load_only(*fields)).all()
+            logger.debug(f"Found {len(programs)} programs")
+            for program in programs:
+                result.append({
+                    'program_id': program.program_id,
+                    'name': program.name,
+                    'description': program.description
+                })
+            return result
+        finally:
+            session.close()
+
 

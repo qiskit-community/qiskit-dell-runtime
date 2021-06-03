@@ -18,12 +18,21 @@ class DBService():
         finally:
             session.close()
     
+    def fetch_runtime_program_data(self, program_id):
+        try:
+            session = Session()
+            fields = ['program_id', 'name', 'description']
+            program = session.query(RuntimeProgram).filter_by(program_id=program_id).options(load_only(*fields)).one()
+            return program.data
+        finally:
+            session.close()
+
     def fetch_runtime_programs(self):
         result = []
         # programs = RuntimeProgram.query.all()
         try:
             session = Session()
-            fields = ['program_id', 'name', 'description']
+            fields = ['data']
             programs = session.query(RuntimeProgram).options(load_only(*fields)).all()
             logger.debug(f"Found {len(programs)} programs")
             for program in programs:

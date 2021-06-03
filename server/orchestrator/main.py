@@ -35,3 +35,11 @@ def programs():
     logger.debug(f"GET /program: {result}")
     json_result = json.dumps(result)
     return Response(json_result, status=200, mimetype="application/json")
+
+# this URL needs to be a lot more restrictive in terms of security
+# 1. only available to internal call from other container
+# 2. only allow fetch of data of assigned program
+@app.route('/program/<program_id>/data', methods=['GET'])
+def program_data(program_id):
+    result = db_service.fetch_runtime_program_data(program_id)
+    return Response(result, 200, mimetype="application/binary")

@@ -3,70 +3,27 @@ from qiskit import QuantumCircuit
 import logging
 
 RUNTIME_PROGRAM = """
-# This code is part of qiskit-runtime.
-#
-# (C) Copyright IBM 2021.
-#
-# This code is licensed under the Apache License, Version 2.0. You may
-# obtain a copy of this license in the LICENSE.txt file in the root directory
-# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
-#
-# Any modifications or derivative works of this code must retain this
-# copyright notice, and modified files need to carry a notice indicating
-# that they have been altered from the originals.
+import random
 
-# This is a simplified version of the circuit-runner program.
+from qiskit import transpile
+from qiskit.circuit.random import random_circuit
 
-from qiskit.compiler import transpile, schedule
+def prepare_circuits(backend):
+    circuit = random_circuit(num_qubits=5, depth=4, measure=True,
+                            seed=random.randint(0, 1000))
+    return transpile(circuit, backend)
 
+def main(backend, user_messenger, **kwargs):
+    # iterations = kwargs['iterations']
+    iterations = 3
+    # interim_results = kwargs.pop('interim_results', {})
+    # final_result = kwargs.pop("final_result", {})
+    for it in range(iterations):
+        qc = prepare_circuits(backend)
+        # user_messenger.publish({"iteration": it, "interim_results": interim_results})
+        backend.run(qc).result()
 
-def main(
-    backend,
-    user_messenger,
-    circuits,
-    initial_layout=None,
-    seed_transpiler=None,
-    optimization_level=None,
-    transpiler_options=None,
-    scheduling_method=None,
-    schedule_circuit=False,
-    inst_map=None,
-    meas_map=None,
-    measurement_error_mitigation=False,
-    **kwargs,
-):
-
-    # transpiling the circuits using given transpile options
-    transpiler_options = transpiler_options or {}
-    circuits = transpile(
-        circuits,
-        initial_layout=initial_layout,
-        seed_transpiler=seed_transpiler,
-        optimization_level=optimization_level,
-        backend=backend,
-        **transpiler_options,
-    )
-
-    if schedule_circuit:
-        circuits = schedule(
-            circuits=circuits,
-            backend=backend,
-            inst_map=inst_map,
-            meas_map=meas_map,
-            method=scheduling_method,
-        )
-
-    if not isinstance(circuits, list):
-        circuits = [circuits]
-
-    # Compute raw results
-    result = backend.run(circuits, **kwargs).result()
-
-    if measurement_error_mitigation:
-        # Performs measurement error mitigation.
-        pass
-
-    user_messenger.publish(result.to_dict(), final=True)
+    # user_messenger.publish(final_result, final=True)
 """
 
 RUNTIME_PROGRAM_METADATA = {
@@ -82,7 +39,7 @@ def main():
 
     provider = EmulatorProvider()
     provider.remote('http://localhost:5000')
-    program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+    program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA, description="basic execution 2")
     print(f"PROGRAM ID: {program_id}")
 
 if __name__ == "__main__":

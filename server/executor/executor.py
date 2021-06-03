@@ -1,6 +1,8 @@
 from qiskit import Aer
-from qiskit_emulator import RemoteUserMessengerClient
+
 from program import main
+from user_messenger_client import RemoteUserMessengerClient
+
 import json
 import os
 from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder

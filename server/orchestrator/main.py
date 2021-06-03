@@ -1,3 +1,4 @@
+import os
 import flask
 from flask import Flask, Response
 import logging
@@ -6,11 +7,14 @@ from logging.config import fileConfig
 
 app = Flask(__name__)
 
+from .kube_client import KubeClient
 from .models import DBService, RuntimeProgram
 
 db_service = DBService()
+kube_client = KubeClient()
 
-fileConfig('logging_config.ini')
+path = '/'.join((os.path.abspath(__file__).replace('\\', '/')).split('/')[:-1])
+fileConfig(os.path.join(path, 'logging_config.ini'))
 logger = logging.getLogger(__name__)
 
 @app.route('/program', methods=['POST'])
@@ -43,3 +47,9 @@ def programs():
 def program_data(program_id):
     result = db_service.fetch_runtime_program_data(program_id)
     return Response(result, 200, mimetype="application/binary")
+
+@app.route('/program/<program_id>/job', methods=['POST'])
+def run_program(program_id):
+    kube_client.run(program_id)
+    # create job and return later
+    return Response('', 200, mimetype="application/json")

@@ -38,7 +38,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
 
     provider = EmulatorProvider()
-    provider.remote('http://localhost:5000')
+    provider.remote('http://100.80.243.207')
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA, description="basic execution 2")
     print(f"PROGRAM ID: {program_id}")
 

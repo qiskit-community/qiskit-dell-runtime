@@ -1,0 +1,1 @@
+docker run --name qre-dev-mysql -p 3306:3306 -e MYSQL_DATABASE=qredb -e MYSQL_ROOT_PASSWORD=password -d harbor.dell.com/dojo-harbor/qre/mysql:5.6

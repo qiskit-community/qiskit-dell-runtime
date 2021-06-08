@@ -1,1 +1,5 @@
 pytest
+flask==2.0.1
+kubernetes==17.17.0
+sqlalchemy==1.4.17
+mysqlclient==2.0.2

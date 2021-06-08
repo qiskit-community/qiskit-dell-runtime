@@ -21,7 +21,7 @@ class DBService():
     def fetch_runtime_program_data(self, program_id):
         try:
             session = Session()
-            fields = ['program_id', 'name', 'description']
+            fields = ['program_id', 'name', 'program_metadata']
             program = session.query(RuntimeProgram).filter_by(program_id=program_id).options(load_only(*fields)).one()
             return program.data
         finally:

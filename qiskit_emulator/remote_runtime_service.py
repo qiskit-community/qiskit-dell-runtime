@@ -6,6 +6,9 @@ from qiskit.providers.ibmq.runtime.runtime_program import ProgramParameter, Prog
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 from qiskit.providers import ProviderV1 as Provider
 import logging
+import copy
+import json
+from .emulator_runtime_job import EmulatorRuntimeJob
 
 logger = logging.getLogger(__name__)
 
@@ -79,11 +82,20 @@ class RemoteRuntimeService():
         if name is None:
             name = program_hash
 
+        program_metadata = self._merge_metadata(
+            initial={},
+            metadata=metadata,
+            name=name, max_execution_time=max_execution_time, description=description,
+            version=version, backend_requirements=backend_requirements,
+            parameters=parameters,
+            return_values=return_values, interim_results=interim_results)
+        program_metadata.pop('name', None)
+
         req_body = {
             'program_id': program_hash,
             'data': data,
             'name': name,
-            'description': description
+            'program_metadata': program_metadata
         }
 
         res = self._post('/program', req_body)
@@ -91,5 +103,69 @@ class RemoteRuntimeService():
             logger.error(f"Received {res[0]} as status code")
         else:
             return res[2]
+    
+    def run(
+            self,
+            program_id: str,
+            options: Dict,
+            inputs: Dict,
+            callback: Optional[Callable] = None,
+            result_decoder: Optional[Type[ResultDecoder]] = None
+    ) -> EmulatorRuntimeJob:
+        serialized_inputs = json.dumps(inputs, cls=RuntimeEncoder)
+        res = self._post('/program/{}/job'.format(program_id), serialized_inputs)
+        if (res[0] != 200):
+            raise 'Something went bad'
+        job = EmulatorRuntimeJob()
+        # job.user_messenger = executor._user_messenger
+        return job
 
+
+    # copied from IBM runtime service
+    def _merge_metadata(
+            self,
+            initial: Dict,
+            metadata: Optional[Union[Dict, str]] = None,
+            **kwargs: Any
+    ) -> Dict:
+        """Merge multiple copies of metadata.
+        Args:
+            initial: The initial metadata. This may be mutated.
+            metadata: Name of the program metadata file or metadata dictionary.
+            **kwargs: Additional metadata fields to overwrite.
+        Returns:
+            Merged metadata.
+        """
+        upd_metadata = {}
+        if metadata is not None:
+            if isinstance(metadata, str):
+                with open(metadata, 'r') as file:
+                    upd_metadata = json.load(file)
+            else:
+                upd_metadata = copy.deepcopy(metadata)
+
+        self._tuple_to_dict(initial)
+        initial.update(upd_metadata)
+
+        self._tuple_to_dict(kwargs)
+        for key, val in kwargs.items():
+            if val is not None:
+                initial[key] = val
+
+        # TODO validate metadata format
+        metadata_keys = ['name', 'max_execution_time', 'description', 'version',
+                         'backend_requirements', 'parameters', 'return_values',
+                         'interim_results']
+        return {key: val for key, val in initial.items() if key in metadata_keys}
+
+    def _tuple_to_dict(self, metadata: Dict) -> None:
+        """Convert fields in metadata from named tuples to dictionaries.
+        Args:
+            metadata: Metadata to be converted.
+        """
+        for key in ['parameters', 'return_values', 'interim_results']:
+            doc_list = metadata.pop(key, None)
+            if not doc_list or isinstance(doc_list[0], dict):
+                continue
+            metadata[key] = [dict(elem._asdict()) for elem in doc_list]
 

@@ -19,16 +19,13 @@ logger = logging.getLogger(__name__)
 
 @app.route('/program', methods=['POST'])
 def upload_runtime_program():
-
-    
     json_data = flask.request.json
     logger.debug(f'POST /program: {json_data}')
     
     program = RuntimeProgram()
     program.program_id = json_data['program_id']
     program.name = json_data['name']
-    if 'description' in json_data:
-        program.description = json_data['description']
+    program.program_metadata = json.dumps(json_data['program_metadata'])
     program.data = bytes(json_data['data'], 'utf-8')
     db_service.save_runtime_program(program)
     return (json_data['program_id'], 200)
@@ -50,6 +47,11 @@ def program_data(program_id):
 
 @app.route('/program/<program_id>/job', methods=['POST'])
 def run_program(program_id):
-    kube_client.run(program_id)
+    inputs_str = flask.request.json
+
+    logger.debug(f'POST run program: {inputs_str}')
+    
+    kube_client.run_dev(program_id, inputs_str)
     # create job and return later
     return Response('', 200, mimetype="application/json")
+    

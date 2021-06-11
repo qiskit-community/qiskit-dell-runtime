@@ -2,3 +2,4 @@ flask
 sqlalchemy
 mysqlclient 
 kubernetes
+kafka==2.0.2

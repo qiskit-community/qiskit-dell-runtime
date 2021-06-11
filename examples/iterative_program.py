@@ -17,25 +17,15 @@ RUNTIME_PROGRAM = """
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 from qiskit.compiler import transpile, schedule
+import time
 
+def main(backend, user_messenger, **kwargs):
+    iterations = kwargs.pop("iterations", 5)
+    for it in range(iterations):
+        user_messenger.publish({"iteration": it })
+        time.sleep(5)
 
-def main(
-    backend,
-    user_messenger,
-    circuits,
-    **kwargs,
-):
-    circuits = transpile(
-        circuits,
-    )
-
-    if not isinstance(circuits, list):
-        circuits = [circuits]
-
-    # Compute raw results
-    result = backend.run(circuits, **kwargs).result()
-
-    user_messenger.publish(result.to_dict(), final=True)
+    user_messenger.publish("All done!", final=True)
 """
 
 RUNTIME_PROGRAM_METADATA = {
@@ -54,20 +44,16 @@ def main():
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
     print(f"PROGRAM ID: {program_id}")
 
-    qc = QuantumCircuit(2, 2)
-    qc.h(0)
-    qc.cx(0, 1)
-    qc.measure([0, 1], [0, 1])
 
     program_inputs = {
-        'circuits': qc,
+        'iterations': 3,
     }
 
     
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-
-    # job.stream_results(print)
-    results = job.result(timeout=5)
-    print(results)
+    time.sleep(2)
+    job.stream_results(print)
+    # results = job.result(timeout=5)
+    # print(results)
 if __name__ == "__main__":
     main()

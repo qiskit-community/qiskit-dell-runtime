@@ -11,7 +11,9 @@ logger.setLevel(logging.DEBUG)
 host = os.environ['ORCH_HOST']
 program_id = os.environ['PROGRAM_ID']
 inputs_str = os.environ['INPUTS_STR']
-qre_dir = "/var/qiskit-runtime"
+
+# qre_dir = "/var/qiskit-runtime"
+qre_dir = "/root/workspace/qre-runtime-test"
 executor_path = os.path.join(qre_dir, 'executor.py')
 program_path = os.path.join(qre_dir, 'program.py')
 params_path = os.path.join(qre_dir, 'params.json')

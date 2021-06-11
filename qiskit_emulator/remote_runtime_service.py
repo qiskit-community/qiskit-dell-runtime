@@ -116,8 +116,7 @@ class RemoteRuntimeService():
         res = self._post('/program/{}/job'.format(program_id), serialized_inputs)
         if (res[0] != 200):
             raise 'Something went bad'
-        job = EmulatorRuntimeJob()
-        # job.user_messenger = executor._user_messenger
+        job = EmulatorRuntimeJob(res[2], self.host)
         return job
 
 

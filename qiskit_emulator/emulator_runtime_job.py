@@ -8,9 +8,12 @@ from concurrent import futures
 import traceback
 import queue
 from datetime import datetime
+from qiskit.providers.ibmq.runtime.program.result_decoder import ResultDecoder
+from urllib.parse import urljoin
+import requests
 
 logger = logging.getLogger(__name__)
-
+ 
 
 class EmulatorRuntimeJob:
     """Representation of a runtime program execution.
@@ -20,20 +23,50 @@ class EmulatorRuntimeJob:
 
     def __init__(
             self,
+            job_id,
+            host,
+            result_decoder: Type[ResultDecoder] = ResultDecoder
     ) -> None:
         """RuntimeJob constructor.
         Args:
         """
+        self.job_id = job_id
+        self.host = host
+        self.result_decoder = result_decoder
+
+    def getURL(self, path):
+        url = urljoin(self.host, path)
+        logger.debug(f"{url}")
+        return url
 
     def result(
-            self
+            self,
+            timeout: Optional[float] = None,
+            wait: float = 5,
+            decoder: Optional[Type[ResultDecoder]] = None
     ) -> Any:
-        """Return the results of the job.
-        Args:
-        Returns:
-        Raises:
-        """
+        stime = time.time()
+        isFinal = False
+        finalMessage = None
+        dcd = decoder or self.result_decoder
+        while not isFinal:
+            elapsed_time = time.time() - stime
+            if timeout is not None and elapsed_time >= timeout:
+                raise 'Timeout while waiting for job {}.'.format(self.job_id)
+            time.sleep(wait)
+            response = requests.get(self.getURL('/jobs/'+ self.job_id +'/results'))
+            response.raise_for_status()
+            results = dcd.decode(response.text)
 
+            for result in results:
+                if result['final']:
+                    isFinal = True
+                    finalMessage = result['message']
+        
+        return finalMessage
+
+    
+    
     def cancel(self) -> None:
         """Cancel the job.
         """
@@ -55,11 +88,19 @@ class EmulatorRuntimeJob:
 
     def stream_results(
             self,
+            callback: Callable,
+            decoder: Optional[Type[ResultDecoder]] = None
     ) -> None:
-        """Start streaming job results.
-        Args:
-        Raises:
-        """
+        dcd = decoder or self.result_decoder
+        isFinal = False
+        while not isFinal:
+            response = requests.get(self.getURL('/jobs/'+ self.job_id +'/results'))
+            response.raise_for_status()
+            results = dcd.decode(response.text)
+            for result in results:
+                callback(result['message'])
+                isFinal = result['final']
+                    
 
     def cancel_result_streaming(self) -> None:
         """Cancel result streaming."""

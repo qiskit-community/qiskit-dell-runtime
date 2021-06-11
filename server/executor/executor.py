@@ -11,7 +11,7 @@ def main_method():
     params = None
     
     params_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'params.json')
-    with open(params_path, 'r') as params_file:	
+    with open(params_path, 'r') as params_file:
         params = params_file.read()
     
     backend = Aer.get_backend('aer_simulator')

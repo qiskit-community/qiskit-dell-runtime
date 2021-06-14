@@ -1,0 +1,10 @@
+# FROM harbor.dell.com/base-images/ubuntu:20.04
+FROM python:${PY_V}
+
+# RUN apt-get -y update && apt-get install -y python3 python3-setuptools curl
+# RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+# RUN python3 get-pip.py
+RUN pip3 install --upgrade pip setuptools
+RUN pip3 install qiskit qiskit-aer-gpu py3nvml
+RUN pip3 install setuptools_rust pytest
+

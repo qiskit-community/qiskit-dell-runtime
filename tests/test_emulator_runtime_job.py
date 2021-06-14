@@ -4,7 +4,7 @@ from qiskit_emulator import EmulatorRuntimeJob
 
 class EmulatorRuntimeJobTest(unittest.TestCase):
     def test_emulator_runtime_job(self):
-        job = EmulatorRuntimeJob()
+        job = EmulatorRuntimeJob("test_job_id", "test_host")
         self.assertIsNotNone(job)
         messenger = LocalUserMessenger()
         self.assertIsNotNone(messenger)

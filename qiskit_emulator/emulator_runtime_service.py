@@ -94,7 +94,8 @@ class EmulatorRuntimeService():
             program_data = self._program_data[program_id]
             executor = emulation_executor.EmulationExecutor(program, program_data, options, inputs)
             executor.run()
-            job = EmulatorRuntimeJob()
+            # TODO: Fix this
+            job = EmulatorRuntimeJob("fix_me", "fix_me")
             job.user_messenger = executor._user_messenger
             return job
         else:

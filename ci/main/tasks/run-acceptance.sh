@@ -6,4 +6,4 @@ python3 --version
 cd qiskit-runtime-emulator
 pip3 install . 
 
-pytest tests/
+pytest acceptance_tests/

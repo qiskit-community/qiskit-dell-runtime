@@ -77,7 +77,7 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: python-base-image
+  - get: qiskit-base-image
   - get: qiskit-runtime-emulator
     trigger: true
     passed: [unit_37, unit_38, unit_39]
@@ -89,7 +89,7 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: python-base-image
+  - get: qiskit-base-image
   - get: qiskit-runtime-emulator
     trigger: true
     passed: [unit_37, unit_38, unit_39]
@@ -164,11 +164,11 @@ resources:
     branch: master
     private_key: {{github_secret_secret}}
 
-- name: python-base-image
+- name: qiskit-base-image
   type: docker-image
   icon: docker
   source:
-    repository: {{docker_repo_python}}
+    repository: {{docker_repo_qiskit}}
     username: {{repo_username}}
     password: {{repo_password}}
     insecure_registries: [{{docker_registry}}]

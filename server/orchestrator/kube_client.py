@@ -24,8 +24,8 @@ spec:
 
 class KubeClient():
     def __init__(self):
-        # config.load_incluster_config()
-        config.load_kube_config()
+        config.load_incluster_config()
+        # config.load_kube_config()
         self._api = client.CoreV1Api()
 
     def run(self, **options):

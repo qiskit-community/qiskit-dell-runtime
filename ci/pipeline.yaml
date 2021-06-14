@@ -77,8 +77,8 @@ jobs:
   serial: true
   plan:
   - get: python-base-image
-    trigger: true
   - get: qiskit-runtime-emulator
+    trigger: true
     passed: [unit_37, unit_38, unit_39]
   - put: orchestrator-image
     params:
@@ -89,8 +89,8 @@ jobs:
   serial: true
   plan:
   - get: python-base-image
-    trigger: true
   - get: qiskit-runtime-emulator
+    trigger: true
     passed: [unit_37, unit_38, unit_39]
   - put: executor-image
     params:
@@ -102,6 +102,7 @@ jobs:
   - get: qiskit-runtime-emulator
     trigger: true
     passed: [build_orchestrator, build_executor]
+  - get: qre-secrets
   - task: deploy
     config:
       platform: linux
@@ -115,6 +116,7 @@ jobs:
           insecure_registries: [{{docker_registry}}]
       inputs:
       - name: qiskit-runtime-emulator
+      - name: qre-secrets
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/deploy.sh
     params:
@@ -130,6 +132,14 @@ resources:
     uri: git@eos2git.cec.lab.emc.com:OCTO/qiskit-runtime-emulator.git
     branch: master
     private_key: {{github_secret}}
+
+- name: qre-secrets
+  type: git
+  icon: github-circle
+  source: 
+    uri: git@eos2git.cec.lab.emc.com:DellEMC-Dojo/qre-secrets2.git
+    branch: master
+    private_key: {{github_secret_secret}}
 
 - name: python-base-image
   type: docker-image

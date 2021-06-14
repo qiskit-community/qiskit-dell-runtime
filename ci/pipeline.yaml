@@ -1,10 +1,13 @@
 groups:
 - name: qiskit-emulator
   jobs:
-  - unit
+  - unit_37
+  - unit_38
+  - unit_39
+  - deploy_to_test
 
 jobs:
-- name: unit
+- name: unit_37
   serial: true
   plan:
   - get: qiskit-runtime-emulator
@@ -16,6 +19,7 @@ jobs:
         type: docker-image
         source:
           repository: {{docker_repo}}
+          tag: 3.7
           username: {{repo_username}}
           password: {{repo_password}}
           insecure_registries: [{{docker_registry}}]
@@ -23,9 +27,70 @@ jobs:
       - name: qiskit-runtime-emulator
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
-  - get: qiskit-runtime-emulator-version
-    trigger: false
-    params: {bump: minor}
+
+- name: unit_38
+  serial: true
+  plan:
+  - get: qiskit-runtime-emulator
+    trigger: true
+  - task: run-unit
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: {{docker_repo}}
+          tag: 3.8
+          username: {{repo_username}}
+          password: {{repo_password}}
+          insecure_registries: [{{docker_registry}}]
+      inputs:
+      - name: qiskit-runtime-emulator
+      run:
+        path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
+
+- name: unit_39
+  serial: true
+  plan:
+  - get: qiskit-runtime-emulator
+    trigger: true
+  - task: run-unit
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: {{docker_repo}}
+          tag: 3.9
+          username: {{repo_username}}
+          password: {{repo_password}}
+          insecure_registries: [{{docker_registry}}]
+      inputs:
+      - name: qiskit-runtime-emulator
+      run:
+        path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
+  
+- name: deploy_to_test
+  serial: true
+  plan:
+  - get: qiskit-runtime-emulator
+    trigger: true
+    passed: [unit_37, unit_38, unit_39]
+  - task: deploy
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: {{docker_repo_deploy}}
+          username: {{repo_username}}
+          password: {{repo_password}}
+          insecure_registries: [{{docker_registry}}]
+      inputs:
+      - name: qiskit-runtime-emulator
+      run:
+        path: qiskit-runtime-emulator/ci/main/tasks/build-deploy.sh
+
 
 
 resources:
@@ -37,10 +102,10 @@ resources:
     branch: master
     private_key: {{github_secret}}
 
-- name: qiskit-runtime-emulator-version
-  type: semver
-  icon: update
-  source:
-    <<: *github-secrets
-    driver: git
-    file: ci/version
+# - name: qiskit-runtime-emulator-version
+#   type: semver
+#   icon: update
+#   source:
+#     <<: *github-secrets
+#     driver: git
+#     file: ci/version

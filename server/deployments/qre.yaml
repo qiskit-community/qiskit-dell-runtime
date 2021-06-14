@@ -123,7 +123,7 @@ spec:
   serviceAccountName: qreorch
   containers:
     - name: qre-orchestrator
-      image: harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+      image: harbor.dell.com/dojo-harbor/qre/orchestrator
       env:
       - name: DB_HOST
         value: "mysql"

@@ -1,4 +1,4 @@
-FROM python
+FROM harbor.dell.com/dojo-harbor/python
 
 COPY ./requirements.txt /var/qiskit-runtime/
 RUN pip3 install -r /var/qiskit-runtime/requirements.txt

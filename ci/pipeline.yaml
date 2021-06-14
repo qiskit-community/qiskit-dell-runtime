@@ -4,7 +4,8 @@ groups:
   - unit_37
   - unit_38
   - unit_39
-  - deploy_to_test
+  - build_orchestrator
+  - build_executor
 
 jobs:
 - name: unit_37
@@ -70,16 +71,29 @@ jobs:
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
 
-- name: deploy_to_test
+- name: build_orchestrator
   public: true
   serial: true
   plan:
   - get: python-base-image
     trigger: true
   - get: qiskit-runtime-emulator
+    passed: [unit_37, unit_38, unit_39]
   - put: orchestrator-image
     params:
       build: qiskit-runtime-emulator/server/orchestrator/
+
+- name: build_executor
+  public: true
+  serial: true
+  plan:
+  - get: python-base-image
+    trigger: true
+  - get: qiskit-runtime-emulator
+    passed: [unit_37, unit_38, unit_39]
+  - put: executor-image
+    params:
+      build: qiskit-runtime-emulator/server/executor/
 
 # - name: deploy_to_test
 #   serial: true
@@ -152,6 +166,15 @@ resources:
   icon: docker
   source:
     repository: {{docker_repo_orchestrator}}
+    username: {{repo_username}}
+    password: {{repo_password}}
+    insecure_registries: [{{docker_registry}}]
+
+- name: executor-image
+  type: docker-image
+  icon: docker
+  source:
+    repository: {{docker_repo_executor}}
     username: {{repo_username}}
     password: {{repo_password}}
     insecure_registries: [{{docker_registry}}]

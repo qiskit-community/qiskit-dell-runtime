@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e -x
 
-echo "Do nothing"
 mkdir ~/.kube
 cp qre-secrets/kube_config.yaml ~/.kube/config
 

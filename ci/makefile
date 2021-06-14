@@ -43,6 +43,6 @@ push_test_image39:
 # 	$(DOCKER_CMD) build ./test_base/ -t $(DOCKER_BASE)/test_base:$(PY_V)
 
 deploy: 
-	$(FLY_CMD) -t dojo set-pipeline -p qiskit-emulator -c ./pipeline.yaml -l ../../qre-secrets/secrets.yaml
+	$(FLY_CMD) -t dojo set-pipeline -p qiskit-emulator -c ./pipeline.yaml -l ../../qre-secrets2/secrets.yaml
 	
 clean:

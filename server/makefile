@@ -18,6 +18,7 @@ push:
 	$(DOCKER_CMD) push $(DOCKER_BASE)/executor
 
 deploy: 
-	envsubst < qre.yaml | kubectl apply -f -
+	envsubst < ./deployments/qre.yaml | kubectl apply -f -
 	
 clean:
+	envsubst < ./deployments/qre.yaml | kubectl delete -f -

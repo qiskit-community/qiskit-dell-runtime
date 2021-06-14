@@ -1,4 +1,4 @@
-FROM harbor.dell.com/dojo-harbor/python
+FROM harbor.dell.com/dojo-harbor/qre/qiskit
 
 RUN apt-get update && apt-get install -y python3-flask default-libmysqlclient-dev build-essential
 RUN mkdir /app

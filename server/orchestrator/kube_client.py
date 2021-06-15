@@ -2,6 +2,7 @@ from kubernetes import client, config
 import uuid
 import yaml
 import subprocess
+import os
 
 
 
@@ -30,15 +31,17 @@ spec:
 
 class KubeClient():
     def __init__(self):
-        config.load_incluster_config()
-        # config.load_kube_config()
-        self._api = client.CoreV1Api()
-        self._namespace = open("/var/run/secrets/kubernetes.io/serviceaccount/namespace").read()
+        if "DEV" in os.environ:
+          self.run = self.run_dev
+        else:
+          config.load_incluster_config()
+          self._api = client.CoreV1Api()
+          self._namespace = open("/var/run/secrets/kubernetes.io/serviceaccount/namespace").read()
 
     def run(self, **options):
         program_id = options["program_id"]
         inputs_str = options["inputs_str"]
-        pod_name = "qre-" + str(uuid.uuid1())[-12:]
+        pod_name = "qre-" + str(uuid.uuid1())[-24:]
         orch_host = "http://qre-orchestrator"
         pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id)
         pod_obj = yaml.safe_load(pod_yaml)

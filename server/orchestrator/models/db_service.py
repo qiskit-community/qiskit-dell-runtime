@@ -1,7 +1,9 @@
 
 from .base import Session, engine, Base
 from .runtime_program_model import RuntimeProgram
+from .message_model import Message
 from sqlalchemy.orm import load_only
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,6 +11,18 @@ logger = logging.getLogger(__name__)
 class DBService():
     def __init__(self):
         Base.metadata.create_all(engine)
+
+    def save_message(self, job_id, data):
+        message = Message()
+        message.job_id = job_id
+        message.data = data
+        message.creation_date = datetime.now()
+        session = Session()
+        try:
+            session.add(message)
+            session.commit()
+        finally:
+            session.close()
 
     def save_runtime_program(self, runtime_program: RuntimeProgram):
         session = Session()

@@ -14,4 +14,4 @@ cd ..
 }
 make deploy
 cd -
-kubectl wait --for=condition=Ready pods --all -n $(echo $QRE_NS)
+kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo $QRE_NS)

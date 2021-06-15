@@ -19,6 +19,14 @@ push:
 
 deploy: 
 	envsubst < ./deployments/qre.yaml | kubectl apply -f -
-	
+	envsubst < ./deployments/orch.yaml | kubectl apply -f -
+
 clean:
+	envsubst < ./deployments/orch.yaml | kubectl delete -f -
 	envsubst < ./deployments/qre.yaml | kubectl delete -f -
+	
+redeploy:
+	envsubst < ./deployments/orch.yaml | kubectl delete -f -
+	envsubst < ./deployments/orch.yaml | kubectl apply -f -
+
+

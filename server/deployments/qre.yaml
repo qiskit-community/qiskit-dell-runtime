@@ -110,61 +110,6 @@ spec:
           claimName: mysql-pvc
 
 ---
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: qre-orchestrator
-  namespace: ${QRE_NS}    
-spec:
-  selector:
-    matchLabels:
-      app: qre-orchestrator
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: qre-orchestrator
-    spec:
-      serviceAccountName: qreorch
-      containers:
-        - name: qre-orchestrator
-          
-          image: harbor.dell.com/dojo-harbor/qre/orchestrator
-          env:
-          - name: DB_HOST
-            value: "mysql"
-          - name: DB_PORT
-            value: "3306"
-          - name: DB_USER
-            value: "qre"
-          - name: DB_PASSWORD
-            value: "qre"
-          - name: DB_NAME
-            value: "qre"
-          ports:
-          - containerPort: 8080
-      # imagePullSecrets:
-      #   - name: ${image_secret}
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: qre-orchestrator
-  namespace: ${QRE_NS}
-spec:
-  # loadBalancerIP: 100.80.243.207
-  ports:
-  - port: 80
-    targetPort: 8080
-  selector:
-    app: qre-orchestrator
-  # type: LoadBalancer
-
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -262,22 +207,4 @@ spec:
             - name: KAFKA_CREATE_TOPICS
               value: sample.topic:1:1
 
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: qre-ingress-orchestrator
-  namespace: qre-dev
-  annotations:
-    # use the shared ingress-nginx
-    kubernetes.io/ingress.class: "nginx"
-spec:
-  rules:
-  - host: qre-dev.oro-sandbox-small1.k8s.cec.lab.emc.com
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: qre-orchestrator
-          servicePort: 8080
 

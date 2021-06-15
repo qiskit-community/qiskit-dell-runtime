@@ -21,7 +21,7 @@ class DBService():
     def fetch_runtime_program_data(self, program_id):
         try:
             session = Session()
-            fields = ['program_id', 'name', 'program_metadata']
+            fields = ['data']
             program = session.query(RuntimeProgram).filter_by(program_id=program_id).options(load_only(*fields)).one()
             return program.data
         finally:
@@ -32,14 +32,14 @@ class DBService():
         # programs = RuntimeProgram.query.all()
         try:
             session = Session()
-            fields = ['data']
+            fields = ['program_id', 'name', 'program_metadata']
             programs = session.query(RuntimeProgram).options(load_only(*fields)).all()
             logger.debug(f"Found {len(programs)} programs")
             for program in programs:
                 result.append({
                     'program_id': program.program_id,
                     'name': program.name,
-                    'description': program.description
+                    'program_metadata': program.program_metadata
                 })
             return result
         finally:

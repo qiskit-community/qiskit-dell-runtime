@@ -3,7 +3,7 @@ DOCKER_BASE=harbor.dell.com/dojo-harbor/qre
 
 all: build_base_qiskit_image build_orchestrator_image build_executor_image
 
-dev: all push redeploy
+ddev: all push redeploy
 
 build_base_qiskit_image:
 	$(DOCKER_CMD) build ./qiskit_base/ -t $(DOCKER_BASE)/qiskit

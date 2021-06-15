@@ -15,12 +15,15 @@ metadata:
 spec:
   containers:
     - name: {pod_name}
-      image: harbor.dell.com/dojo-harbor/qre/qre-executor
+      image: harbor.dell.com/dojo-harbor/qre/executor
       env:
       - name: ORCH_HOST
         value: {orch_host}
       - name: PROGRAM_ID
         value: {program_id}
+      - name: INPUTS_STR
+        value: |
+          {inputs_str}
   restartPolicy: Never
 """
 
@@ -37,7 +40,7 @@ class KubeClient():
         inputs_str = options["inputs_str"]
         pod_name = "qre-" + str(uuid.uuid1())[-12:]
         orch_host = "http://qre-orchestrator"
-        pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, orch_host=orch_host, program_id=program_id)
+        pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id)
         pod_obj = yaml.safe_load(pod_yaml)
         self._api.create_namespaced_pod(body=pod_obj, namespace=self._namespace)
 

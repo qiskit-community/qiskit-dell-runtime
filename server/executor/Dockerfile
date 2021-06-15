@@ -6,4 +6,5 @@ RUN mkdir -p /var/qiskit-runtime
 COPY ./executor.py /var/qiskit-runtime/
 COPY ./startup.py /var/qiskit-runtime/
 COPY ./user_messenger_client.py /var/qiskit-runtime/
-CMD python3 /var/qiskit-runtime/startup.py
+COPY ./logging_config.ini /var/qiskit-runtime/
+CMD cd /var/qiskit-runtime/ && python3 startup.py

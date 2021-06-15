@@ -5,15 +5,19 @@ import sys
 import subprocess
 
 import logging
+import logging.config
+
+logging.config.fileConfig("./logging_config.ini")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
 # res = (req.status_code, req.reason, req.text)
 host = os.environ['ORCH_HOST']
 program_id = os.environ['PROGRAM_ID']
 inputs_str = os.environ['INPUTS_STR']
 
-# qre_dir = "/var/qiskit-runtime"
-qre_dir = "/root/workspace/qre-runtime-test"
+qre_dir = "/var/qiskit-runtime"
+# qre_dir = "/root/workspace/qre-runtime-test"
 executor_path = os.path.join(qre_dir, 'executor.py')
 program_path = os.path.join(qre_dir, 'program.py')
 params_path = os.path.join(qre_dir, 'params.json')
@@ -34,6 +38,7 @@ def download_program_from_orchestrator():
         logger.debug('finished writing to ' + program_path)
 
 def main():
+    print("RUNNING!")
     try:
         write_program_params_file()
         download_program_from_orchestrator()
@@ -46,6 +51,7 @@ def main():
         exec_result.check_returncode()
     except Exception as e:
         logger.error(e)
+    print("EXIT")
 
 if __name__ == "__main__":
     main()

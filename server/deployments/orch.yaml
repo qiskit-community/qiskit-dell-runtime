@@ -59,13 +59,13 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: qre-ingress-orchestrator
-  namespace: qre-dev
+  namespace: ${QRE_NS}
   annotations:
     # use the shared ingress-nginx
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - host: qre-dev.oro-sandbox-small1.k8s.cec.lab.emc.com
+  - host: ${QRE_NS}.oro-sandbox-small1.k8s.cec.lab.emc.com
     http:
       paths:
       - path: /

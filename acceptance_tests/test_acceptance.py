@@ -64,3 +64,10 @@ class AcceptanceTest(unittest.TestCase):
         except Exception:
             exc = True
         self.assertTrue(exc)
+
+    def test_upload(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+        proglist = provider.runtime.programs()
+        self.assertIsNotNone(proglist[0])

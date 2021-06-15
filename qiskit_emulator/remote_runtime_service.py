@@ -16,6 +16,9 @@ class RemoteRuntimeService():
     def __init__(self, provider: Provider, host: str) -> None:
         self.provider = provider
         self.host = host
+        status_response = self._get("/status")
+        if not (status_response[0] == 200):
+            raise Exception("Wrong status code from host: {}".format(self.host))
         self._programs = {}
 
     # def pprint_programs(self):

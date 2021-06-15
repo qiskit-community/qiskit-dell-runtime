@@ -46,6 +46,11 @@ def program_data(program_id):
     result = db_service.fetch_runtime_program_data(program_id)
     return Response(result, 200, mimetype="application/binary")
 
+@app.route('/status', methods=['GET'])
+def get_status():
+    json_result = json.dumps(False)
+    return Response(json_result, 200, mimetype="application/json")
+
 @app.route('/program/<program_id>/job', methods=['POST'])
 def run_program(program_id):
     inputs_str = flask.request.json

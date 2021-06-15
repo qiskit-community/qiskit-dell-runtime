@@ -6,11 +6,12 @@ cp qre-secrets/kube_config.yaml ~/.kube/config
 
 cd qiskit-runtime-emulator/server/deployments
 source test.sh
+cd ..
 {
-    envsubst < ./qre.yaml | kubectl delete -f - &&
+    make clean
 } || {
 
 }
-envsubst < ./qre.yaml | kubectl apply -f -
-
+make deploy
+cd -
 kubectl wait --for=condition=Ready pods --all -n $(echo $QRE_NS)

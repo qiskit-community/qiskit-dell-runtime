@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e -x
 
-mkdir ~/.kube
+mkdir -p ~/.kube
 cp qre-secrets/kube_config.yaml ~/.kube/config
 
 cd qiskit-runtime-emulator/server/deployments
@@ -10,7 +10,7 @@ cd ..
 {
     make clean
 } || {
-
+    echo ""
 }
 make deploy
 cd -

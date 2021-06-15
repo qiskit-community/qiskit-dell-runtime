@@ -6,6 +6,7 @@ import json
 from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 app = Flask(__name__)
+import uuid
 
 from .kube_client import KubeClient
 from .models import DBService, RuntimeProgram
@@ -19,17 +20,23 @@ fileConfig(os.path.join(path, 'logging_config.ini'))
 logger = logging.getLogger(__name__)
 KAFKA_SERVERS = os.getenv("KAFKA_SERVERS")
 
+def random_program_id():
+    new_uuid = uuid.uuid4()
+    return str(new_uuid)[-16:]
+
 @app.route('/program', methods=['POST'])
 def upload_runtime_program():
     json_data = flask.request.json
     
     program = RuntimeProgram()
-    program.program_id = json_data['program_id']
+    # program.program_id = json_data['program_id']
+    new_id = random_program_id()
+    program.program_id = new_id
     program.name = json_data['name']
     program.program_metadata = json.dumps(json_data['program_metadata'])
     program.data = bytes(json_data['data'], 'utf-8')
     db_service.save_runtime_program(program)
-    return (json_data['program_id'], 200)
+    return (new_id, 200)
 
 @app.route('/program', methods=['GET'])
 def programs():
@@ -63,7 +70,7 @@ def run_program(program_id):
         "kafka_topic": job_id,
         "kafka_key": "0"
     }
-    kube_client.run_dev(**options)
+    kube_client.run(**options)
     # create job and return later
     return Response(job_id, 200, mimetype="application/json")
 

@@ -146,8 +146,7 @@ jobs:
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-acceptance.sh
     params:
-      ACCEPTANCE_URL: |
-        {{acceptance_url}}
+      ACCEPTANCE_URL: {{acceptance_url}}
 
 
 resources:

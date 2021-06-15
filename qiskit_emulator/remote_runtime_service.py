@@ -120,6 +120,7 @@ class RemoteRuntimeService():
         if res[0] != 200:
             logger.error(f"Received {res[0]} as status code")
         else:
+            logger.debug(f"Received program_id: {res[2]}")
             return res[2]
     
     def run(
@@ -133,7 +134,7 @@ class RemoteRuntimeService():
         serialized_inputs = json.dumps(inputs, cls=RuntimeEncoder)
         res = self._post('/program/{}/job'.format(program_id), serialized_inputs)
         if (res[0] != 200):
-            raise 'Something went bad'
+            raise Exception('Something went bad')
         job = EmulatorRuntimeJob(res[2], self.host)
         return job
 

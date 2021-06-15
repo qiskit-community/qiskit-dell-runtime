@@ -3,13 +3,15 @@ import uuid
 import yaml
 import subprocess
 
+
+
 YAML = """
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: {pod_name}
-  namespace: qre
+  namespace: {namespace}
 spec:
   containers:
     - name: {pod_name}
@@ -19,6 +21,7 @@ spec:
         value: {orch_host}
       - name: PROGRAM_ID
         value: {program_id}
+  restartPolicy: Never
 """
 
 
@@ -27,15 +30,16 @@ class KubeClient():
         config.load_incluster_config()
         # config.load_kube_config()
         self._api = client.CoreV1Api()
+        self._namespace = open("/var/run/secrets/kubernetes.io/serviceaccount/namespace").read()
 
     def run(self, **options):
         program_id = options["program_id"]
         inputs_str = options["inputs_str"]
         pod_name = "qre-" + str(uuid.uuid1())[-12:]
         orch_host = "http://qre-orchestrator"
-        pod_yaml = YAML.format(pod_name=pod_name, orch_host=orch_host, program_id=program_id)
+        pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, orch_host=orch_host, program_id=program_id)
         pod_obj = yaml.safe_load(pod_yaml)
-        self._api.create_namespaced_pod(body=pod_obj, namespace="qre")
+        self._api.create_namespaced_pod(body=pod_obj, namespace=self._namespace)
 
     def run_dev(self, **options):
         program_id = options["program_id"]

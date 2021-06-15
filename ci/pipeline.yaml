@@ -140,11 +140,14 @@ jobs:
           tag: 3.9
           username: {{repo_username}}
           password: {{repo_password}}
-          insecure_registries: [{{docker_registry}}]
+          insecure_registries: [{{docker_registry}}]        
       inputs:
       - name: qiskit-runtime-emulator
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-acceptance.sh
+    params:
+      ACCEPTANCE_URL: |
+        {{acceptance_url}}
 
 
 resources:

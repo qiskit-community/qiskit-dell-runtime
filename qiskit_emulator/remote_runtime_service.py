@@ -41,33 +41,38 @@ class RemoteRuntimeService():
         logger.debug(f"GET {url} RESPONSE: {res}")
         return res
         
-    def programs(self, refresh: bool = False) -> List[RuntimeProgram]:
-        res = self._get('/program')
-        if res[0] != 200:
-            logger.error(f'Cannot fetch programs: {res[0]}')
-        else:
-            proglist = json.loads(res[2])
-            result = []
-            for prog in proglist:
-                program_metadata = json.loads(prog['program_metadata'])
-                result.append(RuntimeProgram(program_name=prog['name'], 
-                                            program_id=prog['program_id'], 
-                                            description=program_metadata['description'], 
-                                            max_execution_time=(int(program_metadata['max_execution_time']) if 'max_execution_time' in program_metadata else 0),
-                                            parameters=(program_metadata['parameters'] if 'parameters' in program_metadata else None)  ,
-                                            return_values=(program_metadata['return_values'] if 'return_values' in program_metadata else None),
-                                            interim_results=(program_metadata['interim_results'] if 'interim_results' in program_metadata else None),
-                                            version=(program_metadata['version'] if 'version' in program_metadata else "0"),
-                                            backend_requirements=(program_metadata['backend_requirements'] if 'backend_requirements' in program_metadata else None),
-                                            creation_date=(program_metadata['creation_date'] if 'creation_date' in program_metadata else "")))
+    def programs(self, refresh: bool = False):
+        if refresh or (self._programs == {}):
+            res = self._get('/program')
+            if res[0] != 200:
+                logger.error(f'Cannot fetch programs: {res[0]}')
+            else:
+                proglist = json.loads(res[2])
+                for prog in proglist:
+                    program_metadata = json.loads(prog['program_metadata'])
+                    self._programs[prog['program_id']] = RuntimeProgram(program_name=prog['name'], 
+                                                        program_id=prog['program_id'], 
+                                                        description=program_metadata['description'], 
+                                                        max_execution_time=(int(program_metadata['max_execution_time']) if 'max_execution_time' in program_metadata else 0),
+                                                        parameters=(program_metadata['parameters'] if 'parameters' in program_metadata else None)  ,
+                                                        return_values=(program_metadata['return_values'] if 'return_values' in program_metadata else None),
+                                                        interim_results=(program_metadata['interim_results'] if 'interim_results' in program_metadata else None),
+                                                        version=(program_metadata['version'] if 'version' in program_metadata else "0"),
+                                                        backend_requirements=(program_metadata['backend_requirements'] if 'backend_requirements' in program_metadata else None),
+                                                        creation_date=(program_metadata['creation_date'] if 'creation_date' in program_metadata else ""))
 
-            return result
+        return self._programs
+
 
     def program(self, program_id: str, refresh: bool = False) -> RuntimeProgram:
-        if program_id in self._programs:
+        if (not refresh) and program_id in self._programs:
             return self._programs[program_id]
         else:
-            return None
+            self.programs(refresh=True)
+            if program_id in self._programs:
+                return self._programs[program_id]
+            else:
+                return None
 
     # copied from IBMQ Provider
     def pprint_programs(self, refresh: bool = False) -> None:

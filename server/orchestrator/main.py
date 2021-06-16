@@ -65,7 +65,8 @@ def run_program(program_id):
     job_id = random_id()
     options = {
         "program_id": program_id,
-        "inputs_str": inputs_str
+        "inputs_str": inputs_str,
+        "job_id": job_id
         # "kafka_servers": KAFKA_SERVERS,
         # "kafka_topic": job_id,
         # "kafka_key": "0"
@@ -78,15 +79,19 @@ def run_program(program_id):
 # for this specific job can call this URL 
 @app.route('/job/<job_id>/message', methods=['POST'])
 def add_message(job_id):
-    data = flask.request.json
+    data = flask.request.data
     db_service.save_message(job_id, data)
     return ("", 200)
 
 
 @app.route('/job/<job_id>/results', methods=['GET'])
 def get_job_results(job_id):
-    result = db_service.fetch_message(job_id)
-    return Response(result, 200, mimetype="application/binary")
+    try:
+        logger.debug(f"GET /job/{job_id}/results")
+        result = db_service.fetch_message(job_id)
+        return Response(result, 200, mimetype="application/binary")
+    except:
+        return Response(None, 204, mimetype="application/binary")
 
 @app.route('/job/<job_id>/delete_message', methods=['GET'])
 def delete_message(job_id):

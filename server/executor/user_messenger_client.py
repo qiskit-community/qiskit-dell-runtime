@@ -1,12 +1,15 @@
 from typing import Any, Type
 import json
 from qiskit.providers.ibmq.runtime import UserMessenger, RuntimeEncoder
-from kafka import KafkaProducer
+# from kafka import KafkaProducer
+import requests
+from urllib.parse import urljoin
 import os
 
 class RemoteUserMessengerClient(UserMessenger):
     def __init__(self):
-        self.kafka_client = KafkaClient()
+        self.host = os.environ['ORCH_HOST']
+        self.job_id = os.environ['JOB_ID']
 
     def publish(
             self,
@@ -14,9 +17,12 @@ class RemoteUserMessengerClient(UserMessenger):
             encoder: Type[json.JSONEncoder] = RuntimeEncoder,
             final: bool = False
     ):  
-        
+    
         str_msg = json.dumps({"final": final, "message": message}, cls=encoder)
-        self.kafka_client.publish(str_msg)
+        url = urljoin(self.host, f'job/{self.job_id}/message')
+        req = requests.post(url, str_msg)
+        if req.status_code != 200:
+            raise (f'Error POST {url}: {req.status_code}')
 
 class KafkaClient:
     def __init__(self):

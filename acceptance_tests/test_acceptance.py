@@ -1,3 +1,4 @@
+from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
 from qiskit_emulator import EmulatorProvider
@@ -72,13 +73,7 @@ class AcceptanceTest(unittest.TestCase):
         provider.remote(ACCEPTANCE_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
-
-        qc = QuantumCircuit(2, 2)
-        qc.h(0)
-        qc.cx(0, 1)
-        qc.measure([0, 1], [0, 1])
-
-        runtime_program = provider.runtime.program(program_id, refresh=True)
+        runtime_program = provider.runtime.program(program_id)
         self.assertEqual(runtime_program.description, "Qiskit test program")
         self.assertEqual(runtime_program.program_id, program_id)
 
@@ -99,28 +94,23 @@ class AcceptanceTest(unittest.TestCase):
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
         self.assertEqual(job.host, ACCEPTANCE_URL)
-
-
-
-    # def test_view_program(self):
-
     
-    # def test_get_results(self):
-    #     provider = EmulatorProvider()
-    #     provider.remote(ACCEPTANCE_URL)
-    #     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+    def test_get_results(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
-    #     qc = QuantumCircuit(2, 2)
-    #     qc.h(0)
-    #     qc.cx(0, 1)
-    #     qc.measure([0, 1], [0, 1])
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
 
-    #     program_inputs = {
-    #         'circuits': qc,
-    #     }
+        program_inputs = {
+            'circuits': qc,
+        }
 
-    #     runtime_program = provider.runtime.program(program_id)
-    #     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-    #     results = job.result()
-    #     self.assertIsNotNone(results)
+        runtime_program = provider.runtime.program(program_id)
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+        results = job.result()
+        self.assertEqual('aer_simulator', results['backend_name'])

@@ -22,6 +22,8 @@ spec:
         value: {orch_host}
       - name: PROGRAM_ID
         value: {program_id}
+      - name: JOB_ID
+        value: {job_id}
       - name: INPUTS_STR
         value: |
           {inputs_str}
@@ -41,9 +43,10 @@ class KubeClient():
     def run(self, **options):
         program_id = options["program_id"]
         inputs_str = options["inputs_str"]
+        job_id = options["job_id"]
         pod_name = "qre-" + str(uuid.uuid1())[-24:]
         orch_host = "http://qre-orchestrator"
-        pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id)
+        pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
         pod_obj = yaml.safe_load(pod_yaml)
         self._api.create_namespaced_pod(body=pod_obj, namespace=self._namespace)
 

@@ -54,14 +54,16 @@ class EmulatorRuntimeJob:
             if timeout is not None and elapsed_time >= timeout:
                 raise 'Timeout while waiting for job {}.'.format(self.job_id)
             time.sleep(wait)
-            response = requests.get(self.getURL('/jobs/'+ self.job_id +'/results'))
-            response.raise_for_status()
-            results = dcd.decode(response.text)
+            response = requests.get(self.getURL('/job/'+ self.job_id +'/results'))
+            if response.status_code == 204:
+                logger.debug('result: status 204, job not done.')
+                continue
+            # response.raise_for_status()
+            result = dcd.decode(response.text)
 
-            for result in results:
-                if result['final']:
-                    isFinal = True
-                    finalMessage = result['message']
+            if result['final']:
+                isFinal = True
+                finalMessage = result['message']
         
         return finalMessage
 

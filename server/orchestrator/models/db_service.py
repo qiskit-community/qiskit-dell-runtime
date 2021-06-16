@@ -31,6 +31,26 @@ class DBService():
             session.commit()
         finally:
             session.close()
+
+    def fetch_message(self, job_id):
+        try:
+            session = Session()
+            fields = ['data']
+            job = session.query(Message).filter_by(job_id=job_id).options(load_only(*fields)).one()
+            return job.data
+        finally:
+            session.close()
+
+    def delete_message(self, job_id):
+        try:
+            session = Session()
+            jobs = session.query(Message).filter_by(job_id=job_id).all()
+            for job in jobs:
+                session.delete(job)
+            session.commit()
+            return
+        finally:
+            session.close()
     
     def fetch_runtime_program_data(self, program_id):
         try:

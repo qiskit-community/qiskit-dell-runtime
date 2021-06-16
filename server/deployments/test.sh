@@ -1,1 +1,1 @@
-export QRE_NS=qre-test2
+export QRE_NS=qre-test

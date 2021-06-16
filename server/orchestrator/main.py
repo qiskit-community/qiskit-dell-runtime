@@ -83,9 +83,16 @@ def add_message(job_id):
     return ("", 200)
 
 
-@app.route('/jobs/<job_id>/results', methods=['GET'])
+@app.route('/job/<job_id>/results', methods=['GET'])
 def get_job_results(job_id):
-    print(type(job_id))
+    result = db_service.fetch_message(job_id)
+    return Response(result, 200, mimetype="application/binary")
+
+@app.route('/job/<job_id>/delete_message', methods=['GET'])
+def delete_message(job_id):
+    db_service.delete_message(job_id)
+    return Response(None, 200)
+
 
     # consumer = KafkaConsumer(bootstrap_servers="localhost:9092", group_id="0")
     # partition = TopicPartition(job_id, 0)

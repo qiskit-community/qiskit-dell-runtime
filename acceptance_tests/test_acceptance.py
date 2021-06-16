@@ -85,3 +85,23 @@ class AcceptanceTest(unittest.TestCase):
 
         runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+    
+    # def test_get_results(self):
+    #     provider = EmulatorProvider()
+    #     provider.remote(ACCEPTANCE_URL)
+    #     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+    #     qc = QuantumCircuit(2, 2)
+    #     qc.h(0)
+    #     qc.cx(0, 1)
+    #     qc.measure([0, 1], [0, 1])
+
+    #     program_inputs = {
+    #         'circuits': qc,
+    #     }
+
+    #     runtime_program = provider.runtime.program(program_id)
+    #     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+    #     results = job.result()
+    #     self.assertIsNotNone(results)

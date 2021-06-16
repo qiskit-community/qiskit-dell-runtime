@@ -10,7 +10,7 @@ cd ..
 {
     make clean
 } || {
-    echo ""
+    echo "failure in clean"
 }
 make deploy
 cd -

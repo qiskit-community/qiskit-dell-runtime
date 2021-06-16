@@ -85,6 +85,7 @@ spec:
       labels:
         app: mysql
     spec:
+      nodeName: k8s-w-3-oro-sandbox-small1
       containers:
       - image: harbor.dell.com/dojo-harbor/qre/mysql:5.6
         name: mysql

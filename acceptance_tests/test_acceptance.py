@@ -60,13 +60,27 @@ class AcceptanceTest(unittest.TestCase):
         provider.remote(ACCEPTANCE_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         proglist = provider.runtime.programs()
-        self.assertIsNotNone(proglist[0])
+        self.assertIsNotNone(proglist[program_id])
         findProgId = False
         logger.debug(proglist)
-        for prog in proglist:
-            if prog.program_id == program_id:
-                findProgId = True
+        if program_id in proglist:
+            findProgId = True
         self.assertTrue(findProgId)
+
+    def test_view_program(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        runtime_program = provider.runtime.program(program_id, refresh=True)
+        self.assertEqual(runtime_program.description, "Qiskit test program")
+        self.assertEqual(runtime_program.program_id, program_id)
 
     def test_run_program(self):
         provider = EmulatorProvider()
@@ -83,8 +97,13 @@ class AcceptanceTest(unittest.TestCase):
             'circuits': qc,
         }
 
-        runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+        self.assertEqual(job.host, ACCEPTANCE_URL)
+
+
+
+    # def test_view_program(self):
+
     
     # def test_get_results(self):
     #     provider = EmulatorProvider()

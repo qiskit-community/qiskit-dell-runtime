@@ -77,6 +77,23 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(runtime_program.description, "Qiskit test program")
         self.assertEqual(runtime_program.program_id, program_id)
 
+    def test_view_program_refresh(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+        prog_list = provider.runtime.programs(refresh=False)
+
+        self.assertTrue(len(prog_list) >= 1)
+
+        new_program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+        new_prog_list = provider.runtime.programs(refresh=False)
+        
+        self.assertEqual(len(prog_list), len(new_prog_list))
+
+        newnew_prog_list = provider.runtime.programs(refresh=True)
+
+        self.assertGreater(len(newnew_prog_list), len(prog_list))
+
     def test_run_program(self):
         provider = EmulatorProvider()
         provider.remote(ACCEPTANCE_URL)

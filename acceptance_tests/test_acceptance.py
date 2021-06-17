@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import true
 from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
@@ -147,4 +148,20 @@ class AcceptanceTest(unittest.TestCase):
 
         self.assertGreater(count, (0.45 * shots))
         self.assertLess(count, (0.55 * shots))
+
+    def test_delete_program(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+        prog_list = provider.runtime.programs(refresh=False)
+
+        self.assertTrue(len(prog_list) >= 1)
+
+        deleted = provider.runtime.delete_program(program_id)
+
+        self.assertTrue(deleted)
+
+        new_prog_list = provider.runtime.programs(refresh=True)
+        
+        self.assertGreater(len(prog_list), len(new_prog_list))
 

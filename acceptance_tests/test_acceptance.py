@@ -30,6 +30,7 @@ def main(
     result = backend.run(circuits, **kwargs).result()
 
     user_messenger.publish(result.to_dict(), final=True)
+    print("job complete successfully")
 """
 
 RUNTIME_PROGRAM_METADATA = {

@@ -42,6 +42,24 @@ def upload_runtime_program():
     db_service.save_runtime_program(program)
     return (new_id, 200)
 
+@app.route('/program/<program_id>/update', methods=['POST'])
+def update_runtime_program(program_id):
+    json_data = flask.request.json
+    
+    # program.program_id = json_data['program_id']
+    name = None
+    data = None
+    program_metadata = None
+    if json_data['name']:
+        name = json_data['name']
+    if json_data['data']:
+        data = bytes(json_data['data'], 'utf-8')
+    if json_data['program_metadata']:
+        program_metadata = json_data['program_metadata']
+    
+    db_service.update_runtime_program(program_id, name, data, program_metadata)
+    return ("", 200)
+
 @app.route('/program', methods=['GET'])
 def programs():
     result = db_service.fetch_runtime_programs()

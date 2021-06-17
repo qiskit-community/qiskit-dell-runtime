@@ -16,3 +16,4 @@ class RuntimeProgram(Base):
     name = Column(String(64))
     data = Column(LargeBinary)
     program_metadata = Column(TEXT)
+    status = Column(String(64))

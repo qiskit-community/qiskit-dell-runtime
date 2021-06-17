@@ -8,6 +8,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+ACTIVE="Active"
+INACTIVE="Inactive"
+
 class DBService():
     def __init__(self):
         Base.metadata.create_all(engine)
@@ -28,6 +31,16 @@ class DBService():
         session = Session()
         try:
             session.add(runtime_program)
+            session.commit()
+        finally:
+            session.close()
+
+    def delete_runtime_program(self, program_id):
+        session = Session()
+        try:
+            prog = session.query(RuntimeProgram).filter_by(program_id=program_id).one()
+            logger.debug(f"Found {prog} with status {prog.status}")
+            setattr(prog, "status", INACTIVE)       
             session.commit()
         finally:
             session.close()
@@ -56,7 +69,7 @@ class DBService():
         try:
             session = Session()
             fields = ['data']
-            program = session.query(RuntimeProgram).filter_by(program_id=program_id).options(load_only(*fields)).one()
+            program = session.query(RuntimeProgram).filter_by(program_id=program_id).filter_by(status=ACTIVE).options(load_only(*fields)).one()
             return program.data
         finally:
             session.close()
@@ -67,7 +80,7 @@ class DBService():
         try:
             session = Session()
             fields = ['program_id', 'name', 'program_metadata']
-            programs = session.query(RuntimeProgram).options(load_only(*fields)).all()
+            programs = session.query(RuntimeProgram).filter_by(status=ACTIVE).options(load_only(*fields)).all()
             logger.debug(f"Found {len(programs)} programs")
             for program in programs:
                 result.append({

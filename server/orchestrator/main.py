@@ -15,6 +15,9 @@ from .models import DBService, RuntimeProgram
 db_service = DBService()
 kube_client = KubeClient()
 
+ACTIVE="Active"
+INACTIVE="Inactive"
+
 path = '/'.join((os.path.abspath(__file__).replace('\\', '/')).split('/')[:-1])
 fileConfig(os.path.join(path, 'logging_config.ini'))
 logger = logging.getLogger(__name__)
@@ -35,6 +38,7 @@ def upload_runtime_program():
     program.name = json_data['name']
     program.program_metadata = json.dumps(json_data['program_metadata'])
     program.data = bytes(json_data['data'], 'utf-8')
+    program.status = ACTIVE
     db_service.save_runtime_program(program)
     return (new_id, 200)
 
@@ -52,6 +56,11 @@ def programs():
 def program_data(program_id):
     result = db_service.fetch_runtime_program_data(program_id)
     return Response(result, 200, mimetype="application/binary")
+
+@app.route('/program/<program_id>/delete', methods=['GET'])
+def delete_program(program_id):
+    db_service.delete_runtime_program(program_id)
+    return Response(None, 200, mimetype="application/binary")
 
 @app.route('/status', methods=['GET'])
 def get_status():
@@ -82,6 +91,8 @@ def add_message(job_id):
     data = flask.request.data
     db_service.save_message(job_id, data)
     return ("", 200)
+
+# TODO determine whether kubernetes pod is launched
 
 
 @app.route('/job/<job_id>/results', methods=['GET'])

@@ -130,6 +130,18 @@ class RemoteRuntimeService():
         else:
             logger.debug(f"Received program_id: {res[2]}")
             return res[2]
+
+    def delete_program(
+        self,
+        program_id: str,
+    ) -> str:
+        res = self._get(f'/program/{program_id}/delete')
+        if res[0] != 200:
+            logger.error(f"Received {res[0]} as status code")
+            return False
+        else:
+            logger.debug(f"Deleted {program_id} successfully")
+            return True
     
     def run(
             self,

@@ -17,6 +17,10 @@ def main_method():
     backend = Aer.get_backend('aer_simulator')
     inputs = json.loads(params, cls=RuntimeDecoder)
     user_messenger = RemoteUserMessengerClient()
+
+    # Wrap in try/except to determine whether or not job fails
+    # Call back to orch to tell whether job succeed/fail
+
     main(backend, user_messenger=user_messenger, **inputs)
     print("exit")
 

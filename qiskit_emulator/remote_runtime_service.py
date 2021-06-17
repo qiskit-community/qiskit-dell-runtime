@@ -48,6 +48,7 @@ class RemoteRuntimeService():
                 logger.error(f'Cannot fetch programs: {res[0]}')
             else:
                 proglist = json.loads(res[2])
+                self._programs = {}
                 for prog in proglist:
                     program_metadata = json.loads(prog['program_metadata'])
                     self._programs[prog['program_id']] = RuntimeProgram(program_name=prog['name'], 
@@ -90,6 +91,7 @@ class RemoteRuntimeService():
     def upload_program(
             self,
             data: Union[bytes, str],
+            program_id: Optional[str] = None,
             metadata: Optional[Union[Dict, str]] = None,
             name: Optional[str] = None,
             max_execution_time: Optional[int] = None,
@@ -101,9 +103,10 @@ class RemoteRuntimeService():
             interim_results: Optional[List[ProgramResult]] = None
     ) -> str:
         # careful of hash collision
-        program_hash = hex(hash((data, name, version)))[-16:]
-        if name is None:
-            name = program_hash
+        if program_id == None:
+            pe = hex(hash((data, name, version)))[-16:]
+            if name is None:
+                name = pe
 
         program_metadata = self._merge_metadata(
             initial={},
@@ -115,7 +118,7 @@ class RemoteRuntimeService():
         program_metadata.pop('name', None)
 
         req_body = {
-            'program_id': program_hash,
+            'program_id': pe,
             'data': data,
             'name': name,
             'program_metadata': program_metadata
@@ -142,6 +145,21 @@ class RemoteRuntimeService():
             raise Exception('Something went bad')
         job = EmulatorRuntimeJob(res[2], self.host)
         return job
+
+    # def update_program(
+    #         self,
+    #         program_id: str,
+    #         data: Optional[Union[bytes, str]] = None,
+    #         metadata: Optional[Union[Dict, str]] = None,
+    #         name: Optional[str] = None,
+    #         max_execution_time: Optional[int] = None,
+    #         description: Optional[str] = None,
+    #         version: Optional[float] = None,
+    #         backend_requirements: Optional[str] = None,
+    #         parameters: Optional[List[ProgramParameter]] = None,
+    #         return_values: Optional[List[ProgramResult]] = None,
+    #         interim_results: Optional[List[ProgramResult]] = None
+    # )
 
 
     # copied from IBM runtime service

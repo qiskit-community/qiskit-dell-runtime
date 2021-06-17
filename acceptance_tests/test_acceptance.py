@@ -6,6 +6,7 @@ from qiskit.providers import JobStatus
 from time import sleep
 import os
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +129,22 @@ class AcceptanceTest(unittest.TestCase):
             'circuits': qc,
         }
 
-        runtime_program = provider.runtime.program(program_id)
+        # runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        results = job.result()
-        self.assertEqual('aer_simulator', results['backend_name'])
+        response = job.result()
+        # print(json.dumps(results))
+        # results['results'] = json.loads(results['results'])
+
+        results = response['results'][0]
+
+        self.assertIsNotNone(results)
+        self.assertTrue(results['success'])
+        self.assertTrue(results['success'])
+        self.assertEqual("DONE", results['status'])
+
+        shots = results['shots']
+        count = results['data']['counts']['0x0']
+
+        self.assertGreater(count, (0.45 * shots))
+        self.assertLess(count, (0.55 * shots))
+

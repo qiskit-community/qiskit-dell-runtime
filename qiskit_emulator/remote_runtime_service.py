@@ -104,9 +104,9 @@ class RemoteRuntimeService():
     ) -> str:
         # careful of hash collision
         if program_id == None:
-            pe = hex(hash((data, name, version)))[-16:]
+            program_id = hex(hash((data, name, version)))[-16:]
             if name is None:
-                name = pe
+                name = program_id
 
         program_metadata = self._merge_metadata(
             initial={},
@@ -118,7 +118,7 @@ class RemoteRuntimeService():
         program_metadata.pop('name', None)
 
         req_body = {
-            'program_id': pe,
+            'program_id': program_id,
             'data': data,
             'name': name,
             'program_metadata': program_metadata
@@ -158,21 +158,48 @@ class RemoteRuntimeService():
         job = EmulatorRuntimeJob(res[2], self.host)
         return job
 
-    # def update_program(
-    #         self,
-    #         program_id: str,
-    #         data: Optional[Union[bytes, str]] = None,
-    #         metadata: Optional[Union[Dict, str]] = None,
-    #         name: Optional[str] = None,
-    #         max_execution_time: Optional[int] = None,
-    #         description: Optional[str] = None,
-    #         version: Optional[float] = None,
-    #         backend_requirements: Optional[str] = None,
-    #         parameters: Optional[List[ProgramParameter]] = None,
-    #         return_values: Optional[List[ProgramResult]] = None,
-    #         interim_results: Optional[List[ProgramResult]] = None
-    # )
+    def update_program(
+            self,
+            program_id: str,
 
+            # We include data as a field even though we don't get it
+            # back from program() as part of RuntimeProgram.
+            # We are assuming it gets updated.
+
+            data: Optional[Union[bytes, str]] = None,
+            metadata: Optional[Union[Dict, str]] = None,
+            name: Optional[str] = None,
+            max_execution_time: Optional[int] = None,
+            description: Optional[str] = None,
+            version: Optional[float] = None,
+            backend_requirements: Optional[str] = None,
+            parameters: Optional[List[ProgramParameter]] = None,
+            return_values: Optional[List[ProgramResult]] = None,
+            interim_results: Optional[List[ProgramResult]] = None
+    ):
+        program_metadata = self._merge_metadata(
+            initial={},
+            metadata=metadata,
+            name=name, max_execution_time=max_execution_time, description=description,
+            version=version, backend_requirements=backend_requirements,
+            parameters=parameters,
+            return_values=return_values, interim_results=interim_results)
+        program_metadata.pop('name', None)
+
+        req_body = {
+            'program_id': program_id,
+            'data': data,
+            'name': name,
+            'program_metadata': program_metadata
+        }
+
+        res = self._post(f'/program/{program_id}/update', req_body)
+        if res[0] != 200:
+            logger.error(f"Received {res[0]} as status code")
+            return False
+        else:
+            logger.debug(f"Successfully updated program {program_id}")
+            return True
 
     # copied from IBM runtime service
     def _merge_metadata(

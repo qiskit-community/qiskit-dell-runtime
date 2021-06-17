@@ -5,6 +5,7 @@ from .message_model import Message
 from sqlalchemy.orm import load_only
 from datetime import datetime
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,25 @@ class DBService():
         session = Session()
         try:
             session.add(runtime_program)
+            session.commit()
+        finally:
+            session.close()
+
+    def update_runtime_program(self, program_id, name, data, program_metadata):
+        session = Session()
+        try:
+            prog = session.query(RuntimeProgram).filter_by(program_id=program_id).one()
+            if name:
+                setattr(prog, "name", name)
+            if data:
+                setattr(prog, "data", data)
+            if program_metadata:
+                meta = json.loads(prog.program_metadata)
+                for (key,value) in program_metadata.items():
+                    if value:
+                        meta[key] = value
+                meta_str = json.dumps(meta)
+                setattr(prog, "program_metadata", meta_str)
             session.commit()
         finally:
             session.close()

@@ -165,3 +165,18 @@ class AcceptanceTest(unittest.TestCase):
         
         self.assertGreater(len(prog_list), len(new_prog_list))
 
+    def test_update_program(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+        new_meta = {'description': 'Qiskit Test Update', 'max_execution_time': RUNTIME_PROGRAM_METADATA['max_execution_time']}
+
+        updated = provider.runtime.update_program(program_id, name='Test Update', metadata=new_meta)
+
+        self.assertTrue(updated)
+
+        program2 = provider.runtime.program(program_id, refresh=True)
+
+        self.assertEqual('Qiskit Test Update', program2.description)
+        self.assertEqual('Test Update', program2.name)

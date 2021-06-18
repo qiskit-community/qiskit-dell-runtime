@@ -12,5 +12,8 @@ newVersion=$(cat ci/version | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(leng
 echo $newVersion > ci/version
 git add ci/version
 git commit -m "[ci skip] bump version"
+git tag -l $newVersion
+
+
 
 

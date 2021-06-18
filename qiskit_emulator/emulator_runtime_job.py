@@ -11,6 +11,9 @@ from datetime import datetime
 from qiskit.providers.ibmq.runtime.program.result_decoder import ResultDecoder
 from urllib.parse import urljoin
 import requests
+import threading
+from datetime import datetime
+import json
 
 logger = logging.getLogger(__name__)
  
@@ -34,40 +37,124 @@ class EmulatorRuntimeJob:
         self.host = host
         self.result_decoder = result_decoder
 
+        self._imsgs = []
+        self._msgRead = 0
+        self._poller = threading.Thread(target=self.poll_for_results)
+        self._finalResults = None
+        self._kill = False
+        self._poller.start()
+
+# Ben 6/17/21: implemented thread to poll for messages until there's a final
+#              result. Once there's a final result exit thread.
+
+# Does not yet work with multiple messages - need to adjust orchestrator 
+# and db_service in order to accomodate getting unread messages (or all)
+# perhaps easier to just get all, send back to ERJ, and sort them out there?
+
+
+
+    def __del__(self):
+        self._kill = True
+        try:            
+            self._poller.join()
+        except:
+            logger.debug("poller thread joined")
+
+
+    def poll_for_results(self):
+        dcd = self.result_decoder
+        lastTimestamp = None
+
+        while not self._finalResults:     
+            if self._kill:
+                break
+
+            time.sleep(3)
+
+            url = self.getURL('/job/'+ self.job_id +'/results')
+            if lastTimestamp:
+                url = self.getURL('/job/'+ self.job_id +'/results/' + str(lastTimestamp))
+            
+            response = requests.get(url)
+            if response.status_code == 204:
+                logger.debug('result: status 204, no new messages.')
+                continue
+            # response.raise_for_status()
+            res_json = json.loads(response.text)
+            logger.debug(f'got: {res_json}')
+            messages = res_json["messages"]
+
+            logger.debug(f'result: got {messages}')
+
+            for msg in messages:
+                if not lastTimestamp:
+                    lastTimestamp = datetime.fromisoformat(msg['timestamp'])
+                else:
+                    msgTime = datetime.fromisoformat(msg['timestamp'])
+                    if lastTimestamp < msgTime:
+                        lastTimestamp = msgTime
+
+                msg_data = json.loads(msg['data'])
+                if msg_data['final']:
+                    logger.debug('result: got final result.')
+                    self._finalResults = msg_data['message']
+                else:
+                    self._imsgs.append(msg_data['message'])
+        return
+
+
     def getURL(self, path):
         url = urljoin(self.host, path)
         logger.debug(f"{url}")
         return url
 
-    def result(
-            self,
-            timeout: Optional[float] = None,
-            wait: float = 5,
-            decoder: Optional[Type[ResultDecoder]] = None
-    ) -> Any:
-        stime = time.time()
-        isFinal = False
-        finalMessage = None
-        dcd = decoder or self.result_decoder
-        while not isFinal:
-            elapsed_time = time.time() - stime
-            if timeout is not None and elapsed_time >= timeout:
-                raise 'Timeout while waiting for job {}.'.format(self.job_id)
-            time.sleep(wait)
-            response = requests.get(self.getURL('/job/'+ self.job_id +'/results'))
-            if response.status_code == 204:
-                logger.debug('result: status 204, job not done.')
-                continue
-            # response.raise_for_status()
-            result = dcd.decode(response.text)
+    # def result(
+    #         self,
+    #         timeout: Optional[float] = None,
+    #         wait: float = 5,
+    #         decoder: Optional[Type[ResultDecoder]] = None
+    # ) -> Any:
+    #     stime = time.time()
+    #     isFinal = False
+    #     finalMessage = None
+    #     dcd = decoder or self.result_decoder
+    #     while not isFinal:
+    #         elapsed_time = time.time() - stime
+    #         if timeout is not None and elapsed_time >= timeout:
+    #             raise 'Timeout while waiting for job {}.'.format(self.job_id)
+    #         time.sleep(wait)
+    #         response = requests.get(self.getURL('/job/'+ self.job_id +'/results'))
+    #         if response.status_code == 204:
+    #             logger.debug('result: status 204, job not done.')
+    #             continue
+    #         # response.raise_for_status()
+    #         result = dcd.decode(response.text)
 
-            if result['final']:
-                isFinal = True
-                finalMessage = result['message']
+    #         if result['final']:
+    #             isFinal = True
+    #             finalMessage = result['message']
         
-        return finalMessage
+    #     return finalMessage
 
-    
+    def result(self, 
+               timeout: Optional[float] = None):
+        if timeout is not None:
+            stime = time.time()
+            while not self._finalResults:
+                elapsed_time = time.time() - stime
+                if elapsed_time >= timeout:
+                    raise 'Timeout while waiting for job {}.'.format(self.job_id)
+                time.sleep(3)
+        
+        return self._finalResults
+
+    def get_unread_messages(self):
+        if len(self._imsgs) == self._msgRead:
+            return []
+        else:
+            strt = self._msgRead
+            self._msgRead = len(self._imsgs)
+            return self._imsgs[strt:]
     
     def cancel(self) -> None:
         """Cancel the job.
@@ -88,20 +175,20 @@ class EmulatorRuntimeJob:
         Raises:
         """
 
-    def stream_results(
-            self,
-            callback: Callable,
-            decoder: Optional[Type[ResultDecoder]] = None
-    ) -> None:
-        dcd = decoder or self.result_decoder
-        isFinal = False
-        while not isFinal:
-            response = requests.get(self.getURL('/jobs/'+ self.job_id +'/results'))
-            response.raise_for_status()
-            results = dcd.decode(response.text)
-            for result in results:
-                callback(result['message'])
-                isFinal = result['final']
+    # def stream_results(
+    #         self,
+    #         callback: Callable,
+    #         decoder: Optional[Type[ResultDecoder]] = None
+    # ) -> None:
+    #     dcd = decoder or self.result_decoder
+    #     isFinal = False
+    #     while not isFinal:
+    #         response = requests.get(self.getURL('/jobs/'+ self.job_id +'/results'))
+    #         response.raise_for_status()
+    #         results = dcd.decode(response.text)
+    #         for result in results:
+    #             callback(result['message'])
+    #             isFinal = result['final']
                     
 
     def cancel_result_streaming(self) -> None:

@@ -154,8 +154,7 @@ jobs:
   plan:
   - get: qiskit-runtime-emulator
     trigger: true
-    passed: [acceptance_test]
-  - task: run-acceptance
+  - task: release
     config:
       platform: linux
       image_resource:
@@ -170,6 +169,8 @@ jobs:
       - name: qiskit-runtime-emulator
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/release.sh
+      outputs:
+      - name: qiskit-runtime-emulator
   - put: qiskit-runtime-emulator
     params:
       repository: qiskit-runtime-emulator

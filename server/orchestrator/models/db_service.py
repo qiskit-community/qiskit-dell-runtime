@@ -65,12 +65,16 @@ class DBService():
         finally:
             session.close()
 
-    def fetch_message(self, job_id):
+    def fetch_messages(self, job_id, timestamp):
         try:
             session = Session()
-            fields = ['data']
-            job = session.query(Message).filter_by(job_id=job_id).options(load_only(*fields)).one()
-            return job.data
+            fields = ['data', 'creation_date']
+            all_messages = session.query(Message).filter_by(job_id=job_id).options(load_only(*fields)).all()
+            new_messages = []
+            for msg in all_messages:
+                if not timestamp or timestamp < msg.creation_date:
+                    new_messages.append({"data": msg.data, "timestamp": str(msg.creation_date)})
+            return new_messages
         finally:
             session.close()
 

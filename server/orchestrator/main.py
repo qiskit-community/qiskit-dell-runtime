@@ -7,6 +7,7 @@ from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 app = Flask(__name__)
 import uuid
+from datetime import datetime
 
 from .kube_client import KubeClient
 from .models import DBService, RuntimeProgram
@@ -117,10 +118,20 @@ def add_message(job_id):
 def get_job_results(job_id):
     try:
         logger.debug(f"GET /job/{job_id}/results")
-        result = db_service.fetch_message(job_id)
-        return Response(result, 200, mimetype="application/binary")
+        result = db_service.fetch_messages(job_id, None)
+        return Response(json.dumps({"messages": result}), 200, mimetype="application/binary")
     except:
-        return Response(None, 204, mimetype="application/binary")
+        return Response(json.dumps({"messages": []}), 204, mimetype="application/binary")
+
+@app.route('/job/<job_id>/results/<timestamp>', methods=['GET'])
+def get_new_job_results(job_id, timestamp):
+    try:
+        logger.debug(f"GET /job/{job_id}/results/{timestamp}")
+        tstamp = datetime.fromisoformat(timestamp)
+        result = db_service.fetch_messages(job_id, tstamp)
+        return Response(json.dumps({"messages": result}), 200, mimetype="application/binary")
+    except:
+        return Response(json.dumps({"messages": []}), 204, mimetype="application/binary")
 
 @app.route('/job/<job_id>/delete_message', methods=['GET'])
 def delete_message(job_id):

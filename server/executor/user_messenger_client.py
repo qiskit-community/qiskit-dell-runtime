@@ -24,17 +24,17 @@ class RemoteUserMessengerClient(UserMessenger):
         if req.status_code != 200:
             raise (f'Error POST {url}: {req.status_code}')
 
-class KafkaClient:
-    def __init__(self):
-        # servers=os.getenv('KAFKA_SERVERS')
-        # topic = os.getenv('KAFKA_TOPIC')
-        # key = os.getenv('KAFKA_KEY')
-        # self.servers = servers
-        # self.producer = KafkaProducer(bootstrap_servers=servers)
-        # self.topic = topic
-        # self.key = key
-        print("DO NOTHING")
+# class KafkaClient:
+#     def __init__(self):
+#         # servers=os.getenv('KAFKA_SERVERS')
+#         # topic = os.getenv('KAFKA_TOPIC')
+#         # key = os.getenv('KAFKA_KEY')
+#         # self.servers = servers
+#         # self.producer = KafkaProducer(bootstrap_servers=servers)
+#         # self.topic = topic
+#         # self.key = key
+#         print("DO NOTHING")
 
-    def publish(self, message):
-        # self.producer.send(self.topic, message.encode('utf8'))
-        print("DO NOTHING")
+#     def publish(self, message):
+#         # self.producer.send(self.topic, message.encode('utf8'))
+#         print("DO NOTHING")

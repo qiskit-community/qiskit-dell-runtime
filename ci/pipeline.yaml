@@ -155,6 +155,7 @@ jobs:
   - get: qiskit-runtime-emulator
     trigger: true
   - get: qre-secrets
+  - get: ibm-repo
   - task: release
     config:
       platform: linux
@@ -167,6 +168,7 @@ jobs:
           password: {{repo_password}}
           insecure_registries: [{{docker_registry}}]
       inputs:
+      - name: ibm-repo
       - name: qiskit-runtime-emulator
       - name: qre-secrets
       run:
@@ -180,6 +182,9 @@ jobs:
   - put: qre-secrets
     params:
       repository: qre-secrets
+  - put: qiskit-runtime-emulator
+    params:
+      repository: ibm-repo
 
 resources:
 - name: qiskit-runtime-emulator
@@ -189,6 +194,14 @@ resources:
     uri: git@eos2git.cec.lab.emc.com:OCTO/qiskit-runtime-emulator.git
     branch: master
     private_key: {{github_secret}}
+
+- name: ibm-repo
+  type: git
+  icon: github-circle
+  source: 
+    uri: {{ibm_repo_uri}}
+    branch: master
+    private_key: {{ibm_repo_key}}
 
 - name: qre-secrets
   type: git

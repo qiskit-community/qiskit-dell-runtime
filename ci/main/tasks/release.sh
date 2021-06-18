@@ -17,6 +17,12 @@ git commit -m "[ci skip] bump version"
 cd ../qiskit-runtime-emulator
 git tag -a $newVersion -m "CICD Build Tag"
 
+# cd ..
+# cp -r qiskit-runtime-emulator/ ibm-repo/
 
+# cd ibm-repo
+# git add . 
+# git commit -m "build $newVersion"
+# git tag -a $newVersion -m "CICD Build Tag"
 
 

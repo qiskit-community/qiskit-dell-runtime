@@ -154,6 +154,7 @@ jobs:
   plan:
   - get: qiskit-runtime-emulator
     trigger: true
+  - get: qre-secrets
   - task: release
     config:
       platform: linux
@@ -167,13 +168,18 @@ jobs:
           insecure_registries: [{{docker_registry}}]
       inputs:
       - name: qiskit-runtime-emulator
+      - name: qre-secrets
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/release.sh
       outputs:
       - name: qiskit-runtime-emulator
+      - name: qre-secrets
   - put: qiskit-runtime-emulator
     params:
       repository: qiskit-runtime-emulator
+  - put: qre-secrets
+    params:
+      repository: qre-secrets
 
 resources:
 - name: qiskit-runtime-emulator
@@ -188,7 +194,7 @@ resources:
   type: git
   icon: github-circle
   source: 
-    uri: git@eos2git.cec.lab.emc.com:DellEMC-Dojo/qre-secrets2.git
+    uri: git@eos2git.cec.lab.emc.com:DellEMC-Dojo/qre-secrets.git
     branch: master
     private_key: {{github_secret_secret}}
 

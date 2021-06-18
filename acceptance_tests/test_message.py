@@ -1,6 +1,7 @@
 import unittest
 from urllib.parse import urljoin
 import os, requests
+import json
 
 ACCEPTANCE_URL = os.getenv('ACCEPTANCE_URL')
 
@@ -22,5 +23,8 @@ class MessageTest(unittest.TestCase):
         self.assertEqual(200, req.status_code)
         url = urljoin(ACCEPTANCE_URL, f'/job/{job_id}/results')
         res = requests.get(url)
+
+        msg = json.loads(res.text)
+
         self.assertEqual(200, res.status_code)
-        self.assertEqual('testing message two', res.text)
+        self.assertEqual('testing message two', msg['messages'][0]['data'])

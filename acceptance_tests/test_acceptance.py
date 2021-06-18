@@ -20,6 +20,9 @@ def main(
     circuits,
     **kwargs,
 ):
+
+    user_messenger.publish({'results': 'intermittently'})
+
     circuits = transpile(
         circuits,
     )
@@ -30,6 +33,7 @@ def main(
     # Compute raw results
     result = backend.run(circuits, **kwargs).result()
 
+    user_messenger.publish({'results': 'finally'})
     user_messenger.publish(result.to_dict(), final=True)
     print("job complete successfully")
 """
@@ -131,7 +135,8 @@ class AcceptanceTest(unittest.TestCase):
 
         # runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        response = job.result()
+        response = job.result(timeout=120)
+        logger.debug("through")
         # print(json.dumps(results))
         # results['results'] = json.loads(results['results'])
 
@@ -197,19 +202,15 @@ class AcceptanceTest(unittest.TestCase):
 
         # runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        response = job.result()
-        # print(json.dumps(results))
-        # results['results'] = json.loads(results['results'])
+        
+        result = job.result(timeout=120)
+        messages = job.get_unread_messages()
+        logger.debug(f'unread messages {messages}')
+            
+        self.assertEqual(len(messages), 2)
+        self.assertEqual("intermittently", messages[0]['results'])
+        self.assertEqual("finally", messages[1]['results'])
 
-        results = response['results'][0]
-
-        self.assertIsNotNone(results)
-        self.assertTrue(results['success'])
-        self.assertTrue(results['success'])
-        self.assertEqual("DONE", results['status'])
-
-        shots = results['shots']
-        count = results['data']['counts']['0x0']
-
-        self.assertGreater(count, (0.45 * shots))
-        self.assertLess(count, (0.55 * shots))
+        messages = job.get_unread_messages()
+        
+        self.assertEqual(0, len(messages))

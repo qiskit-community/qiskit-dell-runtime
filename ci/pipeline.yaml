@@ -175,12 +175,13 @@ jobs:
       outputs:
       - name: qiskit-runtime-emulator
       - name: qre-secrets
-  - put: qiskit-runtime-emulator
-    params:
-      repository: qiskit-runtime-emulator
   - put: qre-secrets
     params:
       repository: qre-secrets
+  - put: qiskit-runtime-emulator
+    params:
+      repository: qiskit-runtime-emulator
+  
 
 resources:
 - name: qiskit-runtime-emulator

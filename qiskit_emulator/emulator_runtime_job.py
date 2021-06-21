@@ -36,7 +36,8 @@ class EmulatorRuntimeJob:
         self.job_id = job_id
         self.host = host
         self.result_decoder = result_decoder
-
+        
+        self._status = None
         self._imsgs = []
         self._msgRead = 0
         self._poller = threading.Thread(target=self.poll_for_results)
@@ -65,9 +66,7 @@ class EmulatorRuntimeJob:
         dcd = self.result_decoder
         lastTimestamp = None
 
-        while not self._finalResults:     
-            if self._kill:
-                break
+        while not self._finalResults and not self._kill and not self._status == "Failed":     
 
             time.sleep(3)
 
@@ -159,13 +158,31 @@ class EmulatorRuntimeJob:
     def cancel(self) -> None:
         """Cancel the job.
         """
+        url = self.getURL('/job/' + self.job_id + '/cancel')
+        response = requests.get(url)
+        response.raise_for_status()
+        self._kill = True
+        if response.status_code == 200:
+            return True
+        elif response.status_code == 204:
+            return False
       
-    #def status(self) -> JobStatus:
-    #    """Return the status of the job.
-    #    Returns:
-    #        Status of this job.
-    #    Raises:
-    #    """
+    def status(self):
+        """Return the status of the job.
+        Returns:
+            Status of this job.
+        Raises:
+        """
+        url = self.getURL('/job/' + self.job_id + '/status')
+        response = requests.get(url)
+        response.raise_for_status()
+        if response.status_code == 200:
+            self._status = response.text
+            return self._status
+        elif response.status_code == 204:
+            return None
+
+
 
     def wait_for_final_state(
             self,

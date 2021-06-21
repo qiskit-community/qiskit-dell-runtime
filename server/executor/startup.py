@@ -15,6 +15,8 @@ logger.setLevel(logging.DEBUG)
 host = os.environ['ORCH_HOST']
 program_id = os.environ['PROGRAM_ID']
 inputs_str = os.environ['INPUTS_STR']
+job_id = os.environ['JOB_ID']
+RUNNING = "Running"
 
 qre_dir = "/var/qiskit-runtime"
 # qre_dir = "/root/workspace/qre-runtime-test"
@@ -37,11 +39,19 @@ def download_program_from_orchestrator():
         program_file.write(req.text)
         logger.debug('finished writing to ' + program_path)
 
+def update_status_to_running():
+    url = urljoin(host, f'/job/{job_id}/status')
+    req = requests.post(url, json=RUNNING)
+    if req.status_code != 200:
+        raise (f'Error POST {url}: {req.status_code}')
+    
+
 def main():
     print("RUNNING!")
     try:
         write_program_params_file()
         download_program_from_orchestrator()
+        update_status_to_running()
         
         cmd = [sys.executable, executor_path]
         exec_result = subprocess.run(cmd, capture_output=True, text=True)

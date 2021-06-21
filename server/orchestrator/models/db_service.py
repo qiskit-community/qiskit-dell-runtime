@@ -2,6 +2,7 @@
 from .base import Session, engine, Base
 from .runtime_program_model import RuntimeProgram
 from .message_model import Message
+from .job_model import Job
 from sqlalchemy.orm import load_only
 from datetime import datetime
 import logging
@@ -36,6 +37,14 @@ class DBService():
         finally:
             session.close()
 
+    def save_job(self, job: Job):
+        session = Session()
+        try:
+            session.add(job)
+            session.commit()
+        finally:
+            session.close()
+
     def update_runtime_program(self, program_id, name, data, program_metadata):
         session = Session()
         try:
@@ -52,6 +61,24 @@ class DBService():
                 meta_str = json.dumps(meta)
                 setattr(prog, "program_metadata", meta_str)
             session.commit()
+        finally:
+            session.close()
+
+    def update_job_status(self, job_id, status):
+        session = Session()
+        try:
+            job = session.query(Job).filter_by(job_id=job_id).one()
+            setattr(job, "status", status)
+            session.commit()
+        finally:
+            session.close()
+
+    def fetch_pod_name(self, job_id):
+        try:
+            session = Session()
+            fields = ['pod_name']
+            job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
+            return job.pod_name
         finally:
             session.close()
 
@@ -113,6 +140,15 @@ class DBService():
                     'program_metadata': program.program_metadata
                 })
             return result
+        finally:
+            session.close()
+
+    def fetch_job_status(self, job_id):
+        try:
+            session = Session()
+            fields = ['status']
+            job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
+            return job.status
         finally:
             session.close()
 

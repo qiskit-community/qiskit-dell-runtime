@@ -44,7 +44,7 @@ class KubeClient():
         program_id = options["program_id"]
         inputs_str = options["inputs_str"]
         job_id = options["job_id"]
-        pod_name = "qre-" + str(uuid.uuid1())[-24:]
+        pod_name = options["pod_name"]
         orch_host = "http://qre-orchestrator"
         pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
         pod_obj = yaml.safe_load(pod_yaml)
@@ -57,3 +57,6 @@ class KubeClient():
         kafka_topic = options["kafka_topic"]
         kafka_key = options["kafka_key"]
         subprocess.call(['sh', 'scripts/runexecutordev.sh', program_id, inputs_str, kafka_servers, kafka_topic, kafka_key])
+
+    def cancel(self, pod_name):
+        self._api.delete_namespaced_pod(pod_name, namespace=self._namespace)

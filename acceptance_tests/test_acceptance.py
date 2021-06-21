@@ -38,6 +38,20 @@ def main(
     print("job complete successfully")
 """
 
+FAIL_PROGRAM = """
+from qiskit.compiler import transpile, schedule
+
+
+def main(
+    backend,
+    user_messenger,
+    circuits,
+    **kwargs,
+):
+
+    raise Exception('test failure')
+"""
+
 RUNTIME_PROGRAM_METADATA = {
     "max_execution_time": 600,
     "description": "Qiskit test program"
@@ -214,3 +228,74 @@ class AcceptanceTest(unittest.TestCase):
         messages = job.get_unread_messages()
         
         self.assertEqual(0, len(messages))
+
+    def test_get_status(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        program_inputs = {
+            'circuits': qc,
+        }
+
+        # runtime_program = provider.runtime.program(program_id)
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+        status = job.status()
+        correct_status = status == "Creating" or status == "Running"
+        self.assertTrue(correct_status)
+        job.result(timeout=120)
+        status = job.status()
+        self.assertEqual(status, "Completed")
+
+    def test_get_failed_status(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(FAIL_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        program_inputs = {
+            'circuits': qc,
+        }
+
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+        status = job.status()
+        self.assertEqual(status, "Creating")
+        
+        while status == "Running" or status == "Creating":
+            status = job.status()
+            sleep(5)
+
+        self.assertEqual(status, "Failed")
+
+    def test_cancel_job(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        program_inputs = {
+            'circuits': qc,
+        }
+
+        # runtime_program = provider.runtime.program(program_id)
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+        res = job.cancel()
+        self.assertTrue(res)
+
+        status = job.status()
+        self.assertEqual(status, "Canceled")

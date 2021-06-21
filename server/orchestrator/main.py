@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime
 
 from .kube_client import KubeClient
-from .models import DBService, RuntimeProgram
+from .models import DBService, RuntimeProgram, Job
 # from kafka import KafkaConsumer, TopicPartition
 
 db_service = DBService()
@@ -18,6 +18,11 @@ kube_client = KubeClient()
 
 ACTIVE="Active"
 INACTIVE="Inactive"
+CREATING="Creating"
+RUNNING = "Running"
+COMPLETED = "Completed"
+FAILED = "Failed"
+CANCELED = "Canceled"
 
 path = '/'.join((os.path.abspath(__file__).replace('\\', '/')).split('/')[:-1])
 fileConfig(os.path.join(path, 'logging_config.ini'))
@@ -91,17 +96,58 @@ def run_program(program_id):
     inputs_str = flask.request.json
 
     job_id = random_id()
+    pod_name = "qre-" + str(uuid.uuid1())[-24:]    
     options = {
         "program_id": program_id,
         "inputs_str": inputs_str,
-        "job_id": job_id
+        "job_id": job_id,
+        "pod_name": pod_name
         # "kafka_servers": KAFKA_SERVERS,
         # "kafka_topic": job_id,
         # "kafka_key": "0"
     }
+
+    db_job = Job()
+    db_job.job_id = job_id
+    db_job.status = CREATING
+    db_job.pod_name = pod_name
+    db_service.save_job(db_job)
+
     kube_client.run(**options)
     # create job and return later
     return Response(job_id, 200, mimetype="application/json")
+
+@app.route('/job/<job_id>/status', methods=['GET'])
+def get_job_status(job_id):
+    try:
+        logger.debug(f'GET /job/{job_id}/status')
+        result = db_service.fetch_job_status(job_id)
+        return Response(result, 200, mimetype="application/binary")
+    except:
+        return Response("", 204, mimetype="application/binary")
+
+@app.route('/job/<job_id>/status', methods=['POST'])
+def update_job_status(job_id):
+    status = flask.request.json
+    logger.debug(f"GET /job/{job_id}/status: {status}")
+
+    db_service.update_job_status(job_id, status)
+    return ("", 200)
+
+@app.route('/job/<job_id>/cancel', methods=['GET'])
+def cancel_job(job_id):
+    status = db_service.fetch_job_status(job_id)
+    logger.debug(f"GET /job/{job_id}/cancel")
+    if status == COMPLETED or status == FAILED or status == CANCELED:
+        return ("Job no longer running", 204)
+    else:
+        try:
+            pod_name = db_service.fetch_pod_name(job_id)
+            kube_client.cancel(pod_name)
+            db_service.update_job_status(job_id, CANCELED)
+            return ("", 200)
+        except:
+            return ("Job no longer running", 204)
 
 # TODO check for runtime to make sure only executor 
 # for this specific job can call this URL 

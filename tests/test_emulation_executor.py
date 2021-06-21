@@ -1,5 +1,5 @@
 import unittest
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import EmulatorProvider, EmulatorRuntimeJob
 import os
 import json
 import logging
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class EmulationExecutorTest(unittest.TestCase):
     def test_pre_post_run(self):
         try:
-            executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM)
+            executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, local_port=0)
             self.assertIsNotNone(executor)
 
             executor._pre_run()
@@ -56,7 +56,8 @@ class EmulationExecutorTest(unittest.TestCase):
 
         
     def test_run(self):
-        executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, inputs = { "iterations": 2 })
+        job = EmulatorRuntimeJob("1", None)
+        executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, local_port=job.local_port, inputs = { "iterations": 2 })
         self.assertIsNotNone(executor)
 
         executor.run()

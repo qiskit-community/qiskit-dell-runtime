@@ -9,6 +9,10 @@ from datetime import datetime
 from pathlib import Path
 import os
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 from . import emulation_executor
 from .emulator_runtime_job import EmulatorRuntimeJob
@@ -18,6 +22,7 @@ class EmulatorRuntimeService():
         self.provider = provider
         self._programs = {}
         self._program_data = {}
+        self._nextjobID = "1"
 
     # def pprint_programs(self):
     #     return self._programs
@@ -92,11 +97,14 @@ class EmulatorRuntimeService():
         if program_id in self._programs:
             program = self._programs[program_id]
             program_data = self._program_data[program_id]
-            executor = emulation_executor.EmulationExecutor(program, program_data, options, inputs)
+
+            job = EmulatorRuntimeJob(self._nextjobID, None)
+            self._nextjobID = str(int(self._nextjobID) + 1)
+            executor = emulation_executor.EmulationExecutor(program, program_data, job.local_port, options, inputs, )
             executor.run()
             # TODO: Fix this
-            job = EmulatorRuntimeJob("fix_me", "fix_me")
-            job.user_messenger = executor._user_messenger
+            
+            # job.user_messenger = executor._user_messenger
             return job
         else:
             return None

@@ -14,11 +14,10 @@ import json
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-from .local_user_messenger import LocalUserMessenger
-
 class EmulationExecutor():
 
     def __init__(self, program: RuntimeProgram, program_data: Union[bytes, str],
+            local_port: int,
             options: Dict = {},
             inputs: Dict = {},
             callback: Optional[Callable] = None, 
@@ -28,7 +27,8 @@ class EmulationExecutor():
         
         self._options = options
         self._inputs = inputs
-        self._user_messenger = LocalUserMessenger()
+        self._local_port = local_port
+        # self._user_messenger = LocalUserMessenger()
         
         self._temp_dir = None
         
@@ -47,7 +47,7 @@ class EmulationExecutor():
             logger.debug('finished writing to ' + program_path)
 
         executor_path = os.path.join(self._temp_dir, "executor.py")
-        executor_content = EXECUTOR_CODE.format(params_path, self._user_messenger.port())
+        executor_content = EXECUTOR_CODE.format(params_path, self._local_port)
         with open(executor_path, "w+") as executor_file:
             executor_file.write(executor_content)
             logger.debug('finished writing to ' + executor_path)
@@ -55,13 +55,13 @@ class EmulationExecutor():
     def _post_run(self):
         if self._temp_dir is not None:
             shutil.rmtree(self._temp_dir)
-            self._user_messenger.close()
+            # self._user_messenger.close()
 
     def temp_dir(self):
         return self._temp_dir
 
     def _execute(self):
-        self._user_messenger.listen()
+        # self._user_messenger.listen()
 
         executor_path = os.path.join(self._temp_dir, "executor.py")
         cmd = [sys.executable, executor_path]

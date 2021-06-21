@@ -1,5 +1,6 @@
 """Qiskit emulator runtime job."""
 
+# from qiskit_emulator.local_user_messenger import LocalUserMessenger
 from typing import Any, Optional, Callable, Dict, Type
 import time
 import logging
@@ -14,6 +15,7 @@ import requests
 import threading
 from datetime import datetime
 import json
+import socket
 
 logger = logging.getLogger(__name__)
  
@@ -34,16 +36,34 @@ class EmulatorRuntimeJob:
         Args:
         """
         self.job_id = job_id
+
         self.host = host
-        self.result_decoder = result_decoder
-        
+        self._sock = None
+        self.local_port = None
+
         self._status = None
-        self._imsgs = []
         self._msgRead = 0
-        self._poller = threading.Thread(target=self.poll_for_results)
+
+        self._imsgs = []
         self._finalResults = None
         self._kill = False
+        
+        if not self.host:
+            self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._sock.bind(('localhost', 0))
+            self.local_port = self._sock.getsockname()[1]
+            logger.debug(self.local_port)
+            self._poller = threading.Thread(target=self.local_poll_for_results)
+        else:
+            self._poller = threading.Thread(target=self.remote_poll_for_results)
+
+        self.result_decoder = result_decoder
+
         self._poller.start()
+        
+        
+
+        
 
 # Ben 6/17/21: implemented thread to poll for messages until there's a final
 #              result. Once there's a final result exit thread.
@@ -61,13 +81,41 @@ class EmulatorRuntimeJob:
         except:
             logger.debug("poller thread joined")
 
+    def job_completed(self):
+        self.status()
+        return (self._status == "Failed" or self._status == "Completed" or self._status == "Canceled")
 
-    def poll_for_results(self):
+    def local_poll_for_results(self):
+        logging.debug(f"starting to listen to port {self.local_port}")
+        self._sock.listen(1)
+
+        conn, addr = self._sock.accept()
+        logging.debug(f"accepted client connection from {addr}")
+        with conn:
+            while not self._finalResults and not self._kill:
+                # TODO: loop here...
+                data = conn.recv(4096)
+                if not data:
+                    break
+                else:
+                    data_obj = json.loads(data.decode("utf-8"), cls=ResultDecoder)
+                    message = data_obj["message"]
+                    print(f"MESSENGER RECEIVED: {message}")
+                    self._imsgs.append(message)
+                    logging.debug(f"MESSENGER RECEIVED: {message}")
+                    if data_obj['final']:
+                        logger.debug('result: got final result.')
+                        self._finalResults = message
+                    else:
+                        self._imsgs.append(message)
+            self._sock.close()
+
+
+    def remote_poll_for_results(self):
         dcd = self.result_decoder
         lastTimestamp = None
 
-        while not self._finalResults and not self._kill and not self._status == "Failed":     
-
+        while not self._finalResults and not self._kill and not self.job_completed():     
             time.sleep(3)
 
             url = self.getURL('/job/'+ self.job_id +'/results')

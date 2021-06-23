@@ -41,7 +41,7 @@ def upload_runtime_program():
     # program.program_id = json_data['program_id']
     new_id = random_id()
     program.program_id = new_id
-    program.name = json_data['name']
+    program.name = new_id
     program.program_metadata = json.dumps(json_data['program_metadata'])
     program.data = bytes(json_data['data'], 'utf-8')
     program.status = ACTIVE

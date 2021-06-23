@@ -83,7 +83,7 @@ class RemoteRuntimeService():
             refresh: If ``True``, re-query the server for the programs. Otherwise
                 return the cached value.
         """
-        programs = self.programs(refresh)
+        programs = self.programs(refresh).values()
         for prog in programs:
             print("="*50)
             print(str(prog))
@@ -103,10 +103,10 @@ class RemoteRuntimeService():
             interim_results: Optional[List[ProgramResult]] = None
     ) -> str:
         # careful of hash collision
-        if program_id == None:
-            program_id = hex(hash((data, name, version)))[-16:]
-            if name is None:
-                name = program_id
+        # if program_id == None:
+        #     program_id = hex(hash((data, name, version)))[-16:]
+        #     if name is None:
+        #         name = program_id
 
         program_metadata = self._merge_metadata(
             initial={},
@@ -118,9 +118,7 @@ class RemoteRuntimeService():
         program_metadata.pop('name', None)
 
         req_body = {
-            'program_id': program_id,
-            'data': data,
-            'name': name,
+            'data': data,  
             'program_metadata': program_metadata
         }
 

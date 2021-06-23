@@ -299,3 +299,24 @@ class AcceptanceTest(unittest.TestCase):
 
         status = job.status()
         self.assertEqual(status, "Canceled")
+    def test_pprint_programs(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        self.assertIsNotNone(provider)
+        self.assertIsNotNone(provider.runtime)
+
+        pr_id_1 = provider.runtime.upload_program("fake-program1", metadata=RUNTIME_PROGRAM_METADATA)
+        import sys
+        import io
+        old_stdout = sys.stdout
+        new_stdout = io.StringIO()
+        sys.stdout = new_stdout
+        provider.runtime.pprint_programs()
+        output = new_stdout.getvalue()
+        sys.stdout = old_stdout
+        print(output)
+        self.assertTrue(
+        '''==================================================
+{}:
+  Name: {}'''.format(pr_id_1,pr_id_1)
+         in output)

@@ -30,7 +30,7 @@ class EmulatorRuntimeJob:
             self,
             job_id,
             host,
-            executor: Type[EmulationExecutor],
+            executor: Optional[Type[EmulationExecutor]] = None,
             result_decoder: Type[ResultDecoder] = ResultDecoder
     ) -> None:
         """RuntimeJob constructor.
@@ -84,7 +84,7 @@ class EmulatorRuntimeJob:
         except:
             logger.debug("poller thread joined")
         
-        self.executor.__del__()
+        # self.executor.__del__()
 
     def job_completed(self):
         self.status()
@@ -168,39 +168,12 @@ class EmulatorRuntimeJob:
         logger.debug(f"{url}")
         return url
 
-    # def result(
-    #         self,
-    #         timeout: Optional[float] = None,
-    #         wait: float = 5,
-    #         decoder: Optional[Type[ResultDecoder]] = None
-    # ) -> Any:
-    #     stime = time.time()
-    #     isFinal = False
-    #     finalMessage = None
-    #     dcd = decoder or self.result_decoder
-    #     while not isFinal:
-    #         elapsed_time = time.time() - stime
-    #         if timeout is not None and elapsed_time >= timeout:
-    #             raise 'Timeout while waiting for job {}.'.format(self.job_id)
-    #         time.sleep(wait)
-    #         response = requests.get(self.getURL('/job/'+ self.job_id +'/results'))
-    #         if response.status_code == 204:
-    #             logger.debug('result: status 204, job not done.')
-    #             continue
-    #         # response.raise_for_status()
-    #         result = dcd.decode(response.text)
-
-    #         if result['final']:
-    #             isFinal = True
-    #             finalMessage = result['message']
-        
-    #     return finalMessage
 
     def result(self, 
                timeout: Optional[float] = None):
         if timeout is not None:
             stime = time.time()
-            while self._finalResults == None and not self._kill and not self.job_completed():
+            while self._finalResults == None:
                 elapsed_time = time.time() - stime
                 if elapsed_time >= timeout:
                     raise 'Timeout while waiting for job {}.'.format(self.job_id)

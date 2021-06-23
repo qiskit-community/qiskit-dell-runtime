@@ -78,9 +78,8 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         try:
             job = provider.runtime.run(program_id, options=None, inputs={"iterations": 2})
 
-            job.result(timeout=15)
-            status = job.status()
-            self.assertEqual(status, "Completed")
+            result = job.result(timeout=15)
+            self.assertIsNotNone(result)
         except Exception:
             self.fail("should pass")
 

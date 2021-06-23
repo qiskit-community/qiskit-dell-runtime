@@ -40,7 +40,7 @@ RUNTIME_PROGRAM_METADATA = {
     "description": "Qiskit test program"
 }
 
-PROGRAM_PREFIX = 'qiskit-test'
+# PROGRAM_PREFIX = 'qiskit-test'
 
 def main():
     provider = EmulatorProvider()
@@ -59,6 +59,8 @@ def main():
 
     
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+
+    job.result(timeout=120)
     
 
 if __name__ == "__main__":

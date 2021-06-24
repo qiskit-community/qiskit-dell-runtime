@@ -21,9 +21,6 @@ class RemoteRuntimeService():
             raise Exception("Wrong status code from host: {}".format(self.host))
         self._programs = {}
 
-    # def pprint_programs(self):
-    #     return self._programs
-
     def _post(self, path, data):
         url = urljoin(self.host, path)
         logger.debug(f"POST {url}: {data}")
@@ -102,6 +99,10 @@ class RemoteRuntimeService():
             return_values: Optional[List[ProgramResult]] = None,
             interim_results: Optional[List[ProgramResult]] = None
     ) -> str:
+
+        # We removed this because the orchestrator assigns the actual program ID.
+        # That is now the name in the DB, as well, if none is provided.
+        
         # careful of hash collision
         # if program_id == None:
         #     program_id = hex(hash((data, name, version)))[-16:]
@@ -118,7 +119,8 @@ class RemoteRuntimeService():
         program_metadata.pop('name', None)
 
         req_body = {
-            'data': data,  
+            'data': data,
+            'name': name,  
             'program_metadata': program_metadata
         }
 

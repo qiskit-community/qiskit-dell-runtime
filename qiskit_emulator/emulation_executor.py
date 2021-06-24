@@ -10,8 +10,6 @@ import sys
 import logging
 import subprocess
 import json
-import threading
-import signal
 import multiprocessing 
 import ctypes
 from time import sleep
@@ -42,8 +40,6 @@ class EmulationExecutor():
         self._temp_dir = None
         self._local_port = 0
 
-        self._setup = False
-
         self._statusvalue = multiprocessing.Value(ctypes.c_int)
         self._statusvalue.value = STATUS_VALUES.index(CREATING)
         self._xprocess = multiprocessing.Process(target=self._execute,args =(self._statusvalue,))
@@ -56,9 +52,7 @@ class EmulationExecutor():
                     pass
             except Exception as e:
                 logger.debug("terminating process with : ")
-        if self._setup:
-            self._post_run()
-        
+
     def _pre_run(self):
         self._temp_dir = tempfile.mkdtemp()
         logger.debug('creating temp directory at ' + self._temp_dir)
@@ -79,21 +73,20 @@ class EmulationExecutor():
             executor_file.write(executor_content)
             logger.debug('finished writing to ' + executor_path)
 
-        self._setup = True
+        
 
     def _post_run(self):
-        if threading.current_thread() is threading.main_thread():
+        try:
             if self._temp_dir is not None:
                 shutil.rmtree(self._temp_dir)
-                # self._user_messenger.close()
-
-            self._setup = False
+        except:
+            logger.debug("Its gone")
+        
 
     def temp_dir(self):
         return self._temp_dir
 
     def _execute(self, statusvalue):
-        # self._user_messenger.listen()
         statusvalue.value = STATUS_VALUES.index(RUNNING)
         try:
             executor_path = os.path.join(self._temp_dir, "executor.py")
@@ -106,12 +99,13 @@ class EmulationExecutor():
             exec_result.check_returncode()
             statusvalue.value = STATUS_VALUES.index(COMPLETED)
             logger.debug(f"status: sent COMPLETED")
-            exit(0)
+            self._post_run()
+            sys.exit(0)
         except Exception as e:
-            # logger.debug(e)
             statusvalue.value = STATUS_VALUES.index(FAILED)
+            self._post_run()
             logger.debug(f"status: sent FAILED")
-            exit(1)
+            sys.exit(1)
 
             
     def run(self):
@@ -121,28 +115,20 @@ class EmulationExecutor():
     def get_status(self):
         return STATUS_VALUES[self._statusvalue.value]
 
-    # for 6/22/21: change exthread from Thread to Process
-    # Use signals to update status
-    # and can kill process very easily
-    # definitely works. but will be annoying.
-
-
     def cancel(self):
         self._xprocess.kill()
         
         while self._xprocess.is_alive():
             sleep(1)     
         self._statusvalue.value = STATUS_VALUES.index(CANCELED)
-        if self._setup:
-            self._post_run()
-    
-    # def wait_for_job_complete(self):
-    #     self._exthread.join()
+        self._post_run()
+
 
 EXECUTOR_CODE = """
 from qiskit import Aer
 from qiskit_emulator import LocalUserMessengerClient
 from program import main
+import sys
 import json
 import os
 from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
@@ -161,8 +147,7 @@ if __name__ == "__main__":
         
     except Exception as e:
         print(e)
-        exit(1)
-
+        sys.exit(1)
     print("exit")
   
 """

@@ -68,15 +68,6 @@ class EmulatorRuntimeJob:
             self.executor._local_port = self.local_port
             self.executor.run()
 
-# Ben 6/17/21: implemented thread to poll for messages until there's a final
-#              result. Once there's a final result exit thread.
-
-# Does not yet work with multiple messages - need to adjust orchestrator 
-# and db_service in order to accomodate getting unread messages (or all)
-# perhaps easier to just get all, send back to ERJ, and sort them out there?
-
-
-
     def __del__(self):
         self._kill = True
         try:            
@@ -100,7 +91,7 @@ class EmulatorRuntimeJob:
             with conn:
                 while self._finalResults == None and not self._kill and not self.job_completed():
                     # TODO: loop here...
-                    data = conn.recv(4096)
+                    data = conn.recv(16384)
 
                     if not data:
                         break
@@ -139,7 +130,7 @@ class EmulatorRuntimeJob:
             if response.status_code == 204:
                 logger.debug('result: status 204, no new messages.')
                 continue
-            # response.raise_for_status()
+            response.raise_for_status()
             res_json = json.loads(response.text)
             logger.debug(f'got: {res_json}')
             messages = res_json["messages"]

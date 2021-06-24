@@ -24,9 +24,6 @@ class EmulatorRuntimeService():
         self._program_data = {}
         self._nextjobID = "1"
 
-    # def pprint_programs(self):
-    #     return self._programs
-
     # copied from IBMQ Provider
     def pprint_programs(self, refresh: bool = False) -> None:
         """Pretty print information about available runtime programs.

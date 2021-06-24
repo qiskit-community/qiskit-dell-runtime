@@ -395,7 +395,7 @@ RUNTIME_PROGRAM_METADATA = {
 
 # In[33]:
 
-# provider.remote(os.getenv("ACCEPTANCE_URL"))
+provider.remote(os.getenv("ACCEPTANCE_URL"))
 program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -445,8 +445,5 @@ program_inputs = {
 runtime_program = provider.runtime.program(program_id)
 job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
-res = job.result(timeout=300)
+res = job.result(timeout=600)
 print(res)
-
-
-

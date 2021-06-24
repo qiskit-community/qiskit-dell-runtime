@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class EmulationExecutorTest(unittest.TestCase):
     def test_pre_post_run(self):
         try:
-            executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM)
+            executor = EmulationExecutor(program=None, program_data=(RUNTIME_PROGRAM, "STRING"))
             self.assertIsNotNone(executor)
 
             executor._pre_run()

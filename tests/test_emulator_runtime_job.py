@@ -79,9 +79,9 @@ logger = logging.getLogger(__name__)
 
 class EmulatorRuntimeJobTest(unittest.TestCase):
     def test_multiple_runtime_jobs(self):
-        executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, inputs = { "iterations": 2 })
-        executor2 = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, inputs = { "iterations": 2 })
-        executor3 = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, inputs = { "iterations": 2 })
+        executor = EmulationExecutor(program=None, program_data=(RUNTIME_PROGRAM, "STRING"), inputs = { "iterations": 2 })
+        executor2 = EmulationExecutor(program=None, program_data=(RUNTIME_PROGRAM, "STRING"), inputs = { "iterations": 2 })
+        executor3 = EmulationExecutor(program=None, program_data=(RUNTIME_PROGRAM, "STRING"), inputs = { "iterations": 2 })
         self.assertIsNotNone(executor)
         job = EmulatorRuntimeJob("1", None, executor=executor)
         job2 = EmulatorRuntimeJob("1", None, executor=executor2)

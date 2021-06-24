@@ -3,6 +3,7 @@ from qiskit import QuantumCircuit
 import logging
 import requests
 import time
+import os
 
 RUNTIME_PROGRAM = """
 # This code is part of qiskit-runtime.
@@ -44,7 +45,7 @@ RUNTIME_PROGRAM_METADATA = {
 }
 
 PROGRAM_PREFIX = 'qiskit-test'
-REMOTE_RUNTIME = 'http://localhost:8080'
+REMOTE_RUNTIME = os.getenv("ACCEPTANCE_URL") 
 def main():
     print("Starting...")
     logging.basicConfig(level=logging.DEBUG)
@@ -67,7 +68,7 @@ def main():
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
     # job.stream_results(print)
-    results = job.result(timeout=5)
+    results = job.result(timeout=15)
     print(results)
 if __name__ == "__main__":
     main()

@@ -40,7 +40,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
 
     provider = EmulatorProvider()
-    provider.remote(REMOTE_RUNTIME)
+    # provider.remote(REMOTE_RUNTIME)
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
     print(f"PROGRAM ID: {program_id}")
 
@@ -52,8 +52,8 @@ def main():
     
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
     time.sleep(2)
-    job.stream_results(print)
-    # results = job.result(timeout=5)
-    # print(results)
+    print(job.get_unread_messages())
+    results = job.result(timeout=25)
+    print(results)
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 from qiskit_emulator import EmulatorProvider
 from qiskit import QuantumCircuit
+import os
 
 RUNTIME_PROGRAM = """
 # This code is part of qiskit-runtime.
@@ -74,11 +75,9 @@ RUNTIME_PROGRAM_METADATA = {
 }
 
 PROGRAM_PREFIX = 'qiskit-test'
-
 def main():
     provider = EmulatorProvider()
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
-    
     N = 6
     qc = QuantumCircuit(N)
 
@@ -103,6 +102,10 @@ def main():
 
     
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+
+    res = job.result(timeout=10)
+
+    print(f"res: {res}")
 
 if __name__ == "__main__":
     main()

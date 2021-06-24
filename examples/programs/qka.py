@@ -5,8 +5,11 @@
 from qiskit_emulator import EmulatorProvider
 from qiskit import QuantumCircuit
 import pandas as pd
+from time import sleep
+import os
 
-df = pd.read_csv('./examples/aux_file/dataset_graph7.csv',sep=',', header=None) # alterative problem: dataset_graph10.csv
+
+df = pd.read_csv(os.path.dirname(os.path.abspath(__file__)) + '/aux_file/dataset_graph7.csv',sep=',', header=None) # alterative problem: dataset_graph10.csv
 data = df.values
 provider = EmulatorProvider()
 
@@ -392,7 +395,7 @@ RUNTIME_PROGRAM_METADATA = {
 
 # In[33]:
 
-
+# provider.remote(os.getenv("ACCEPTANCE_URL"))
 program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -442,7 +445,8 @@ program_inputs = {
 runtime_program = provider.runtime.program(program_id)
 job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
-
+res = job.result(timeout=300)
+print(res)
 
 
 

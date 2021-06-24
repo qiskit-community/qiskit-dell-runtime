@@ -21,9 +21,6 @@ class RemoteRuntimeService():
             raise Exception("Wrong status code from host: {}".format(self.host))
         self._programs = {}
 
-    # def pprint_programs(self):
-    #     return self._programs
-
     def _post(self, path, data):
         url = urljoin(self.host, path)
         logger.debug(f"POST {url}: {data}")
@@ -83,7 +80,7 @@ class RemoteRuntimeService():
             refresh: If ``True``, re-query the server for the programs. Otherwise
                 return the cached value.
         """
-        programs = self.programs(refresh)
+        programs = self.programs(refresh).values()
         for prog in programs:
             print("="*50)
             print(str(prog))
@@ -102,11 +99,15 @@ class RemoteRuntimeService():
             return_values: Optional[List[ProgramResult]] = None,
             interim_results: Optional[List[ProgramResult]] = None
     ) -> str:
+
+        # We removed this because the orchestrator assigns the actual program ID.
+        # That is now the name in the DB, as well, if none is provided.
+        
         # careful of hash collision
-        if program_id == None:
-            program_id = hex(hash((data, name, version)))[-16:]
-            if name is None:
-                name = program_id
+        # if program_id == None:
+        #     program_id = hex(hash((data, name, version)))[-16:]
+        #     if name is None:
+        #         name = program_id
 
         program_metadata = self._merge_metadata(
             initial={},
@@ -118,9 +119,8 @@ class RemoteRuntimeService():
         program_metadata.pop('name', None)
 
         req_body = {
-            'program_id': program_id,
             'data': data,
-            'name': name,
+            'name': name,  
             'program_metadata': program_metadata
         }
 

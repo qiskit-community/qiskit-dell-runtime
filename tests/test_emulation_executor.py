@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class EmulationExecutorTest(unittest.TestCase):
     def test_pre_post_run(self):
         try:
-            executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, local_port=0)
+            executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM)
             self.assertIsNotNone(executor)
 
             executor._pre_run()
@@ -55,13 +55,7 @@ class EmulationExecutorTest(unittest.TestCase):
             self.assertFalse(os.path.isdir(executor.temp_dir()))
 
         
-    def test_run(self):
-        job = EmulatorRuntimeJob("1", None)
-        executor = EmulationExecutor(program=None, program_data=RUNTIME_PROGRAM, local_port=job.local_port, inputs = { "iterations": 2 })
-        self.assertIsNotNone(executor)
-
-        executor.run()
-        self.assertFalse(os.path.isdir(executor.temp_dir()))
+    
 
 
         

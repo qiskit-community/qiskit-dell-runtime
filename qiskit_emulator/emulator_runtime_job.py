@@ -1,6 +1,6 @@
 """Qiskit emulator runtime job."""
 
-# from qiskit_emulator.local_user_messenger import LocalUserMessenger
+from qiskit_emulator.emulation_executor import EmulationExecutor
 from typing import Any, Optional, Callable, Dict, Type
 import time
 import logging
@@ -30,6 +30,7 @@ class EmulatorRuntimeJob:
             self,
             job_id,
             host,
+            executor: Optional[Type[EmulationExecutor]] = None,
             result_decoder: Type[ResultDecoder] = ResultDecoder
     ) -> None:
         """RuntimeJob constructor.
@@ -40,6 +41,8 @@ class EmulatorRuntimeJob:
         self.host = host
         self._sock = None
         self.local_port = None
+
+        self.executor = executor
 
         self._status = None
         self._msgRead = 0
@@ -60,19 +63,10 @@ class EmulatorRuntimeJob:
         self.result_decoder = result_decoder
 
         self._poller.start()
-        
-        
 
-        
-
-# Ben 6/17/21: implemented thread to poll for messages until there's a final
-#              result. Once there's a final result exit thread.
-
-# Does not yet work with multiple messages - need to adjust orchestrator 
-# and db_service in order to accomodate getting unread messages (or all)
-# perhaps easier to just get all, send back to ERJ, and sort them out there?
-
-
+        if self.executor:
+            self.executor._local_port = self.local_port
+            self.executor.run()
 
     def __del__(self):
         self._kill = True
@@ -80,6 +74,8 @@ class EmulatorRuntimeJob:
             self._poller.join()
         except:
             logger.debug("poller thread joined")
+        
+        # self.executor.__del__()
 
     def job_completed(self):
         self.status()
@@ -88,34 +84,42 @@ class EmulatorRuntimeJob:
     def local_poll_for_results(self):
         logging.debug(f"starting to listen to port {self.local_port}")
         self._sock.listen(1)
+        self._sock.settimeout(3)
+        try:
+            conn, addr = self._sock.accept()
+            logging.debug(f"accepted client connection from {addr}")
+            with conn:
+                while self._finalResults == None and not self._kill and not self.job_completed():
+                    # TODO: loop here...
+                    data = conn.recv(16384)
 
-        conn, addr = self._sock.accept()
-        logging.debug(f"accepted client connection from {addr}")
-        with conn:
-            while not self._finalResults and not self._kill:
-                # TODO: loop here...
-                data = conn.recv(4096)
-                if not data:
-                    break
-                else:
-                    data_obj = json.loads(data.decode("utf-8"), cls=ResultDecoder)
-                    message = data_obj["message"]
-                    print(f"MESSENGER RECEIVED: {message}")
-                    self._imsgs.append(message)
-                    logging.debug(f"MESSENGER RECEIVED: {message}")
-                    if data_obj['final']:
-                        logger.debug('result: got final result.')
-                        self._finalResults = message
+                    if not data:
+                        break
                     else:
-                        self._imsgs.append(message)
-            self._sock.close()
+                        data_str = data.decode('utf-8')
+                        msgs = data_str.split('\u0004')[:-1]
+                        for msg in msgs:
+                            data_obj = json.loads(msg, cls=self.result_decoder)
+                            # print(f"MESSENGER RECEIVED: {data_obj}")
+                            message = data_obj["message"]
+                            
+                            if data_obj['final']:
+                                logger.debug('result: got final result.')
+                                self._finalResults = message
+                            else:
+                                self._imsgs.append(message)
+                self._sock.close()
+                logger.debug("local thread: exiting")
+                return
+        except socket.timeout as e:
+            logger.debug(e)
 
 
     def remote_poll_for_results(self):
         dcd = self.result_decoder
         lastTimestamp = None
 
-        while not self._finalResults and not self._kill and not self.job_completed():     
+        while self._finalResults == None and not self._kill and not self.job_completed():     
             time.sleep(3)
 
             url = self.getURL('/job/'+ self.job_id +'/results')
@@ -126,7 +130,7 @@ class EmulatorRuntimeJob:
             if response.status_code == 204:
                 logger.debug('result: status 204, no new messages.')
                 continue
-            # response.raise_for_status()
+            response.raise_for_status()
             res_json = json.loads(response.text)
             logger.debug(f'got: {res_json}')
             messages = res_json["messages"]
@@ -155,43 +159,16 @@ class EmulatorRuntimeJob:
         logger.debug(f"{url}")
         return url
 
-    # def result(
-    #         self,
-    #         timeout: Optional[float] = None,
-    #         wait: float = 5,
-    #         decoder: Optional[Type[ResultDecoder]] = None
-    # ) -> Any:
-    #     stime = time.time()
-    #     isFinal = False
-    #     finalMessage = None
-    #     dcd = decoder or self.result_decoder
-    #     while not isFinal:
-    #         elapsed_time = time.time() - stime
-    #         if timeout is not None and elapsed_time >= timeout:
-    #             raise 'Timeout while waiting for job {}.'.format(self.job_id)
-    #         time.sleep(wait)
-    #         response = requests.get(self.getURL('/job/'+ self.job_id +'/results'))
-    #         if response.status_code == 204:
-    #             logger.debug('result: status 204, job not done.')
-    #             continue
-    #         # response.raise_for_status()
-    #         result = dcd.decode(response.text)
-
-    #         if result['final']:
-    #             isFinal = True
-    #             finalMessage = result['message']
-        
-    #     return finalMessage
 
     def result(self, 
                timeout: Optional[float] = None):
         if timeout is not None:
             stime = time.time()
-            while not self._finalResults:
+            while self._finalResults == None:
                 elapsed_time = time.time() - stime
                 if elapsed_time >= timeout:
                     raise 'Timeout while waiting for job {}.'.format(self.job_id)
-                time.sleep(3)
+                time.sleep(1)
         
         return self._finalResults
 
@@ -206,10 +183,15 @@ class EmulatorRuntimeJob:
     def cancel(self) -> None:
         """Cancel the job.
         """
+        self._kill = True
+        if self.executor:
+            self.executor.cancel()
+            return True
+        
         url = self.getURL('/job/' + self.job_id + '/cancel')
         response = requests.get(url)
         response.raise_for_status()
-        self._kill = True
+        
         if response.status_code == 200:
             return True
         elif response.status_code == 204:
@@ -221,6 +203,9 @@ class EmulatorRuntimeJob:
             Status of this job.
         Raises:
         """
+        if self.executor:
+            return self.executor.get_status()
+
         url = self.getURL('/job/' + self.job_id + '/status')
         response = requests.get(url)
         response.raise_for_status()
@@ -229,8 +214,6 @@ class EmulatorRuntimeJob:
             return self._status
         elif response.status_code == 204:
             return None
-
-
 
     def wait_for_final_state(
             self,

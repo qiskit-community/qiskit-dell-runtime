@@ -10,12 +10,18 @@ from pathlib import Path
 import os
 import json
 import logging
+import shutil
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 from . import emulation_executor
 from .emulator_runtime_job import EmulatorRuntimeJob
+
+DIR = "DIR"
+STRING = "STRING"
+
+QRE_DIR = os.path.expanduser("~") + "/.qre"
 
 class EmulatorRuntimeService():
     def __init__(self, provider: Provider) -> None:
@@ -64,8 +70,41 @@ class EmulatorRuntimeService():
             return_values=return_values, interim_results=interim_results)
 
         program_metadata.pop('name', None)
+
+        # data can be one of three things:
+        # Filename -> read to string, send
+        # Directory -> zip, send
+        # String -> send
+
+        if os.path.isdir(data):
+            logger.debug(f"Have directory: {data}")
+            if not os.path.isdir(QRE_DIR):
+                os.mkdir(QRE_DIR)
+            dirsplit = data.split("/")
+            if dirsplit[-1] == "":
+                if not os.path.isfile(data + "program.py"):
+                    raise Exception("program.py is required for directory upload")
+                if os.path.isfile(data + "executor.py") or os.path.isfile(data + "params.json"):
+                    raise Exception("executor.py and params.json are unallowable names in directory")
+                zipname = QRE_DIR + "/" + dirsplit[-2]
+            else:
+                if not os.path.isfile(data + "/program.py"):
+                    raise Exception("program.py is required for directory upload")
+                if os.path.isfile(data + "/executor.py") or os.path.isfile(data + "/params.json"):
+                    raise Exception("executor.py and params.json are unallowable names in directory")
+                zipname = QRE_DIR + "/" + dirsplit[-1]
+
+            zipped = shutil.make_archive(zipname, "zip", data)
+            logger.debug(f"made: {zipped}")
+            self._program_data[program_hash] = (zipped, DIR)
+        elif os.path.isfile(data):
+            with open(data, "r") as f:
+                self._program_data[program_hash] = (f.read(), STRING)
+        else:
+            logger.debug(f"Have string: {data}")
+            self._program_data[program_hash] = (data, STRING)
         
-        self._program_data[program_hash] = data
+        
         self._programs[program_hash] = RuntimeProgram(
             program_id = program_hash,
             creation_date= datetime.now().strftime("%d/%m/%Y %H:%M:%S"),

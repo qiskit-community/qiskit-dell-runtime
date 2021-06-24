@@ -1,4 +1,4 @@
-from typing import Type, Callable, Optional, Dict
+from typing import Type, Callable, Optional, Dict, Tuple
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 
@@ -24,9 +24,12 @@ CANCELED = "Canceled"
 
 STATUS_VALUES = [CREATING, RUNNING, COMPLETED, FAILED, CANCELED]
 
+STRING = "STRING"
+DIR = "DIR"
+
 class EmulationExecutor():
 
-    def __init__(self, program: RuntimeProgram, program_data: Union[bytes, str],
+    def __init__(self, program: RuntimeProgram, program_data: Tuple[Union[bytes, str], str],
             options: Dict = {},
             inputs: Dict = {},
             callback: Optional[Callable] = None, 
@@ -57,15 +60,19 @@ class EmulationExecutor():
         self._temp_dir = tempfile.mkdtemp()
         logger.debug('creating temp directory at ' + self._temp_dir)
 
+        if self._program_data[1] == STRING:
+            program_path = os.path.join(self._temp_dir, "program.py")
+            with open(program_path, "w+") as program_file:
+                program_file.write(self._program_data[0])
+                logger.debug('finished writing to ' + program_path)
+        elif self._program_data[1] == DIR:
+            shutil.unpack_archive(self._program_data[0], extract_dir=self._temp_dir, format="zip")
+            logger.debug("finished extracting archive")
+
         params_path = os.path.join(self._temp_dir, "params.json")
         with open(params_path, "w+") as params_file:
             params_file.write(json.dumps(self._inputs, cls=RuntimeEncoder))
             logger.debug('finished writing to ' + params_path)
-
-        program_path = os.path.join(self._temp_dir, "program.py")
-        with open(program_path, "w+") as program_file:
-            program_file.write(self._program_data)
-            logger.debug('finished writing to ' + program_path)
 
         executor_path = os.path.join(self._temp_dir, "executor.py")
         executor_content = EXECUTOR_CODE.format(params_path, self._local_port)

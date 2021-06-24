@@ -22,12 +22,12 @@ def main(backend, user_messenger, **kwargs):
         # user_messenger.publish({"iteration": it, "interim_results": interim_results})
         backend.run(qc).result()
 
-    # user_messenger.publish(final_result, final=True)
+    user_messenger.publish(final_result, final=True)
 """
 
 RUNTIME_PROGRAM_METADATA = {
     "name": "qiskit-test",
-    "description": "Test program.",
+    "description": "Test program",
     "max_execution_time": 300,
     "version": "0.1",
     "backend_requirements": {"min_num_qubits":  5},
@@ -43,31 +43,27 @@ RUNTIME_PROGRAM_METADATA = {
     ]
 }
 
-PROGRAM_PREFIX = 'qiskit-test'
+# PROGRAM_PREFIX = 'qiskit-test'
 
 class EmulatorRuntimeServiceTest(unittest.TestCase):
-    def test_upload_program(self):
+    def test_upload(self):
         provider = EmulatorProvider()
-        self.assertIsNotNone(provider)
-        self.assertIsNotNone(provider.runtime)
-
-        self.assertEqual(0, len(provider.runtime.programs()))
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
-        self.assertEqual(1, len(provider.runtime.programs()))
+        proglist = provider.runtime.programs()
+        self.assertIsNotNone(proglist[program_id])
+        findProgId = False
+        if program_id in proglist:
+            findProgId = True
+        self.assertTrue(findProgId)
 
-    def test_program(self):
+    def test_view_program(self):
         provider = EmulatorProvider()
-        self.assertIsNotNone(provider)
-        self.assertIsNotNone(provider.runtime)
-
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
-        self.assertEqual(1, len(provider.runtime.programs()))
-
-        runtime_program = provider.runtime.program('fake_id')
-        self.assertIsNone(runtime_program)
 
         runtime_program = provider.runtime.program(program_id)
-        self.assertIsNotNone(runtime_program)
+        self.assertEqual(runtime_program.description, "Test program")
+        self.assertEqual(runtime_program.program_id, program_id)
+
 
     def test_run_program(self):
         provider = EmulatorProvider()
@@ -80,7 +76,10 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         runtime_program = provider.runtime.program(program_id)
         self.assertIsNotNone(runtime_program)
         try:
-            provider.runtime.run(program_id, options=None, inputs={"iterations": 2})
+            job = provider.runtime.run(program_id, options=None, inputs={"iterations": 2})
+
+            result = job.result(timeout=15)
+            self.assertIsNotNone(result)
         except Exception:
             self.fail("should pass")
 
@@ -94,6 +93,22 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         provider.runtime.upload_program("fake-program2", metadata=RUNTIME_PROGRAM_METADATA)
         programs = provider.runtime.programs()
         self.assertEqual(len(programs), 2)
+
+    
+    def test_update_program(self):
+        provider = EmulatorProvider()
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+        new_meta = {'description': 'Qiskit Test Update', 'max_execution_time': RUNTIME_PROGRAM_METADATA['max_execution_time']}
+
+        updated = provider.runtime.update_program(program_id, name='Test Update', metadata=new_meta)
+
+        self.assertTrue(updated)
+
+        program2 = provider.runtime.program(program_id, refresh=True)
+
+        self.assertEqual('Qiskit Test Update', program2.description)
+        self.assertEqual('Test Update', program2.name)
 
     def test_pprint_programs(self):
         provider = EmulatorProvider()
@@ -148,3 +163,18 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
             cr.main()
         except Exception as e:
             self.fail("should pass")
+
+    def test_delete_program(self):
+        provider = EmulatorProvider()
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+        prog_list = provider.runtime.programs(refresh=False)
+
+        self.assertTrue(len(prog_list) >= 1)
+
+        deleted = provider.runtime.delete_program(program_id)
+
+        self.assertTrue(deleted)
+
+        new_prog_list = provider.runtime.programs(refresh=True)
+        
+        self.assertGreater(len(prog_list), len(new_prog_list))

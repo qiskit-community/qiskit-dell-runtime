@@ -24,9 +24,6 @@ class EmulatorRuntimeService():
         self._program_data = {}
         self._nextjobID = "1"
 
-    # def pprint_programs(self):
-    #     return self._programs
-
     # copied from IBMQ Provider
     def pprint_programs(self, refresh: bool = False) -> None:
         """Pretty print information about available runtime programs.
@@ -35,7 +32,7 @@ class EmulatorRuntimeService():
             refresh: If ``True``, re-query the server for the programs. Otherwise
                 return the cached value.
         """
-        programs = self.programs(refresh)
+        programs = self.programs(refresh).values()
         for prog in programs:
             print("="*50)
             print(str(prog))
@@ -84,7 +81,7 @@ class EmulatorRuntimeService():
             return None
 
     def programs(self, refresh: bool = False) -> List[RuntimeProgram]:
-        return self._programs.values()
+        return self._programs.copy()
 
     def run(
             self,
@@ -98,19 +95,72 @@ class EmulatorRuntimeService():
             program = self._programs[program_id]
             program_data = self._program_data[program_id]
 
-            job = EmulatorRuntimeJob(self._nextjobID, None)
+            executor = emulation_executor.EmulationExecutor(program, program_data, options, inputs)
+            job = EmulatorRuntimeJob(self._nextjobID, None, executor=executor)
             self._nextjobID = str(int(self._nextjobID) + 1)
-            executor = emulation_executor.EmulationExecutor(program, program_data, job.local_port, options, inputs, )
-            executor.run()
-            # TODO: Fix this
-            
-            # job.user_messenger = executor._user_messenger
             return job
         else:
             return None
+
+    def update_program(
+            self,
+            program_id: str,
+
+            # We include data as a field even though we don't get it
+            # back from program() as part of RuntimeProgram.
+            # We are assuming it gets updated.
+
+            data: Optional[Union[bytes, str]] = None,
+            metadata: Optional[Union[Dict, str]] = None,
+            name: Optional[str] = None,
+            max_execution_time: Optional[int] = None,
+            description: Optional[str] = None,
+            version: Optional[float] = None,
+            backend_requirements: Optional[str] = None,
+            parameters: Optional[List[ProgramParameter]] = None,
+            return_values: Optional[List[ProgramResult]] = None,
+            interim_results: Optional[List[ProgramResult]] = None
+    ):
+        program_metadata = self._merge_metadata(
+            initial={
+                'name':self._programs[program_id].name, 
+                'max_execution_time':self._programs[program_id].max_execution_time, 
+                'description':self._programs[program_id].description,
+                'version':self._programs[program_id].version, 
+                'backend_requirements':self._programs[program_id].backend_requirements,
+                'parameters':self._programs[program_id].parameters,
+                'return_values':self._programs[program_id].return_values, 
+                'interim_results':self._programs[program_id].interim_results,
+            },
+            metadata=metadata,
+            name=name, 
+            max_execution_time=max_execution_time, 
+            description=description,
+            version=version, 
+            backend_requirements=backend_requirements,
+            parameters=parameters,
+            return_values=return_values, 
+            interim_results=interim_results)
+        program_metadata.pop('name', None)
+
+        self._program_data[program_id] = data if data else self._program_data[program_id]
+        self._programs[program_id] = RuntimeProgram(
+            program_id = program_id,
+            creation_date= self._programs[program_id].creation_date,
+            program_name = name if name else self._programs[program_id].name,
+            **program_metadata
+        )
+
+
+        return True
         
     def delete_program(self, program_id: str) -> None:
-        print("Do Nothing")
+        try:
+            del self._programs[program_id]
+            del self._program_data[program_id]
+            return True
+        except:
+            return False
 
     def job(self, job_id: str) -> EmulatorRuntimeJob:
         print("Do nothing")
@@ -150,10 +200,12 @@ class EmulatorRuntimeService():
         self._tuple_to_dict(initial)
         initial.update(upd_metadata)
 
+
         self._tuple_to_dict(kwargs)
         for key, val in kwargs.items():
             if val is not None:
                 initial[key] = val
+        
 
         # TODO validate metadata format
         metadata_keys = ['name', 'max_execution_time', 'description', 'version',

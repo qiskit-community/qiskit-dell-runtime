@@ -180,7 +180,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         self.assertIsNotNone(provider.runtime)
 
         here = os.path.dirname(os.path.realpath(__file__))
-        program_id = provider.runtime.upload_program(here + "/dirtest/program.py", metadata=RUNTIME_PROGRAM_METADATA)
+        program_id = provider.runtime.upload_program(here + "/dirtest/", metadata=RUNTIME_PROGRAM_METADATA)
         self.assertEqual(1, len(provider.runtime.programs()))
 
         runtime_program = provider.runtime.program(program_id)

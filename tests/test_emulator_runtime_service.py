@@ -2,6 +2,9 @@ import unittest
 from qiskit_emulator import EmulatorProvider
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
 from qiskit.providers.ibmq.runtime.runtime_program import ProgramParameter, ProgramResult
+from qiskit import QuantumCircuit
+import os
+
 RUNTIME_PROGRAM = """
 import random
 
@@ -163,6 +166,53 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
             cr.main()
         except Exception as e:
             self.fail("should pass")
+
+    def test_dir_circuit_runner(self):
+        from . import dir_circuit_runner as dcr
+        try:
+            dcr.main()
+        except Exception as e:
+            self.fail("should pass")
+
+    def test_upload_file(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
+        self.assertIsNotNone(provider.runtime)
+
+        here = os.path.dirname(os.path.realpath(__file__))
+        program_id = provider.runtime.upload_program(here + "/dirtest/program.py", metadata=RUNTIME_PROGRAM_METADATA)
+        self.assertEqual(1, len(provider.runtime.programs()))
+
+        runtime_program = provider.runtime.program(program_id)
+        self.assertIsNotNone(runtime_program)
+        try:
+            qc = QuantumCircuit(2, 2)
+            qc.h(0)
+            qc.cx(0, 1)
+            qc.measure([0, 1], [0, 1])
+
+            program_inputs = {
+                'circuits': qc,
+            }
+
+            job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+
+            result = job.result(timeout=15)
+            self.assertIsNotNone(result)
+        except Exception:
+            self.fail("should pass")
+
+    def test_reserved_names(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
+        self.assertIsNotNone(provider.runtime)
+
+        try:
+            here = os.path.dirname(os.path.realpath(__file__))
+            program_id = provider.runtime.upload_program(here + "/dirfail/", metadata=RUNTIME_PROGRAM_METADATA)
+            self.fail("Should not allow upload")
+        except Exception:
+            self.assertTrue(True)
 
     def test_delete_program(self):
         provider = EmulatorProvider()

@@ -177,6 +177,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertTrue(correct_status)
         job.result(timeout=15)
         status = job.status()
+        sleep(2)
         self.assertEqual(status, "Completed")
 
     def test_get_failed_status(self):

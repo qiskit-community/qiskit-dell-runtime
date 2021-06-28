@@ -49,8 +49,8 @@ def upload_runtime_program():
     new_id = random_id()
     program.program_id = new_id
     program.name = flask.request.form.get("name") if flask.request.form.get("name") else new_id
-    program.data_type = flask.request.form.get("data_type")
-    program.program_metadata = flask.request.form.get("program_metadata")
+    program.data_type = flask.request.form.get("data_type") if flask.request.form.get("name") else "STRING"
+    program.program_metadata = flask.request.form.get("program_metadata") if flask.request.form.get("name") else "{}"
     
 
     
@@ -157,6 +157,7 @@ def run_program(program_id):
 
     db_job = Job()
     db_job.job_id = job_id
+    db_job.program_id = program_id
     db_job.status = CREATING
     db_job.pod_name = pod_name
     db_service.save_job(db_job)

@@ -135,7 +135,7 @@ class EmulatorRuntimeService():
             program_data = self._program_data[program_id]
 
             executor = emulation_executor.EmulationExecutor(program, program_data, options, inputs)
-            job = EmulatorRuntimeJob(self._nextjobID, None, executor=executor)
+            job = EmulatorRuntimeJob(self._nextjobID, None, executor=executor, callback = callback)
             self._nextjobID = str(int(self._nextjobID) + 1)
             return job
         else:

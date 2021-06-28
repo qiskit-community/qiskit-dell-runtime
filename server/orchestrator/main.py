@@ -49,8 +49,8 @@ def upload_runtime_program():
     new_id = random_id()
     program.program_id = new_id
     program.name = flask.request.form.get("name") if flask.request.form.get("name") else new_id
-    program.data_type = flask.request.form.get("data_type") if flask.request.form.get("name") else "STRING"
-    program.program_metadata = flask.request.form.get("program_metadata") if flask.request.form.get("name") else "{}"
+    program.data_type = flask.request.form.get("data_type") if flask.request.form.get("data_type") else "STRING"
+    program.program_metadata = flask.request.form.get("program_metadata") if flask.request.form.get("program_metadata") else "{}"
     
 
     

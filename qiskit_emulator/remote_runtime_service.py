@@ -211,7 +211,7 @@ class RemoteRuntimeService():
         res = self._post('/program/{}/job'.format(program_id), serialized_inputs)
         if (res[0] != 200):
             raise Exception('Something went bad')
-        job = EmulatorRuntimeJob(res[2], self.host)
+        job = EmulatorRuntimeJob(res[2], self.host, callback = callback)
         return job
 
     def update_program(

@@ -32,7 +32,6 @@ class EmulationExecutor():
     def __init__(self, program: RuntimeProgram, program_data: Tuple[Union[bytes, str], str],
             options: Dict = {},
             inputs: Dict = {},
-            callback: Optional[Callable] = None, 
             result_decoder: Optional[Type[ResultDecoder]] = None) -> None:
         self._program = program
         self._program_data = program_data

@@ -63,6 +63,8 @@ class RemoteRuntimeService():
                 self._programs = {}
                 for prog in proglist:
                     program_metadata = json.loads(prog['program_metadata'])
+                    if not program_metadata:
+                        program_metadata = {}
                     self._programs[prog['program_id']] = RuntimeProgram(program_name=prog['name'], 
                                                         program_id=prog['program_id'], 
                                                         description=program_metadata['description'], 

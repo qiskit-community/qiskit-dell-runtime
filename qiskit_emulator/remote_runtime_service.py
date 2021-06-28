@@ -1,3 +1,4 @@
+import shutil
 from typing import List, Dict, Optional, Callable, Type, Union, NamedTuple, Any
 from urllib.parse import urljoin
 import requests
@@ -8,9 +9,14 @@ from qiskit.providers import ProviderV1 as Provider
 import logging
 import copy
 import json
+import os
+import base64
 from .emulator_runtime_job import EmulatorRuntimeJob
 
 logger = logging.getLogger(__name__)
+
+DIR = "DIR"
+STRING = "STRING"
 
 class RemoteRuntimeService():
     def __init__(self, provider: Provider, host: str) -> None:
@@ -25,6 +31,15 @@ class RemoteRuntimeService():
         url = urljoin(self.host, path)
         logger.debug(f"POST {url}: {data}")
         req = requests.post(url, json=data)
+
+        res = (req.status_code, req.reason, req.text)
+        logger.debug(f"POST {url} RESPONSE: {res}")
+        return res
+
+    def _post_program(self, path, data, files: Optional[Dict] = None):
+        url = urljoin(self.host, path)
+        logger.debug(f"POST {url}: {data}")
+        req = requests.post(url, data=data, files=files)
 
         res = (req.status_code, req.reason, req.text)
         logger.debug(f"POST {url} RESPONSE: {res}")
@@ -118,13 +133,52 @@ class RemoteRuntimeService():
             return_values=return_values, interim_results=interim_results)
         program_metadata.pop('name', None)
 
+        str_metadata = json.dumps(program_metadata)
+
+        data_type = STRING
+
         req_body = {
-            'data': data,
-            'name': name,  
-            'program_metadata': program_metadata
+            'data': None,
+            'name': name,
+            'data_type': data_type,  
+            'program_metadata': str_metadata
         }
 
-        res = self._post('/program', req_body)
+        if os.path.isdir(data):
+            logger.debug(f"Have directory: {data}")
+            dirsplit = data.split("/")
+            if dirsplit[-1] == "":
+                if not os.path.isfile(data + "program.py"):
+                    raise Exception("program.py is required for directory upload")
+                if os.path.isfile(data + "executor.py") or os.path.isfile(data + "params.json"):
+                    raise Exception("executor.py and params.json are unallowable names in directory")
+                zipname = dirsplit[-2]
+            else:
+                if not os.path.isfile(data + "/program.py"):
+                    raise Exception("program.py is required for directory upload")
+                if os.path.isfile(data + "/executor.py") or os.path.isfile(data + "/params.json"):
+                    raise Exception("executor.py and params.json are unallowable names in directory")
+                zipname = dirsplit[-1]
+
+            zipped = shutil.make_archive(zipname, "zip", data)
+            logger.debug(f"made: {zipped}")
+            filename = zipped.split("/")[-1]
+            # self._program_data[program_hash] = (zipped, DIR)
+
+            req_body['data_type'] = DIR
+            with open(zipped, "rb") as z:
+                res = self._post_program('/program', data=req_body, files={filename: z})
+            os.remove(zipped)
+        elif os.path.isfile(data):
+            filename = data.split("/")[-1]
+
+            with open(data, "rb") as f:
+                res = self._post_program('/program', data=req_body, files={filename: f})
+        else:
+            req_body['data'] = data
+            res = self._post_program('/program', data=req_body)
+
+        
         if res[0] != 200:
             logger.error(f"Received {res[0]} as status code")
         else:
@@ -185,15 +239,56 @@ class RemoteRuntimeService():
             parameters=parameters,
             return_values=return_values, interim_results=interim_results)
         program_metadata.pop('name', None)
+        
+        str_metadata = json.dumps(program_metadata)
 
         req_body = {
             'program_id': program_id,
-            'data': data,
+            'data': None,
             'name': name,
-            'program_metadata': program_metadata
+            'data_type': None,  
+            'program_metadata': str_metadata
         }
 
-        res = self._post(f'/program/{program_id}/update', req_body)
+        if data:
+            req_body['data_type'] = STRING
+
+            if os.path.isdir(data):
+                logger.debug(f"Have directory: {data}")
+                dirsplit = data.split("/")
+                if dirsplit[-1] == "":
+                    if not os.path.isfile(data + "program.py"):
+                        raise Exception("program.py is required for directory upload")
+                    if os.path.isfile(data + "executor.py") or os.path.isfile(data + "params.json"):
+                        raise Exception("executor.py and params.json are unallowable names in directory")
+                    zipname = dirsplit[-2]
+                else:
+                    if not os.path.isfile(data + "/program.py"):
+                        raise Exception("program.py is required for directory upload")
+                    if os.path.isfile(data + "/executor.py") or os.path.isfile(data + "/params.json"):
+                        raise Exception("executor.py and params.json are unallowable names in directory")
+                    zipname = dirsplit[-1]
+
+                zipped = shutil.make_archive(zipname, "zip", data)
+                logger.debug(f"made: {zipped}")
+                filename = zipped.split("/")[-1]
+                # self._program_data[program_hash] = (zipped, DIR)
+
+                req_body['data_type'] = DIR
+                with open(zipped, "rb") as z:
+                    res = self._post_program(f'/program/{program_id}/update', data=req_body, files={filename: z})
+                os.remove(zipped)
+            elif os.path.isfile(data):
+                filename = data.split("/")[-1]
+
+                with open(data, "rb") as f:
+                    res = self._post_program(f'/program/{program_id}/update', data=req_body, files={filename: f})
+            else:
+                req_body['data'] = data
+                res = self._post_program(f'/program/{program_id}/update', data=req_body)
+        else:
+            res = self._post_program(f'/program/{program_id}/update', data=req_body)
+
         if res[0] != 200:
             logger.error(f"Received {res[0]} as status code")
             return False

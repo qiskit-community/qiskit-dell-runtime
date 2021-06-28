@@ -167,7 +167,8 @@ class EmulatorRuntimeJob:
             while self._finalResults == None:
                 elapsed_time = time.time() - stime
                 if elapsed_time >= timeout:
-                    raise 'Timeout while waiting for job {}.'.format(self.job_id)
+                    self._kill = True
+                    raise Exception('Timeout while waiting for job {}.'.format(self.job_id))
                 time.sleep(1)
         
         return self._finalResults

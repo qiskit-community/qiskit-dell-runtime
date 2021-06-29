@@ -320,3 +320,95 @@ class AcceptanceTest(unittest.TestCase):
 {}:
   Name: {}'''.format(pr_id_1,pr_id_1)
          in output)
+
+
+    def test_dir_circuit_runner(self):
+        from . import dir_circuit_runner as dcr
+        try:
+            dcr.main()
+        except Exception as e:
+            self.fail("should pass")
+
+    def test_upload_file(self):
+        provider = EmulatorProvider()
+        self.assertIsNotNone(provider)
+        self.assertIsNotNone(provider.runtime)
+
+        here = os.path.dirname(os.path.realpath(__file__))
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(here + "/dirtest/program.py", metadata=RUNTIME_PROGRAM_METADATA)
+        self.assertGreater(len(provider.runtime.programs()), 1)
+
+        runtime_program = provider.runtime.program(program_id)
+        self.assertIsNotNone(runtime_program)
+        try:
+            qc = QuantumCircuit(2, 2)
+            qc.h(0)
+            qc.cx(0, 1)
+            qc.measure([0, 1], [0, 1])
+
+            program_inputs = {
+                'circuits': qc,
+            }
+
+            job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+
+            result = job.result(timeout=45)
+            self.assertIsNotNone(result)
+        except Exception:
+            self.fail("should pass")
+
+    def test_reserved_names(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+
+        try:
+            here = os.path.dirname(os.path.realpath(__file__))
+            program_id = provider.runtime.upload_program(here + "/dirfail/", metadata=RUNTIME_PROGRAM_METADATA)
+            self.fail("Should not allow upload")
+        except Exception:
+            self.assertTrue(True)
+
+    def test_large_directory(self):
+        
+        provider = EmulatorProvider()
+
+        provider.remote(ACCEPTANCE_URL)
+        here = os.path.dirname(os.path.realpath(__file__))
+        program_id = provider.runtime.upload_program(here + "/qkad", metadata=RUNTIME_PROGRAM_METADATA)
+
+        job = provider.runtime.run(program_id, options=None, inputs={'garbage': 'nonsense'})
+
+        res = job.result(timeout=120)
+        self.assertTrue("aligned_kernel_parameters" in res)
+        self.assertTrue("aligned_kernel_matrix" in res)
+    def test_callback_function(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        program_inputs = {
+            'circuits': qc,
+        }
+
+        
+        import sys
+        import io
+        old_stdout = sys.stdout
+        new_stdout = io.StringIO()
+        sys.stdout = new_stdout
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs,callback=print)
+        result =job.result(timeout=120)
+        output = new_stdout.getvalue()
+        sys.stdout = old_stdout
+        
+        print(output)
+        self.assertTrue("{'results': 'intermittently'}"
+         in output)
+        pass

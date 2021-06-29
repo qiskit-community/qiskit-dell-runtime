@@ -31,7 +31,8 @@ class EmulatorRuntimeJob:
             job_id,
             host,
             executor: Optional[Type[EmulationExecutor]] = None,
-            result_decoder: Type[ResultDecoder] = ResultDecoder
+            result_decoder: Type[ResultDecoder] = ResultDecoder,
+            callback: Optional[Callable] = None
     ) -> None:
         """RuntimeJob constructor.
         Args:
@@ -56,9 +57,9 @@ class EmulatorRuntimeJob:
             self._sock.bind(('localhost', 0))
             self.local_port = self._sock.getsockname()[1]
             logger.debug(self.local_port)
-            self._poller = threading.Thread(target=self.local_poll_for_results)
+            self._poller = threading.Thread(target=self.local_poll_for_results, args=(callback,))
         else:
-            self._poller = threading.Thread(target=self.remote_poll_for_results)
+            self._poller = threading.Thread(target=self.remote_poll_for_results,args=(callback,))
 
         self.result_decoder = result_decoder
 
@@ -81,7 +82,7 @@ class EmulatorRuntimeJob:
         self.status()
         return (self._status == "Failed" or self._status == "Completed" or self._status == "Canceled")
 
-    def local_poll_for_results(self):
+    def local_poll_for_results(self,callback):
         logging.debug(f"starting to listen to port {self.local_port}")
         self._sock.listen(1)
         self._sock.settimeout(3)
@@ -108,6 +109,8 @@ class EmulatorRuntimeJob:
                                 self._finalResults = message
                             else:
                                 self._imsgs.append(message)
+                                if callback is not None:
+                                    callback(message)
                 self._sock.close()
                 logger.debug("local thread: exiting")
                 return
@@ -115,7 +118,7 @@ class EmulatorRuntimeJob:
             logger.debug(e)
 
 
-    def remote_poll_for_results(self):
+    def remote_poll_for_results(self,callback):
         dcd = self.result_decoder
         lastTimestamp = None
 
@@ -144,13 +147,16 @@ class EmulatorRuntimeJob:
                     msgTime = datetime.fromisoformat(msg['timestamp'])
                     if lastTimestamp < msgTime:
                         lastTimestamp = msgTime
-
                 msg_data = json.loads(msg['data'])
                 if msg_data['final']:
                     logger.debug('result: got final result.')
                     self._finalResults = msg_data['message']
                 else:
                     self._imsgs.append(msg_data['message'])
+                    if callback is not None:
+                        logger.debug('Callback is here')
+                        callback(msg_data['message'])
+
         return
 
 
@@ -167,7 +173,8 @@ class EmulatorRuntimeJob:
             while self._finalResults == None:
                 elapsed_time = time.time() - stime
                 if elapsed_time >= timeout:
-                    raise 'Timeout while waiting for job {}.'.format(self.job_id)
+                    self._kill = True
+                    raise Exception('Timeout while waiting for job {}.'.format(self.job_id))
                 time.sleep(1)
         
         return self._finalResults

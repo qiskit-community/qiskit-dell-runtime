@@ -4,6 +4,7 @@ from program import main
 from urllib.parse import urljoin
 import requests
 import os
+import sys
 
 from user_messenger_client import RemoteUserMessengerClient
 
@@ -21,16 +22,7 @@ logger.setLevel(logging.DEBUG)
 
 host = os.environ['ORCH_HOST']
 job_id = os.environ['JOB_ID']
-COMPLETED = "Completed"
-FAILED = "Failed"
 
-
-def update_status(status):
-    logger.debug(f'Updating status to {status}')
-    url = urljoin(host, f'/job/{job_id}/status')
-    req = requests.post(url, json=status)
-    if req.status_code != 200:
-        raise (f'Error POST {url}: {req.status_code}')
 
 def main_method():
     params = None
@@ -56,12 +48,10 @@ def main_method():
     
     try:
         main(backend, user_messenger=user_messenger, **inputs)
-        update_status(COMPLETED)
+        sys.exit(0)
     except Exception as e:
         print(e)
-        update_status(FAILED)
-
-    print("exit")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main_method()

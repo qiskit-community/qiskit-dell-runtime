@@ -140,7 +140,7 @@ class EmulatorRuntimeService():
             program_data = self._program_data[program_id]
 
             executor = emulation_executor.EmulationExecutor(program, program_data, options, inputs)
-            job = EmulatorRuntimeJob(self._nextjobID, None, executor=executor)
+            job = EmulatorRuntimeJob(self._nextjobID, None, executor=executor, callback = callback)
             self._nextjobID = str(int(self._nextjobID) + 1)
             return job
         else:
@@ -187,14 +187,43 @@ class EmulatorRuntimeService():
             interim_results=interim_results)
         program_metadata.pop('name', None)
 
-        self._program_data[program_id] = data if data else self._program_data[program_id]
+        if data:
+            if os.path.isdir(data):
+                logger.debug(f"Have directory: {data}")
+                if not os.path.isdir(QRE_DIR):
+                    os.mkdir(QRE_DIR)
+                dirsplit = data.split("/")
+                if dirsplit[-1] == "":
+                    if not os.path.isfile(data + "program.py"):
+                        raise Exception("program.py is required for directory upload")
+                    if os.path.isfile(data + "executor.py") or os.path.isfile(data + "params.json"):
+                        raise Exception("executor.py and params.json are unallowable names in directory")
+                    zipname = QRE_DIR + "/" + dirsplit[-2]
+                else:
+                    if not os.path.isfile(data + "/program.py"):
+                        raise Exception("program.py is required for directory upload")
+                    if os.path.isfile(data + "/executor.py") or os.path.isfile(data + "/params.json"):
+                        raise Exception("executor.py and params.json are unallowable names in directory")
+                    zipname = QRE_DIR + "/" + dirsplit[-1]
+
+                zipped = shutil.make_archive(zipname, "zip", data)
+                logger.debug(f"made: {zipped}")
+                self._program_data[program_id] = (zipped, DIR)
+            elif os.path.isfile(data):
+                with open(data, "r") as f:
+                    self._program_data[program_id] = (f.read(), STRING)
+            elif type(data) == Union[bytes, str]:
+                logger.debug(f"Have string: {data}")
+                self._program_data[program_id] = (data, STRING)
+
+
+        # self._program_data[program_id] = data if data else self._program_data[program_id]
         self._programs[program_id] = RuntimeProgram(
             program_id = program_id,
             creation_date= self._programs[program_id].creation_date,
             program_name = name if name else self._programs[program_id].name,
             **program_metadata
         )
-
 
         return True
         

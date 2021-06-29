@@ -22,7 +22,7 @@ class ProviderTest(unittest.TestCase):
 
         self.assertEqual("aer_simulator", backend_config.backend_name)
         # self.assertEqual("0.1.0", backend_config.backend_version)
-        self.assertEqual(33, backend_config.n_qubits)
+        self.assertGreater(backend_config.n_qubits, 25)
 
         # TODO: Need to relook at this later
         self.assertEqual(80, len(backend_config.basis_gates))

@@ -24,6 +24,13 @@ RUNNING = "Running"
 COMPLETED = "Completed"
 FAILED = "Failed"
 CANCELED = "Canceled"
+POD_ERROR = "Error"
+POD_SUCCESS = "Succeeded"
+POD_UNKNOWN = "Unknown"
+POD_PENDING = "Pending"
+
+STATUS_PRECEDENCE = [COMPLETED, FAILED, CANCELED, POD_ERROR, POD_SUCCESS, RUNNING, POD_PENDING, CREATING]
+
 
 path = '/'.join((os.path.abspath(__file__).replace('\\', '/')).split('/')[:-1])
 fileConfig(os.path.join(path, 'logging_config.ini'))
@@ -52,10 +59,7 @@ def upload_runtime_program():
     program.data_type = flask.request.form.get("data_type") if flask.request.form.get("data_type") else "STRING"
     program.program_metadata = flask.request.form.get("program_metadata") if flask.request.form.get("program_metadata") else "{}"
     
-
-    
     logger.debug(f'form data type: {program.data_type}')
-
 
     if not flask.request.form.get("data"):
         logger.debug("Reading directory")
@@ -66,17 +70,6 @@ def upload_runtime_program():
             program.data = z.read()
     else:
         program.data = bytes(flask.request.form.get("data"), 'utf-8')
-
-    
-    # for z in file_list.values():
-    #     here = os.path.dirname(os.path.realpath(__file__))
-    #     tmpzip = os.path.join(here, "tmpzip.zip")
-    #     z.save(tmpzip)
-
-    #     with open(tmpzip, "rb") as tz:
-    #         program.data = tz.read()
-    #         logger.debug(f'BEFORE STORE: \n{program.data}')
-    #     # os.remove(tmpzip)
 
     program.status = ACTIVE
     db_service.save_runtime_program(program)
@@ -158,7 +151,7 @@ def run_program(program_id):
     db_job = Job()
     db_job.job_id = job_id
     db_job.program_id = program_id
-    db_job.status = CREATING
+    db_job.job_status = CREATING
     db_job.pod_name = pod_name
     db_service.save_job(db_job)
 
@@ -168,14 +161,41 @@ def run_program(program_id):
 
 @app.route('/job/<job_id>/status', methods=['GET'])
 def get_job_status(job_id):
-    
-    #TODO: If job status is Creating or Running - use kube_client to determine whether
-    #pod is still running. If pod status is Completed/Error then return failed (?)
-
     try:
         logger.debug(f'GET /job/{job_id}/status')
-        result = db_service.fetch_job_status(job_id)
-        return Response(result, 200, mimetype="application/binary")
+        update_pod_status(job_id)
+        result = db_service.fetch_status(job_id)
+
+        # Returns the higher precedent final status (i.e. job completed > pod failed/succeeded)
+        return Response(higherStatus(result), 200, mimetype="application/binary")
+
+# '''
+#     job status | pod status
+#     -----------------------
+#     Creating     Pending
+#     Creating     Succeeded
+#     Creating     Failed
+#     Creating     Running
+#     Running      Running
+#     Running      Failed
+#     Completed    Running
+#     Completed    Failed
+#     Completed    Succeeded
+#     Failed       Failed
+#     Failed       Succeeded
+#     Canceled     Succeeded/Failed
+
+
+#     Precedence of job/pod status to return to client:
+#     -------------------------------------------------
+#     Job completed/failed/canceled FINAL
+#     Pod Failed -- way to tell why? FINAL
+#     Pod succeeded -- it's done? 
+#     Job running/pod running?
+#     Pod pending/unknown
+#     Job creating
+# '''
+
     except:
         return Response("", 204, mimetype="application/binary")
 
@@ -189,9 +209,10 @@ def update_job_status(job_id):
 
 @app.route('/job/<job_id>/cancel', methods=['GET'])
 def cancel_job(job_id):
-    status = db_service.fetch_job_status(job_id)
+    update_pod_status(job_id)
+    status = db_service.fetch_status(job_id)
     logger.debug(f"GET /job/{job_id}/cancel")
-    if status == COMPLETED or status == FAILED or status == CANCELED:
+    if isFinal(status):
         return ("Job no longer running", 204)
     else:
         try:
@@ -236,3 +257,22 @@ def get_new_job_results(job_id, timestamp):
 def delete_message(job_id):
     db_service.delete_message(job_id)
     return Response(None, 200)
+
+def update_pod_status(job_id):
+    pod_name = db_service.fetch_pod_name(job_id)
+    pod_status = kube_client.get_pod_status(pod_name)
+    if pod_status == FAILED:
+        pod_status = POD_ERROR
+
+    db_service.update_pod_status(job_id, pod_status)
+
+def isFinal(status):
+    if STATUS_PRECEDENCE.index(status['job_status']) < STATUS_PRECEDENCE.index(POD_ERROR):
+        return status['job_status']
+    elif STATUS_PRECEDENCE.index(status['pod_status']) < STATUS_PRECEDENCE.index(RUNNING):
+        return status['pod_status']
+    else:
+        return None
+
+def higherStatus(status):
+    return status['job_status'] if STATUS_PRECEDENCE.index(status['job_status']) <= STATUS_PRECEDENCE.index(status['pod_status']) else status['pod_status']

@@ -247,7 +247,7 @@ class AcceptanceTest(unittest.TestCase):
         # runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
         status = job.status()
-        correct_status = status == "Creating" or status == "Running"
+        correct_status = status == "Creating" or status == "Pending" or status == "Running"
         self.assertTrue(correct_status)
         job.result(timeout=120)
         status = job.status()
@@ -269,9 +269,9 @@ class AcceptanceTest(unittest.TestCase):
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
         status = job.status()
-        self.assertEqual(status, "Creating")
+        self.assertTrue(status == "Creating" or status == "Pending")
         
-        while status == "Running" or status == "Creating":
+        while status == "Running" or status == "Creating" or status == "Pending":
             status = job.status()
             sleep(5)
 
@@ -382,6 +382,7 @@ class AcceptanceTest(unittest.TestCase):
         res = job.result(timeout=120)
         self.assertTrue("aligned_kernel_parameters" in res)
         self.assertTrue("aligned_kernel_matrix" in res)
+
     def test_callback_function(self):
         provider = EmulatorProvider()
         provider.remote(ACCEPTANCE_URL)
@@ -411,4 +412,3 @@ class AcceptanceTest(unittest.TestCase):
         print(output)
         self.assertTrue("{'results': 'intermittently'}"
          in output)
-        pass

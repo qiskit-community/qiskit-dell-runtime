@@ -67,11 +67,20 @@ class DBService():
         finally:
             session.close()
 
+    def update_pod_status(self, job_id, status):
+        session = Session()
+        try:
+            job = session.query(Job).filter_by(job_id=job_id).one()
+            setattr(job, "pod_status", status)
+            session.commit()
+        finally:
+            session.close()
+    
     def update_job_status(self, job_id, status):
         session = Session()
         try:
             job = session.query(Job).filter_by(job_id=job_id).one()
-            setattr(job, "status", status)
+            setattr(job, "job_status", status)
             session.commit()
         finally:
             session.close()
@@ -147,12 +156,12 @@ class DBService():
         finally:
             session.close()
 
-    def fetch_job_status(self, job_id):
+    def fetch_status(self, job_id):
         try:
             session = Session()
-            fields = ['status']
+            fields = ['job_status', 'pod_status']
             job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
-            return job.status
+            return {'job_status': job.job_status, 'pod_status': job.pod_status}
         finally:
             session.close()
 

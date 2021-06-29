@@ -60,3 +60,9 @@ class KubeClient():
 
     def cancel(self, pod_name):
         self._api.delete_namespaced_pod(pod_name, namespace=self._namespace)
+
+    def get_pod_status(self, pod_name):
+        podlist = self._api.list_namespaced_pod(self._namespace).items
+        for pod in podlist:
+          if pod.metadata.name == pod_name:
+            return pod.status.phase

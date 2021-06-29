@@ -14,6 +14,6 @@ class Job(Base):
     id = Column(Integer, primary_key=True)
     job_id = Column(String(64))
     program_id = Column(String(64))
-    status = Column(String(64))
+    job_status = Column(String(64))
     pod_name = Column(String(64))
-    
+    pod_status = Column(String(64))

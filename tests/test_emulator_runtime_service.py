@@ -59,6 +59,11 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
             findProgId = True
         self.assertTrue(findProgId)
 
+    def test_runtime_backends(self):
+        provider = EmulatorProvider()
+        backends = provider.runtime.backends()
+        self.assertGreater(len(backends), 1)
+
     def test_view_program(self):
         provider = EmulatorProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)

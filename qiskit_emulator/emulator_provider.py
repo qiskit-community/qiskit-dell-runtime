@@ -11,8 +11,6 @@ logger = logging.getLogger(__name__)
 from . import emulator_runtime_service
 from .remote_runtime_service import RemoteRuntimeService
 from .local_sub_provider import LocalSubProviderManager
-from .remote_sub_provider import RemoteSubProviderManager
-
 
 class EmulatorProvider(Provider):
     name = "emulator_provider"
@@ -33,11 +31,9 @@ class EmulatorProvider(Provider):
     def remote(self, host):
         self.runtime = RemoteRuntimeService(self, host)
         self.services['runtime'] = self.runtime
-        self.sub_provider_manager = RemoteSubProviderManager()
 
     def local(self):
         self.runtime = self.local_runtime
-        self.sub_provider_manager = LocalSubProviderManager(self)
         self.services['runtime'] = self.local_runtime
 
     def get_backend(self, name=None, **kwargs):

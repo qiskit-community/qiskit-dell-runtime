@@ -45,7 +45,7 @@ class DBService():
         finally:
             session.close()
 
-    def update_runtime_program(self, program_id, name, data, program_metadata):
+    def update_runtime_program(self, program_id, name, data, program_metadata, data_type):
         session = Session()
         try:
             prog = session.query(RuntimeProgram).filter_by(program_id=program_id).one()
@@ -53,9 +53,12 @@ class DBService():
                 setattr(prog, "name", name)
             if data:
                 setattr(prog, "data", data)
+            if type:
+                setattr(prog, "data_type", data_type)
             if program_metadata:
+                pm = json.loads(program_metadata)
                 meta = json.loads(prog.program_metadata)
-                for (key,value) in program_metadata.items():
+                for (key,value) in pm.items():
                     if value:
                         meta[key] = value
                 meta_str = json.dumps(meta)
@@ -119,9 +122,10 @@ class DBService():
     def fetch_runtime_program_data(self, program_id):
         try:
             session = Session()
-            fields = ['data']
+            fields = ['data', 'data_type']
             program = session.query(RuntimeProgram).filter_by(program_id=program_id).filter_by(status=ACTIVE).options(load_only(*fields)).one()
-            return program.data
+            resp = {"data": program.data, "data_type": program.data_type}
+            return resp
         finally:
             session.close()
 

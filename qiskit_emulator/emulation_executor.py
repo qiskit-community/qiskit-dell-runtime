@@ -134,6 +134,7 @@ class EmulationExecutor():
 EXECUTOR_CODE = """
 from qiskit import Aer
 from qiskit_emulator import LocalUserMessengerClient
+from qiskit_emulator import EmulatorProvider
 from program import main
 import sys
 import json
@@ -145,9 +146,19 @@ if __name__ == "__main__":
     params_path = '{}'	
     with open(params_path, 'r') as params_file:	
         params = params_file.read()
- 
-    backend = Aer.get_backend('aer_simulator')
+
     inputs = json.loads(params, cls=RuntimeDecoder)
+    backend = None
+    if 'backend_name' in inputs:
+        provider = EmulatorProvider()
+        print(inputs)
+        backend_name = inputs['backend_name']
+        print("using backend: " + backend_name)
+        backend = provider.get_backend(name = backend_name)
+    else:
+        print("using default backend: " + 'aer_simulator')
+        backend = Aer.get_backend('aer_simulator')
+
     user_messenger = LocalUserMessengerClient({})
     try:
         main(backend, user_messenger=user_messenger, **inputs)

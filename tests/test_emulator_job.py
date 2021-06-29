@@ -9,7 +9,7 @@ class ProviderTest(unittest.TestCase):
         provider = EmulatorProvider()
         self.assertIsNotNone(provider)
         
-        backend = provider.get_backend(name="emulator")
+        backend = provider.get_backend(name="aer_simulator")
         self.assertIsNotNone(backend)
 
         qc = QuantumCircuit(2, 2)
@@ -35,7 +35,7 @@ class ProviderTest(unittest.TestCase):
         provider = EmulatorProvider()
         self.assertIsNotNone(provider)
         
-        backend = provider.get_backend(name="emulator")
+        backend = provider.get_backend(name="aer_simulator")
         self.assertIsNotNone(backend)
 
         qc = QuantumCircuit(2, 2)
@@ -57,7 +57,7 @@ class ProviderTest(unittest.TestCase):
         provider = EmulatorProvider()
         self.assertIsNotNone(provider)
         
-        backend = provider.get_backend(name="emulator")
+        backend = provider.get_backend(name="aer_simulator")
         self.assertIsNotNone(backend)
 
         circ = QuantumCircuit(2)

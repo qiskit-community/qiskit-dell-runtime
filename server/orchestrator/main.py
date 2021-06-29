@@ -5,6 +5,8 @@ import logging
 import json
 from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
+from qiskit_emulator import EmulatorProvider
+
 app = Flask(__name__)
 import uuid
 from datetime import datetime
@@ -13,6 +15,8 @@ import shutil
 
 from .kube_client import KubeClient
 from .models import DBService, RuntimeProgram, Job
+
+emulator_provider = EmulatorProvider()
 
 db_service = DBService()
 kube_client = KubeClient()
@@ -133,6 +137,22 @@ def delete_program(program_id):
 @app.route('/status', methods=['GET'])
 def get_status():
     json_result = json.dumps(False)
+    return Response(json_result, 200, mimetype="application/json")
+
+@app.route('/backends', methods=['GET'])
+def get_backends():
+    backends = emulator_provider.runtime.backends()
+    result = []
+    for backend in backends:
+        backend_config = backend.configuration()
+        result.append({
+            'name': backend_config.backend_name,
+            'backend_name': backend_config.backend_name,
+            'description': backend_config.description,
+            'n_qubits': backend_config.n_qubits,
+            'basis_gates': backend_config.basis_gates
+        })
+    json_result = json.dumps(result)
     return Response(json_result, 200, mimetype="application/json")
 
 @app.route('/program/<program_id>/job', methods=['POST'])

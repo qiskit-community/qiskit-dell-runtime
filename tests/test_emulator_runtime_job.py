@@ -226,3 +226,31 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
 
         status = job.status()
         self.assertEqual(status, "Canceled")
+
+    def test_callback_function(self):
+        provider = EmulatorProvider()
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        program_inputs = {
+            'circuits': qc,
+        }
+
+        
+        import sys
+        import io
+        old_stdout = sys.stdout
+        new_stdout = io.StringIO()
+        sys.stdout = new_stdout
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs,callback=print)
+        result =job.result(timeout=120)
+        output = new_stdout.getvalue()
+        sys.stdout = old_stdout
+        
+        self.assertTrue("{'results': 'intermittently'}"
+         in output)

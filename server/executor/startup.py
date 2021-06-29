@@ -19,7 +19,6 @@ host = os.environ['ORCH_HOST']
 program_id = os.environ['PROGRAM_ID']
 inputs_str = os.environ['INPUTS_STR']
 job_id = os.environ['JOB_ID']
-RUNNING = "Running"
 COMPLETED = "Completed"
 FAILED = "Failed"
 
@@ -71,7 +70,7 @@ def update_status(status):
     url = urljoin(host, f'/job/{job_id}/status')
     req = requests.post(url, json=status)
     if req.status_code != 200:
-        raise (f'Error POST {url}: {req.status_code}')
+        raise Exception(f'Error POST {url}: {req.status_code}')
 
     
 
@@ -80,7 +79,6 @@ def main():
     try:
         write_program_params_file()
         download_program_from_orchestrator()
-        update_status(RUNNING)
         
         cmd = [sys.executable, executor_path]
         exec_result = subprocess.run(cmd, capture_output=True, text=True)

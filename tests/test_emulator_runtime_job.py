@@ -156,6 +156,8 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertGreater(count, (0.45 * shots))
         self.assertLess(count, (0.55 * shots))
 
+    
+
     def test_get_status(self):
         provider = EmulatorProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
@@ -177,7 +179,14 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertTrue(correct_status)
         job.result(timeout=15)
         status = job.status()
-        sleep(2)
+
+        max_try = 50
+        attempt = 0
+        while (status == "Creating" or status == "Running") and attempt < max_try:
+            sleep(0.1)
+            attempt += 1
+            status = job.status()
+            
         self.assertEqual(status, "Completed")
 
     def test_get_failed_status(self):
@@ -197,9 +206,12 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         status = job.status()
         self.assertEqual(status, "Creating")
         
-        while status == "Running" or status == "Creating":
+        max_try = 50
+        attempt = 0
+        while (status == "Creating" or status == "Running") and attempt < max_try:
+            sleep(0.1)
+            attempt += 1
             status = job.status()
-            sleep(5)
 
         self.assertEqual(status, "Failed")
 

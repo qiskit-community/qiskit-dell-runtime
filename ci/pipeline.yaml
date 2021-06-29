@@ -4,6 +4,7 @@ groups:
   - unit_37
   - unit_38
   - unit_39
+  - build_qre_base
   - build_orchestrator
   - build_executor
   - deploy_to_test
@@ -74,14 +75,26 @@ jobs:
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-unit.sh
 
+- name: build_qre_base
+  public: true
+  serial: true
+  plan:
+  - get: qre-base-image
+  - get: qiskit-runtime-emulator
+    trigger: true
+    passed: [unit_37, unit_38, unit_39]
+  - put: qre-base-image
+    params:
+      build: qiskit-runtime-emulator/
+
 - name: build_orchestrator
   public: true
   serial: true
   plan:
-  - get: qiskit-base-image
+  - get: orchestrator-image
   - get: qiskit-runtime-emulator
     trigger: true
-    passed: [unit_37, unit_38, unit_39]
+    passed: [build_qre_base]
   - put: orchestrator-image
     params:
       build: qiskit-runtime-emulator/server/orchestrator/
@@ -90,10 +103,10 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: qiskit-base-image
+  - get: executor-image
   - get: qiskit-runtime-emulator
     trigger: true
-    passed: [unit_37, unit_38, unit_39]
+    passed: [build_qre_base]
   - put: executor-image
     params:
       build: qiskit-runtime-emulator/server/executor/
@@ -200,11 +213,20 @@ resources:
     branch: master
     private_key: {{github_secret_secret}}
 
-- name: qiskit-base-image
+# - name: qiskit-base-image
+#   type: docker-image
+#   icon: docker
+#   source:
+#     repository: {{docker_repo_qiskit}}
+#     username: {{repo_username}}
+#     password: {{repo_password}}
+#     insecure_registries: [{{docker_registry}}]
+
+- name: qre-base-image
   type: docker-image
   icon: docker
   source:
-    repository: {{docker_repo_qiskit}}
+    repository: {{docker_repo_qre}}
     username: {{repo_username}}
     password: {{repo_password}}
     insecure_registries: [{{docker_registry}}]

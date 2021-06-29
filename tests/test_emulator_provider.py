@@ -10,7 +10,7 @@ class ProviderTest(unittest.TestCase):
         provider = EmulatorProvider()
         self.assertIsNotNone(provider)
 
-        self.assertEqual(1, len(provider.backends()))
+        self.assertGreater(len(provider.backends()), 1)
 
     def test_runtime_supported(self):
         provider = EmulatorProvider()

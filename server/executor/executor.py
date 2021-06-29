@@ -11,6 +11,7 @@ from user_messenger_client import RemoteUserMessengerClient
 import json
 import os
 from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
+from qiskit_emulator import EmulatorProvider
 
 import logging
 import logging.config
@@ -30,8 +31,19 @@ def main_method():
     with open(params_path, 'r') as params_file:
         params = params_file.read()
     
-    backend = Aer.get_backend('aer_simulator')
     inputs = json.loads(params, cls=RuntimeDecoder)
+
+    backend = None
+    if 'backend_name' in inputs:
+        provider = EmulatorProvider()
+        print(inputs)
+        backend_name = inputs['backend_name']
+        print("using backend: " + backend_name)
+        backend = provider.get_backend(name = backend_name)
+    else:
+        print("using default backend: " + 'aer_simulator')
+        backend = Aer.get_backend('aer_simulator')
+
     user_messenger = RemoteUserMessengerClient()
     
     try:

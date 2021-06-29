@@ -22,6 +22,7 @@ DIR = "DIR"
 STRING = "STRING"
 
 QRE_DIR = os.path.expanduser("~") + "/.qre"
+from .local_sub_provider import LocalSubProviderManager
 
 class EmulatorRuntimeService():
     def __init__(self, provider: Provider) -> None:
@@ -29,6 +30,10 @@ class EmulatorRuntimeService():
         self._programs = {}
         self._program_data = {}
         self._nextjobID = "1"
+        self.sub_provider_manager = LocalSubProviderManager(provider)
+
+    def backends(self) -> None:
+        return self.sub_provider_manager.backends()
 
     # copied from IBMQ Provider
     def pprint_programs(self, refresh: bool = False) -> None:

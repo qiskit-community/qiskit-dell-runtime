@@ -20,6 +20,7 @@ class RemoteRuntimeService():
         if not (status_response[0] == 200):
             raise Exception("Wrong status code from host: {}".format(self.host))
         self._programs = {}
+        self._backends = {}
 
     def _post(self, path, data):
         url = urljoin(self.host, path)
@@ -37,6 +38,16 @@ class RemoteRuntimeService():
         res = (req.status_code, req.reason, req.text)
         logger.debug(f"GET {url} RESPONSE: {res}")
         return res
+
+    def backends(self, refresh: bool = False):
+        if refresh or (self._backends == {}):
+            res = self._get('/backends')
+            if res[0] != 200:
+                logger.error(f'Cannot fetch backends: {res[0]}')
+            else:
+                backend_list = json.loads(res[2])
+                self._backends = backend_list
+        return self._backends
         
     def programs(self, refresh: bool = False):
         if refresh or (self._programs == {}):

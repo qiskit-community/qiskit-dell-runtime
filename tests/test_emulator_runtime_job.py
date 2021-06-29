@@ -156,6 +156,8 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertGreater(count, (0.45 * shots))
         self.assertLess(count, (0.55 * shots))
 
+    
+
     def test_get_status(self):
         provider = EmulatorProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)

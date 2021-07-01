@@ -1,11 +1,13 @@
 import os
 import flask
-from flask import Flask, Response
+from flask import Flask, Response, session
+from flask_session import Session
 import logging
 import json
 from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 from qiskit_emulator import EmulatorProvider
+import requests
 
 app = Flask(__name__)
 import uuid
@@ -14,12 +16,22 @@ import io
 import shutil
 
 from .kube_client import KubeClient
-from .models import DBService, RuntimeProgram, Job
+from .models import DBService, RuntimeProgram, Job, User
 
 emulator_provider = EmulatorProvider()
 
 db_service = DBService()
 kube_client = KubeClient()
+
+#TODO: Implement logic for when there is not SSO attached.
+#      It's probable that some folks won't want it?
+
+#TODO: Export to environment variables, not hard-coded strs.
+app.config["SECRET_KEY"] = os.getenv("SSO_SECRET_KEY")
+app.config["SESSION_TYPE"] = os.getenv("SSO_SESSION_TYPE")
+TOKEN_URL = os.getenv("SSO_TOKEN_URL")
+AUTH_URL = os.getenv("SSO_AUTH_URL")
+INFO_URL = os.getenv("SSO_INFO_URL")
 
 ACTIVE="Active"
 INACTIVE="Inactive"
@@ -40,12 +52,19 @@ path = '/'.join((os.path.abspath(__file__).replace('\\', '/')).split('/')[:-1])
 fileConfig(os.path.join(path, 'logging_config.ini'))
 logger = logging.getLogger(__name__)
 
+pending_logins = {}
+
+Session(app)
+
 def random_id():
     new_uuid = uuid.uuid4()
     return str(new_uuid)[-12:]
 
 @app.route('/program', methods=['POST'])
 def upload_runtime_program():
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
     # json_data = json.loads(flask.request.form)
     logger.debug(f"POST /program")
 
@@ -59,6 +78,7 @@ def upload_runtime_program():
     program = RuntimeProgram()
     new_id = random_id()
     program.program_id = new_id
+    program.user_id = db_service.fetch_user_id(user_name)
     program.name = flask.request.form.get("name") if flask.request.form.get("name") else new_id
     program.data_type = flask.request.form.get("data_type") if flask.request.form.get("data_type") else "STRING"
     program.program_metadata = flask.request.form.get("program_metadata") if flask.request.form.get("program_metadata") else "{}"
@@ -81,8 +101,16 @@ def upload_runtime_program():
 
 @app.route('/program/<program_id>/update', methods=['POST'])
 def update_runtime_program(program_id):
-    form_data = flask.request.form
+
+    #TODO: Refactor into function
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_program_owner(program_id)):
+        return f"User is not authorized to access program {program_id}", 401
     
+    form_data = flask.request.form
     name = None
     data = None
     data_type = None
@@ -110,7 +138,10 @@ def update_runtime_program(program_id):
 
 @app.route('/program', methods=['GET'])
 def programs():
-    result = db_service.fetch_runtime_programs()
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+    result = db_service.fetch_runtime_programs(session["user_id"])
     logger.debug(f"GET /program: {result}")
     json_result = json.dumps(result)
     return Response(json_result, status=200, mimetype="application/binary")
@@ -118,6 +149,7 @@ def programs():
 # this URL needs to be a lot more restrictive in terms of security
 # 1. only available to internal call from other container
 # 2. only allow fetch of data of assigned program
+# 3. no way to associate with user like everything else
 @app.route('/program/<program_id>/data', methods=['GET'])
 def program_data(program_id):
     result = db_service.fetch_runtime_program_data(program_id)
@@ -131,6 +163,13 @@ def program_data(program_id):
 
 @app.route('/program/<program_id>/delete', methods=['GET'])
 def delete_program(program_id):
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_program_owner(program_id)):
+        return f"User is not authorized to delete program {program_id}", 401
+
     db_service.delete_runtime_program(program_id)
     return Response(None, 200, mimetype="application/binary")
 
@@ -157,6 +196,13 @@ def get_backends():
 
 @app.route('/program/<program_id>/job', methods=['POST'])
 def run_program(program_id):
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_program_owner(program_id)):
+        return f"User is not authorized to delete program {program_id}", 401
+
     inputs_str = flask.request.json
 
     job_id = random_id()
@@ -181,6 +227,13 @@ def run_program(program_id):
 
 @app.route('/job/<job_id>/status', methods=['GET'])
 def get_job_status(job_id):
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_job_owner(job_id)):
+        return f"User is not authorized to get job status for {job_id}", 401
+
     try:
         logger.debug(f'GET /job/{job_id}/status')
         update_pod_status(job_id)
@@ -219,6 +272,7 @@ def get_job_status(job_id):
     except:
         return Response("", 204, mimetype="application/binary")
 
+# Need to be sure that this is coming from container, not some goober
 @app.route('/job/<job_id>/status', methods=['POST'])
 def update_job_status(job_id):
     status = flask.request.json
@@ -229,6 +283,13 @@ def update_job_status(job_id):
 
 @app.route('/job/<job_id>/cancel', methods=['GET'])
 def cancel_job(job_id):
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_job_owner(job_id)):
+        return f"User is not authorized to cancel job {job_id}", 401
+
     update_pod_status(job_id)
     status = db_service.fetch_status(job_id)
     logger.debug(f"GET /job/{job_id}/cancel")
@@ -251,11 +312,17 @@ def add_message(job_id):
     db_service.save_message(job_id, data)
     return ("", 200)
 
-# TODO determine whether kubernetes pod is launched
 
 
 @app.route('/job/<job_id>/results', methods=['GET'])
 def get_job_results(job_id):
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_job_owner(job_id)):
+        return f"User is not authorized to get results for {job_id}", 401
+
     try:
         logger.debug(f"GET /job/{job_id}/results")
         result = db_service.fetch_messages(job_id, None)
@@ -265,6 +332,12 @@ def get_job_results(job_id):
 
 @app.route('/job/<job_id>/results/<timestamp>', methods=['GET'])
 def get_new_job_results(job_id, timestamp):
+    user_name, code = is_authenticated()
+    if code != 200:
+        return "User is not authenticated", code
+
+    if not (session["user_id"] == db_service.fetch_job_owner(job_id)):
+        return f"User is not authorized to get results for {job_id}", 401
     try:
         logger.debug(f"GET /job/{job_id}/results/{timestamp}")
         tstamp = datetime.fromisoformat(timestamp)
@@ -277,6 +350,70 @@ def get_new_job_results(job_id, timestamp):
 def delete_message(job_id):
     db_service.delete_message(job_id)
     return Response(None, 200)
+
+
+@app.route("/callback/<attempt_id>", methods=["GET", "POST"])
+def callback(attempt_id):
+    logger.debug("Hit Callback")
+    pending_logins[attempt_id] = "https" + flask.request.url[4:]
+    
+    return "<html><head><script>window.close();</script></head></html>"
+
+@app.route("/tokeninfo/<attempt_id>", methods=["GET", "POST"])
+def get_token_info(attempt_id):
+    logger.debug("Hit Get Token Info")
+    if pending_logins[attempt_id] is not None:
+        urls = json.dumps({"cb_url": pending_logins[attempt_id], "token_url": TOKEN_URL})
+        del pending_logins[attempt_id]
+        return Response(urls, 200, mimetype="application/binary")
+    else:
+        return Response(None, 204)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    logger.debug("Hit Login")
+    id = random_id()
+    pending_logins[id] = None
+    # Eventually this will pull SSO login link from env vars
+    return Response(json.dumps({"auth_url": AUTH_URL, "id": id}), 200, mimetype="application/binary")
+
+
+
+@app.route("/authenticate", methods=["POST"])
+def authenticate():
+    logger.debug("Hit Authenticate")
+    req_json = flask.request.json
+    token = req_json["token"]
+
+    headers = {"Authorization": "Bearer" + token}
+    resp = requests.get(
+        INFO_URL, headers=headers)
+    json_resp = resp.json()
+
+    if "error" in json_resp.keys():
+        return "Invalid Token", 401
+
+    username = json_resp["user_name"]
+    session["user_name"] = username
+
+    user_id = db_service.fetch_user_id(username)
+    if not user_id:
+        new_user = User()
+        new_user.user_name = username
+        db_service.save_user(new_user)
+        user_id = db_service.fetch_user_id(username)
+
+    session["user_id"] = user_id
+
+    print("User logged in: {}".format(session["user_name"]))
+    return username, 200
+
+@app.route("/is_authenticated", methods=["GET"])
+def is_authenticated():
+    if not session.get("user_name"):
+        return "Not authenticated", 401
+    return session.get("user_name"), 200
+
 
 def update_pod_status(job_id):
     pod_name = db_service.fetch_pod_name(job_id)
@@ -296,3 +433,4 @@ def isFinal(status):
 
 def higherStatus(status):
     return status['job_status'] if STATUS_PRECEDENCE.index(status['job_status']) <= STATUS_PRECEDENCE.index(status['pod_status']) else status['pod_status']
+

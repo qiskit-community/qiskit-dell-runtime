@@ -10,13 +10,22 @@ import logging
 import copy
 import json
 import os
-import base64
+import time
+from requests_oauthlib import OAuth2Session
 from .emulator_runtime_job import EmulatorRuntimeJob
+import webbrowser
 
 logger = logging.getLogger(__name__)
 
 DIR = "DIR"
 STRING = "STRING"
+
+# Is this Dell SSO specific? Will each client need their own versions of these?
+scope = ["openid", "roles", "user_attributes"]
+client_id = r"5c731039-4384-4ea1-b134-c9c9c8e25131"
+client_secret = r"4d872bf7-5122-4a5d-8d09-3e6f2c7e9139"
+access_token = ""
+session = requests.Session()
 
 class RemoteRuntimeService():
     def __init__(self, provider: Provider, host: str) -> None:
@@ -25,13 +34,57 @@ class RemoteRuntimeService():
         status_response = self._get("/status")
         if not (status_response[0] == 200):
             raise Exception("Wrong status code from host: {}".format(self.host))
+
+        res = self._get("/login")
+        login_info = json.loads(res[2])
+
+        redirect_uri = urljoin(self.host, f"/callback/{login_info['id']}")
+        global oauth 
+        oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
+
+
+        authorization_url, state = oauth.authorization_url(
+            login_info["auth_url"]
+        )
+        print("Opening webpage\n")
+        webbrowser.open_new(authorization_url)
+
+        urls = {}
+        while not urls:
+            res = self._get(f"/tokeninfo/{login_info['id']}")
+            if res[0] == 200:
+                urls = json.loads(res[2])
+            else:
+                time.sleep(2)
+        
+        global access_token
+        token = oauth.fetch_token(
+            urls["token_url"],
+            client_secret=client_secret,
+            authorization_response=urls["cb_url"],
+        )
+
+        access_token = token["access_token"]
+
+        try:
+            j = {
+                "token": access_token,
+            }
+            resp = self._post("/authenticate", data=j)
+            if not res[0] == 200: 
+                raise Exception("Unable to authenticate user")
+        except Exception as e:
+            print('Hit exception', e)
+            return False
+        
+
         self._programs = {}
         self._backends = {}
 
     def _post(self, path, data):
         url = urljoin(self.host, path)
         logger.debug(f"POST {url}: {data}")
-        req = requests.post(url, json=data)
+        req = session.post(url, json=data)
 
         res = (req.status_code, req.reason, req.text)
         logger.debug(f"POST {url} RESPONSE: {res}")
@@ -40,7 +93,7 @@ class RemoteRuntimeService():
     def _post_program(self, path, data, files: Optional[Dict] = None):
         url = urljoin(self.host, path)
         logger.debug(f"POST {url}: {data}")
-        req = requests.post(url, data=data, files=files)
+        req = session.post(url, data=data, files=files)
 
         res = (req.status_code, req.reason, req.text)
         logger.debug(f"POST {url} RESPONSE: {res}")
@@ -49,7 +102,7 @@ class RemoteRuntimeService():
     def _get(self, path):
         url = urljoin(self.host, path)
         logger.debug(f"GET {url}")
-        req = requests.get(url)
+        req = session.get(url)
         res = (req.status_code, req.reason, req.text)
         logger.debug(f"GET {url} RESPONSE: {res}")
         return res
@@ -222,7 +275,7 @@ class RemoteRuntimeService():
         res = self._post('/program/{}/job'.format(program_id), serialized_inputs)
         if (res[0] != 200):
             raise Exception('Something went bad')
-        job = EmulatorRuntimeJob(res[2], self.host, callback = callback)
+        job = EmulatorRuntimeJob(res[2], self.host, session=session, callback = callback)
         return job
 
     def update_program(

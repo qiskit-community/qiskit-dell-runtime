@@ -13,6 +13,7 @@ class RuntimeProgram(Base):
 
     id = Column(Integer, primary_key=True)
     program_id = Column(String(64))
+    user_id = Column(Integer)
     name = Column(String(64))
     data = Column(LargeBinary(length=(2**32)-1))
     program_metadata = Column(TEXT)

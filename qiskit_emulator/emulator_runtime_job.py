@@ -30,6 +30,7 @@ class EmulatorRuntimeJob:
             self,
             job_id,
             host,
+            session: Optional[Type[requests.Session]] = None,
             executor: Optional[Type[EmulationExecutor]] = None,
             result_decoder: Type[ResultDecoder] = ResultDecoder,
             callback: Optional[Callable] = None
@@ -44,6 +45,7 @@ class EmulatorRuntimeJob:
         self.local_port = None
 
         self.executor = executor
+        self.session = session
 
         self._status = None
         self._msgRead = 0
@@ -129,7 +131,7 @@ class EmulatorRuntimeJob:
             if lastTimestamp:
                 url = self.getURL('/job/'+ self.job_id +'/results/' + str(lastTimestamp))
             
-            response = requests.get(url)
+            response = self.session.get(url)
             if response.status_code == 204:
                 logger.debug('result: status 204, no new messages.')
                 continue
@@ -196,7 +198,7 @@ class EmulatorRuntimeJob:
             return True
         
         url = self.getURL('/job/' + self.job_id + '/cancel')
-        response = requests.get(url)
+        response = self.session.get(url)
         response.raise_for_status()
         
         if response.status_code == 200:
@@ -214,7 +216,7 @@ class EmulatorRuntimeJob:
             return self.executor.get_status()
 
         url = self.getURL('/job/' + self.job_id + '/status')
-        response = requests.get(url)
+        response = self.session.get(url)
         response.raise_for_status()
         if response.status_code == 200:
             self._status = response.text

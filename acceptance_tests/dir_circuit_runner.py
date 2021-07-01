@@ -1,4 +1,3 @@
-from acceptance_tests.test_acceptance import ACCEPTANCE_URL
 from qiskit_emulator import EmulatorProvider
 from qiskit import QuantumCircuit
 import os

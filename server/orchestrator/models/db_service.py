@@ -3,10 +3,12 @@ from .base import Session, engine, Base
 from .runtime_program_model import RuntimeProgram
 from .message_model import Message
 from .job_model import Job
+from .user_model import User
 from sqlalchemy.orm import load_only
 from datetime import datetime
 import logging
 import json
+
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,34 @@ class DBService():
         try:
             session.add(job)
             session.commit()
+        finally:
+            session.close()
+
+    def save_user(self, user: User):
+        session = Session()
+        try:
+            session.add(user)
+            session.commit()
+        finally:
+            session.close()
+    
+    def fetch_job_owner(self, job_id):
+        try:
+            session = Session()
+            fields = ['program_id']
+            job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
+            logger.debug(f'program id of job {job_id} : {job.program_id}')
+            return self.fetch_program_owner(job.program_id)
+        finally:
+            session.close()
+
+    def fetch_program_owner(self, program_id):
+        try:
+            session = Session()
+            fields = ['user_id']
+            program = session.query(RuntimeProgram).filter_by(program_id=program_id).options(load_only(*fields)).one()
+            logger.debug(f'user id of program {program_id} : {program.user_id}')
+            return program.user_id
         finally:
             session.close()
 
@@ -94,6 +124,17 @@ class DBService():
         finally:
             session.close()
 
+    def fetch_user_id(self, username):
+        try:
+            session = Session()
+            fields = ['id']
+            user = session.query(User).filter_by(user_name=username).options(load_only(*fields)).one()
+            return user.id
+        except:
+            return None
+        finally:
+            session.close()
+
     def delete_runtime_program(self, program_id):
         session = Session()
         try:
@@ -138,13 +179,13 @@ class DBService():
         finally:
             session.close()
 
-    def fetch_runtime_programs(self):
+    def fetch_runtime_programs(self, user_id):
         result = []
         # programs = RuntimeProgram.query.all()
         try:
             session = Session()
             fields = ['program_id', 'name', 'program_metadata']
-            programs = session.query(RuntimeProgram).filter_by(status=ACTIVE).options(load_only(*fields)).all()
+            programs = session.query(RuntimeProgram).filter_by(status=ACTIVE).filter_by(user_id=user_id).options(load_only(*fields)).all()
             logger.debug(f"Found {len(programs)} programs")
             for program in programs:
                 result.append({

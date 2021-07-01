@@ -379,7 +379,7 @@ class AcceptanceTest(unittest.TestCase):
 
         job = provider.runtime.run(program_id, options=None, inputs={'garbage': 'nonsense'})
 
-        res = job.result(timeout=120)
+        res = job.result(timeout=600)
         self.assertTrue("aligned_kernel_parameters" in res)
         self.assertTrue("aligned_kernel_matrix" in res)
 
@@ -412,3 +412,43 @@ class AcceptanceTest(unittest.TestCase):
         print(output)
         self.assertTrue("{'results': 'intermittently'}"
          in output)
+    
+    def test_reconnect(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+
+        program_inputs = {
+            'circuits': qc,
+        }
+
+        del(provider)
+
+        # delete session and sign back in via SSO
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+
+        job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
+
+        response = job.result(timeout=120)
+        logger.debug("through")
+
+
+        results = response['results'][0]
+
+        self.assertIsNotNone(results)
+        self.assertTrue(results['success'])
+        self.assertTrue(results['success'])
+        self.assertEqual("DONE", results['status'])
+
+        shots = results['shots']
+        count = results['data']['counts']['0x0']
+
+        self.assertGreater(count, (0.45 * shots))
+        self.assertLess(count, (0.55 * shots))

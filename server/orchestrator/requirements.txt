@@ -1,7 +1,8 @@
 flask
+flask_session
+requests
 sqlalchemy
 mysqlclient 
 kubernetes
-kafka-python==2.0.2
 qiskit-ibmq-provider>=0.13.0
 qiskit-ionq

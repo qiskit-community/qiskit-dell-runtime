@@ -5,6 +5,8 @@ all: build_base_qiskit_image build_base_qre_image build_orchestrator_image build
 
 ddev: all push redeploy
 
+full_restart: clean all push deploy
+
 build_base_qiskit_image:
 	$(DOCKER_CMD) build ./qiskit_base/ -t $(DOCKER_BASE)/qiskit
 

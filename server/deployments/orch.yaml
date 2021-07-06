@@ -34,15 +34,15 @@ spec:
           - name: DB_NAME
             value: "qre"
           - name: SSO_SECRET_KEY
-            value: "g;pqj235hkngfava@^nffKN23"
+            value: ${SSO_SECRET_KEY}
           - name: SSO_SESSION_TYPE
-            value: "filesystem"
+            value: ${SSO_SESSION_TYPE}
           - name: SSO_TOKEN_URL
-            value: "https://appsso.login.scfd.isus.emc.com/oauth/token"
+            value: ${SSO_TOKEN_URL}
           - name: SSO_AUTH_URL
-            value: "https://appsso.login.scfd.isus.emc.com/oauth/authorize"
+            value: ${SSO_AUTH_URL}
           - name: SSO_INFO_URL
-            value: "https://appsso.login.scfd.isus.emc.com/userinfo"                                             
+            value: ${SSO_INFO_URL}                                              
           ports:
           - containerPort: 8080
       # imagePullSecrets:

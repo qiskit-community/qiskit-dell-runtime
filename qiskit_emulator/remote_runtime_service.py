@@ -9,7 +9,7 @@ from qiskit.providers import ProviderV1 as Provider
 import logging
 import copy
 import json
-import os
+
 import time
 from requests_oauthlib import OAuth2Session
 from .emulator_runtime_job import EmulatorRuntimeJob
@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 
 DIR = "DIR"
 STRING = "STRING"
+#TOKEN = 'eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vYXBwc3NvLnVhYS5zY2ZkLmlzdXMuZW1jLmNvbS90b2tlbl9rZXlzIiwia2lkIjoia2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI0ZmZmOTZkMTNhMjY0NGZlYTdiMmUwMGU5NDc0MzdmMCIsInN1YiI6ImNjZTY0OWVjLThhYzQtNDMzMS04ZWM1LTkwNmZiNGM1ZDUyYSIsInNjb3BlIjpbIm9wZW5pZCIsInJvbGVzIiwidXNlcl9hdHRyaWJ1dGVzIl0sImNsaWVudF9pZCI6IjVjNzMxMDM5LTQzODQtNGVhMS1iMTM0LWM5YzljOGUyNTEzMSIsImNpZCI6IjVjNzMxMDM5LTQzODQtNGVhMS1iMTM0LWM5YzljOGUyNTEzMSIsImF6cCI6IjVjNzMxMDM5LTQzODQtNGVhMS1iMTM0LWM5YzljOGUyNTEzMSIsImdyYW50X3R5cGUiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJ1c2VyX2lkIjoiY2NlNjQ5ZWMtOGFjNC00MzMxLThlYzUtOTA2ZmI0YzVkNTJhIiwib3JpZ2luIjoiZGVsbC1zc28iLCJ1c2VyX25hbWUiOiJuaWV2ZW8iLCJlbWFpbCI6Ilhhdmllci5OaWV2ZXNAZGVsbC5jb20iLCJhdXRoX3RpbWUiOjE2MjU1OTU5NjIsInJldl9zaWciOiJiMmYxZmNlZiIsImlhdCI6MTYyNTU5NjI4MSwiZXhwIjoxNjI1NjM5NDgxLCJpc3MiOiJodHRwczovL2FwcHNzby51YWEuc2NmZC5pc3VzLmVtYy5jb20vb2F1dGgvdG9rZW4iLCJ6aWQiOiI5ZDliMDAxMC1hYTkyLTRjZTAtODgzNi1kZWFkNjkxZjZlMzciLCJhdWQiOlsiNWM3MzEwMzktNDM4NC00ZWExLWIxMzQtYzljOWM4ZTI1MTMxIiwib3BlbmlkIl19.b09_v4VElM6EPaiV0750_wSZ0pFE3pSDNFuMUl83HdED379uOvh7OpZ-rJs_lAidZV-m7TmF4KPpIqzl1RnaYtQs-KwzFGTc86uQ4n9HsFbwsi6R7Q0WLNQgOl6Y8bP-BILJ8eo6tWZ4cJeSY6mJOxwnPW_br92rUblFHTQXuTeXxosB1k9HNyylchN7DzNnxaQIdzvSMkEdeoBGq1869m-Vfc3zWAbNY5N3JG3Pcdq7HfZ3w0RnhHHLev4ChcL3Hd_8_716xoBj8bCWZY11vsMmrxjMpzFMtJSYhAcIx4NqjD39PqcK5Ykpi_yIO8eiGog5PndkFjcTOViagq6euw'
+TOKEN=os.getenv("TOKEN")
 
+# TOKEN = None
 # Is this Dell SSO specific? Will each client need their own versions of these?
 scope = ["openid", "roles", "user_attributes"]
 client_id = r"5c731039-4384-4ea1-b134-c9c9c8e25131"
@@ -34,48 +37,55 @@ class RemoteRuntimeService():
         status_response = self._get("/status")
         if not (status_response[0] == 200):
             raise Exception("Wrong status code from host: {}".format(self.host))
+        if  not TOKEN:
+            res = self._get("/login")
+            login_info = json.loads(res[2])
+            redirect_uri = urljoin(self.host, f"/callback/{login_info['id']}")
+            global oauth 
+            oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
-        res = self._get("/login")
-        login_info = json.loads(res[2])
 
-        redirect_uri = urljoin(self.host, f"/callback/{login_info['id']}")
-        global oauth 
-        oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
+            authorization_url, state = oauth.authorization_url(
+                login_info["auth_url"]
+            )
+            print(f"Opening webpage {authorization_url}\n")
 
+            #TODO: figure out whether this can be done CLI
+            
+            webbrowser.open_new(authorization_url)
 
-        authorization_url, state = oauth.authorization_url(
-            login_info["auth_url"]
-        )
-        print("Opening webpage\n")
-        webbrowser.open_new(authorization_url)
+            urls = {}
+            while not urls:
+                res = self._get(f"/tokeninfo/{login_info['id']}")
+                if res[0] == 200:
+                    urls = json.loads(res[2])
+                else:
+                    time.sleep(2)
+            
+            global access_token
+            token = oauth.fetch_token(
+                urls["token_url"],
+                client_secret=client_secret,
+                authorization_response=urls["cb_url"],
+            )
 
-        urls = {}
-        while not urls:
-            res = self._get(f"/tokeninfo/{login_info['id']}")
-            if res[0] == 200:
-                urls = json.loads(res[2])
-            else:
-                time.sleep(2)
-        
-        global access_token
-        token = oauth.fetch_token(
-            urls["token_url"],
-            client_secret=client_secret,
-            authorization_response=urls["cb_url"],
-        )
+            #print(f'dell sso token response: {token}')
 
-        access_token = token["access_token"]
+            access_token = token["access_token"]
+            print(access_token)
+        else: 
+            access_token = TOKEN
 
         try:
             j = {
                 "token": access_token,
             }
             resp = self._post("/authenticate", data=j)
-            if not res[0] == 200: 
+            if not resp[0] == 200: 
                 raise Exception("Unable to authenticate user")
         except Exception as e:
             print('Hit exception', e)
-            return False
+            # return False
         
 
         self._programs = {}

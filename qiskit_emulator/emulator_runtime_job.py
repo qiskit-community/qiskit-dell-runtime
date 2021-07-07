@@ -120,11 +120,13 @@ class EmulatorRuntimeJob:
             logger.debug(e)
 
 
-    def remote_poll_for_results(self,callback):
+    def remote_poll_for_results(self, callback):
         dcd = self.result_decoder
         lastTimestamp = None
+        stay_alive = True
+        final_loop = False
 
-        while self._finalResults == None and not self._kill and not self.job_completed():     
+        while stay_alive:     
             time.sleep(3)
 
             url = self.getURL('/job/'+ self.job_id +'/results')
@@ -155,9 +157,18 @@ class EmulatorRuntimeJob:
                     self._finalResults = msg_data['message']
                 else:
                     self._imsgs.append(msg_data['message'])
+                    logger.debug("appended message to queue")
                     if callback is not None:
                         logger.debug('Callback is here')
                         callback(msg_data['message'])
+            if final_loop:
+                stay_alive = False
+                continue
+            final_loop = not (self._finalResults == None and not self._kill and not self.job_completed())
+            # logger.debug(f"final: {final_loop}")
+            # logger.debug(f"results: {self._finalResults}")
+            # logger.debug(f"kill: {self._kill}")
+            # logger.debug(f"completed: {self.job_completed()}")
 
         return
 

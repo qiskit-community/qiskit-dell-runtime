@@ -68,7 +68,7 @@ def main():
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
     # job.stream_results(print)
-    results = job.result(timeout=15)
+    results = job.result(timeout=60)
     print(results)
 if __name__ == "__main__":
     main()

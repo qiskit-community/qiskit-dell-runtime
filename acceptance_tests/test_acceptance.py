@@ -149,7 +149,7 @@ class AcceptanceTest(unittest.TestCase):
 
         # runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        response = job.result(timeout=120)
+        response = job.result(timeout=180)
         logger.debug("through")
         # print(json.dumps(results))
         # results['results'] = json.loads(results['results'])
@@ -336,7 +336,8 @@ class AcceptanceTest(unittest.TestCase):
 
         here = os.path.dirname(os.path.realpath(__file__))
         provider.remote(ACCEPTANCE_URL)
-        program_id = provider.runtime.upload_program(here + "/dirtest/program.py", metadata=RUNTIME_PROGRAM_METADATA)
+
+        program_id = provider.runtime.upload_program(here + "/program.py", metadata=RUNTIME_PROGRAM_METADATA)
         self.assertGreater(len(provider.runtime.programs()), 1)
 
         runtime_program = provider.runtime.program(program_id)
@@ -353,8 +354,9 @@ class AcceptanceTest(unittest.TestCase):
 
             job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
-            result = job.result(timeout=45)
+            result = job.result(timeout=90)
             self.assertIsNotNone(result)
+
         except Exception:
             self.fail("should pass")
 

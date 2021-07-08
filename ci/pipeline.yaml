@@ -144,6 +144,7 @@ jobs:
   - get: qiskit-runtime-emulator
     trigger: true
     passed: [deploy_to_test]
+  - get: qre-secrets
   - task: run-acceptance
     config:
       platform: linux
@@ -157,6 +158,7 @@ jobs:
           insecure_registries: [{{docker_registry}}]        
       inputs:
       - name: qiskit-runtime-emulator
+      - name: qre-secrets
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-acceptance.sh
     params:

@@ -6,3 +6,4 @@ mysqlclient
 kubernetes
 qiskit-ibmq-provider>=0.13.0
 qiskit-ionq
+waitress

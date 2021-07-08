@@ -1,4 +1,5 @@
 from kubernetes import client, config
+from kubernetes.client.rest import ApiException
 import uuid
 import yaml
 import subprocess
@@ -66,3 +67,15 @@ class KubeClient():
         for pod in podlist:
           if pod.metadata.name == pod_name:
             return pod.status.phase
+
+    def check_pod_existence(self, pod_name):
+      resp = None
+      try:
+          resp = self._api.read_namespaced_pod(name=pod_name,namespace=self._namespace)
+          return True
+      except ApiException as e:
+          if e.status != 404:
+              print("Unknown error: %s" % e)
+              return None
+      if not resp:
+          return False

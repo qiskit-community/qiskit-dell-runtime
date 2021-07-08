@@ -17,4 +17,4 @@ ENV FLASK_APP /app/main.py
 ENV REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
 
 EXPOSE 8080
-CMD flask run -h 0.0.0.0 -p 8080
+CMD cd /app && python3 main.py

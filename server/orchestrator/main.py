@@ -8,6 +8,7 @@ from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 from qiskit_emulator import EmulatorProvider
 import requests
+import waitress
 
 app = Flask(__name__)
 import uuid
@@ -15,8 +16,8 @@ from datetime import datetime
 import io
 import shutil
 
-from .kube_client import KubeClient
-from .models import DBService, RuntimeProgram, Job, User
+from kube_client import KubeClient
+from models import DBService, RuntimeProgram, Job, User
 
 emulator_provider = EmulatorProvider()
 
@@ -206,7 +207,14 @@ def run_program(program_id):
     inputs_str = flask.request.json
 
     job_id = random_id()
-    pod_name = "qre-" + str(uuid.uuid1())[-24:]    
+    pod_name_dupe = True
+    while pod_name_dupe:
+        pod_name = "qre-" + str(uuid.uuid4())[-24:]
+        pod_name_dupe = kube_client.check_pod_existence(pod_name)
+        logger.debug(f"pod {pod_name} exists: {pod_name_dupe}")
+        if pod_name_dupe == None:
+            return "Kubernetes error occurred", 500  
+
     options = {
         "program_id": program_id,
         "inputs_str": inputs_str,
@@ -221,6 +229,7 @@ def run_program(program_id):
     db_job.pod_name = pod_name
     db_service.save_job(db_job)
 
+    
     kube_client.run(**options)
     # create job and return later
     return Response(job_id, 200, mimetype="application/json")
@@ -433,4 +442,7 @@ def isFinal(status):
 
 def higherStatus(status):
     return status['job_status'] if STATUS_PRECEDENCE.index(status['job_status']) <= STATUS_PRECEDENCE.index(status['pod_status']) else status['pod_status']
+
+if __name__=="__main__":
+    waitress.serve(app, host='0.0.0.0', port=8080)
 

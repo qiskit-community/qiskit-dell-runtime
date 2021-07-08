@@ -5,5 +5,5 @@ python3 --version
 
 cd qiskit-runtime-emulator
 pip3 install . 
-source token.sh
+source ../qre-secrets/token.sh
 pytest acceptance_tests/

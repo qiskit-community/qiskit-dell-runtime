@@ -21,7 +21,7 @@ spec:
       containers:
         - name: qre-orchestrator
           
-          image: harbor.dell.com/dojo-harbor/qre/orchestrator
+          image: harbor.dell.com/dojo-harbor/${QRE_NS}/orchestrator
           env:
           - name: DB_HOST
             value: "mysql"

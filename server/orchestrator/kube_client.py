@@ -17,7 +17,7 @@ metadata:
 spec:
   containers:
     - name: {pod_name}
-      image: harbor.dell.com/dojo-harbor/qre/executor
+      image: harbor.dell.com/dojo-harbor/{namespace}/executor
       env:
       - name: ORCH_HOST
         value: {orch_host}

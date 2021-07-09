@@ -1,7 +1,7 @@
 DOCKER_CMD=docker
-DOCKER_BASE=harbor.dell.com/dojo-harbor/qre
+DOCKER_BASE=harbor.dell.com/dojo-harbor/qre-dev
 
-all: build_base_qiskit_image build_base_qre_image build_orchestrator_image build_executor_image
+all: build_base_qiskit_image build_base_qre_image build_orchestrator_image build_executor_image 
 
 ddev: all push redeploy
 

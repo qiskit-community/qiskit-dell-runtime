@@ -25,9 +25,9 @@ TOKEN = os.getenv("TOKEN")
 
 # TOKEN = None
 # Is this Dell SSO specific? Will each client need their own versions of these?
-scope = ["openid", "roles", "user_attributes"]
-client_id = r"5c731039-4384-4ea1-b134-c9c9c8e25131"
-client_secret = r"4d872bf7-5122-4a5d-8d09-3e6f2c7e9139"
+scope = [x.strip() for x in os.getenv("SSO_SCOPE").split(",")]
+client_id = os.getenv("SSO_CLIENT_ID")
+client_secret = os.getenv("SSO_CLIENT_SECRET")
 access_token = ""
 session = requests.Session()
 

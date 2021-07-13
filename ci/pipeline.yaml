@@ -89,6 +89,8 @@ jobs:
   - put: qre-base-test-image
     params:
       build: qiskit-runtime-emulator/
+      build_args:
+        QRE_NS: qre-test
 
 - name: build_orchestrator_test
   public: true
@@ -101,6 +103,8 @@ jobs:
   - put: orchestrator-test-image
     params:
       build: qiskit-runtime-emulator/server/orchestrator/
+      build_args:
+        QRE_NS: qre-test
 
 - name: build_executor_test
   public: true
@@ -113,6 +117,9 @@ jobs:
   - put: executor-test-image
     params:
       build: qiskit-runtime-emulator/server/executor/
+      build_args:
+        QRE_NS: qre-test
+      
 
 - name: deploy_to_test
   serial: true
@@ -211,6 +218,8 @@ jobs:
   - put: qre-base-image
     params:
       build: qiskit-runtime-emulator/
+      build_args:
+        QRE_NS: qre
 
 - name: build_orchestrator
   public: true
@@ -223,6 +232,8 @@ jobs:
   - put: orchestrator-image
     params:
       build: qiskit-runtime-emulator/server/orchestrator/
+      build_args:
+        QRE_NS: qre
 
 - name: build_executor
   public: true
@@ -235,6 +246,8 @@ jobs:
   - put: executor-image
     params:
       build: qiskit-runtime-emulator/server/executor/
+      build_args:
+        QRE_NS: qre
   
 
 resources:

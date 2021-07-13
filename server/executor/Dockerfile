@@ -1,4 +1,6 @@
-FROM harbor.dell.com/dojo-harbor/qre/qre-base
+ARG QRE_NS
+
+FROM harbor.dell.com/dojo-harbor/$QRE_NS/qre-base
 
 COPY ./requirements.txt /var/qiskit-runtime/
 RUN pip3 install -r /var/qiskit-runtime/requirements.txt

@@ -1,4 +1,6 @@
-FROM harbor.dell.com/dojo-harbor/qre/qiskit
+ARG QRE_NS
+
+FROM harbor.dell.com/dojo-harbor/$QRE_NS/qiskit
 
 RUN mkdir -p /var/qre/qiskit_emulator
 

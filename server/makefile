@@ -11,13 +11,13 @@ build_base_qiskit_image:
 	$(DOCKER_CMD) build ./qiskit_base/ -t $(DOCKER_BASE)/qiskit
 
 build_base_qre_image:
-	$(DOCKER_CMD) build ../ -t $(DOCKER_BASE)/qre-base
+	$(DOCKER_CMD) build --build-arg QRE_NS=qre-dev ../ -t $(DOCKER_BASE)/qre-base
 
 build_orchestrator_image:
-	$(DOCKER_CMD) build ./orchestrator/ -t $(DOCKER_BASE)/orchestrator
+	$(DOCKER_CMD) build --build-arg QRE_NS=qre-dev ./orchestrator/ -t $(DOCKER_BASE)/orchestrator
 
 build_executor_image:
-	$(DOCKER_CMD) build ./executor/ -t $(DOCKER_BASE)/executor
+	$(DOCKER_CMD) build --build-arg QRE_NS=qre-dev ./executor/ -t $(DOCKER_BASE)/executor
 
 push:
 	$(DOCKER_CMD) push $(DOCKER_BASE)/qiskit

@@ -9,4 +9,4 @@ acceptance:
 
 unit:
 	pip3 install .
-	pytest tests/
+	pytest --full-trace tests/

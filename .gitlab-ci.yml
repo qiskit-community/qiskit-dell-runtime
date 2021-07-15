@@ -1,0 +1,231 @@
+image: "harbor.dell.com/dojo-harbor/miniforge3"
+
+stages:
+  - Unit Test
+  - Build Base Test
+  - Build Orch Exec Test
+  - Deploy to Test
+  - Acceptance Test
+  # - Release
+  - Build Base Prod
+  - Build Orch Exec
+
+unit_test37:
+  stage: Unit Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.7"
+
+  script:
+  - pip3 install . 
+  - pytest tests/
+
+unit_test38:
+  stage: Unit Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.8"
+
+  script:
+  - pip3 install . 
+  - pytest tests/
+
+unit_test39:
+  stage: Unit Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
+
+  script:
+  - pip3 install . 
+  - pytest tests/
+
+unit_test39:
+  stage: Unit Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
+
+  script:
+  - pip3 install . 
+  - pytest tests/
+
+build_base_test:
+  stage: Build Base Test
+  image: "harbor.dell.com/dojo-harbor/docker"
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  script:
+    - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-base
+    - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
+    - docker push harbor.dell.com/dojo-harbor/qre-test/qre-base
+
+build_orch_test:
+  stage: Build Orch Exec Test
+  image: "harbor.dell.com/dojo-harbor/docker"
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  script:
+    - echo $PATH
+    - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
+    - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
+    - docker push harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
+
+build_exec_test:
+  stage: Build Orch Exec Test
+  image: "harbor.dell.com/dojo-harbor/docker"
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  script:
+    - echo $PATH
+    - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-executor
+    - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
+    - docker push harbor.dell.com/dojo-harbor/qre-test/qre-executor
+
+deploy_to_test:
+  stage: Deploy to Test
+  image: "harbor.dell.com/dojo-harbor/qre/deploy"
+
+  script:
+    - mkdir -p ~/.kube
+    - apt install wget
+    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=master'
+    - ls -a
+    - cp kube_config.yaml ~/.kube/config
+    - cd server/deployments
+    - source test.sh
+    - cd ..
+    - make clean
+    - make deploy
+    - cd -
+    - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test)
+
+acceptance_test:
+  stage: Acceptance Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
+
+  script:
+    - python3 --version
+    - pip3 install .
+    - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
+    - source token.sh
+    - export ACCEPTANCE_URL=http://qre-test.oro-sandbox-small1.k8s.cec.lab.emc.com
+    - pytest acceptance_tests/
+  
+
+build_base:
+  stage: Build Base Prod
+  image: "harbor.dell.com/dojo-harbor/docker"
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  script:
+    - docker build --build-arg QRE_NS=qre ./ -t harbor.dell.com/dojo-harbor/qre/qre-base
+    - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
+    - docker push harbor.dell.com/dojo-harbor/qre/qre-base
+
+build_orch:
+  stage: Build Orch Exec
+  image: "harbor.dell.com/dojo-harbor/docker"
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  script:
+    - echo $PATH
+    - docker build --build-arg QRE_NS=qre ./ -t harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+    - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
+    - docker push harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+
+build_exec:
+  stage: Build Orch Exec
+  image: "harbor.dell.com/dojo-harbor/docker"
+
+  services:
+  - name: harbor.dell.com/dojo-harbor/dind
+    alias: thedockerhost
+    entrypoint: ['dockerd-entrypoint.sh']
+    command: ['--insecure-registry', 'harbor.dell.com' ]
+
+  variables: 
+    # Tell docker CLI how to talk to Docker daemon; see
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-docker-in-docker-executor
+    DOCKER_HOST: tcp://thedockerhost:2375/
+    # Use the overlayfs driver for improved performance:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  script:
+    - echo $PATH
+    - docker build --build-arg QRE_NS=qre ./ -t harbor.dell.com/dojo-harbor/qre/qre-executor
+    - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
+    - docker push harbor.dell.com/dojo-harbor/qre/qre-executor
+

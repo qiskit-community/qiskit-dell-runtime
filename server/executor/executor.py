@@ -38,8 +38,15 @@ def main_method():
         provider = EmulatorProvider()
         print(inputs)
         backend_name = inputs['backend_name']
-        print("using backend: " + backend_name)
-        backend = provider.get_backend(name = backend_name)
+        if 'backend_token' in inputs:
+            backend = provider.get_backend(name = backend_name, backend_token=inputs["backend_token"])
+        else:
+            backend = provider.get_backend(name = backend_name)
+        here = os.path.dirname(os.path.realpath(__file__))
+        cert_path=os.path.join(here,"backend_certs", backend_name+".crt")
+        if os.path.isfile(cert_path):
+            os.environ["REQUESTS_CA_BUNDLE"]=cert_path
+            
     else:
         print("using default backend: " + 'aer_simulator')
         backend = Aer.get_backend('aer_simulator')

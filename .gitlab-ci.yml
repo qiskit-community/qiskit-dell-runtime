@@ -39,7 +39,7 @@ component:
   image: "harbor.dell.com/dojo-harbor/qre/component-base"
 
   services:
-    - name: harbor.dell.com/dojo-harbor/mysql
+    - name: mysql:5.7
       alias: mysql
 
   variables: 

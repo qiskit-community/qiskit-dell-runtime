@@ -65,7 +65,7 @@ def test_fetch_program_owner():
 
     assert(db_service.fetch_program_owner("12") == 1)
 
-def test_fetch_job_owner(mysql):
+def test_fetch_job_owner():
     db_service = DBService()
 
     rp = RuntimeProgram()

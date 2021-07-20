@@ -39,7 +39,7 @@ component:
   image: "harbor.dell.com/dojo-harbor/qre/component-base"
 
   services:
-    - name: mysql:5.7
+    - name: harbor.dell.com/dojo-harbor/mysql
       alias: mysql
       command: [ "--default-authentication-plugin=mysql_native_password" ]
 

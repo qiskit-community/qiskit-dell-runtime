@@ -41,14 +41,15 @@ component:
   services:
     - name: harbor.dell.com/dojo-harbor/mysql
       alias: mysql
+      command: [ "--default-authentication-plugin=mysql_native_password" ]
 
   variables: 
-    MYSQL_DATABASE: test
-    MYSQL_ROOT_PASSWORD: ""
+    MYSQL_DATABASE: $MYSQL_DB
+    MYSQL_ROOT_PASSWORD: $MYSQL_PASS
     DB_HOST: mysql
     DB_PORT: 3306
     DB_USER: root
-    DB_PASSWORD: ""
+    DB_PASSWORD: password
     DB_NAME: test
 
   script:

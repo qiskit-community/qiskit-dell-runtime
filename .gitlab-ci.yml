@@ -38,9 +38,16 @@ component:
   stage: Unit Test
   image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
 
+  variables: 
+    DB_HOST: 127.0.0.1
+    DB_PORT: 3307
+    DB_USER: root
+    DB_PASSWORD: ""
+    DB_NAME: test
+
   script:
   - pip3 install . 
-  - pytest tests/
+  - pytest component_tests/
 
 build_base_test:
   stage: Build Base Test

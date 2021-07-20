@@ -206,4 +206,22 @@ class DBService():
         finally:
             session.close()
 
+    def fetch_job_token(self, job_id):
+        try:
+            session = Session()
+            fields = ['data_token']
+            job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
+            return job.data_token
+        finally:
+            session.close()
+
+    def use_job_token(self, job_id):
+        try:
+            session = Session()
+            job = session.query(Job).filter_by(job_id=job_id).one()
+            setattr(job, "data_token", "USED")
+            session.commit()
+        finally:
+            session.close()
+
 

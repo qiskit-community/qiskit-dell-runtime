@@ -93,7 +93,6 @@ class EmulatorRuntimeJob:
             logging.debug(f"accepted client connection from {addr}")
             with conn:
                 while self._finalResults == None and not self._kill and not self.job_completed():
-                    # TODO: loop here...
                     data = conn.recv(16384)
 
                     if not data:

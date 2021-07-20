@@ -10,3 +10,7 @@ acceptance:
 unit:
 	pip3 install .
 	pytest --full-trace tests/
+
+component:
+	pip3 install .
+	pytest component_tests/

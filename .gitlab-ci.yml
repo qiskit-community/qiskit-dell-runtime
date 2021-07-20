@@ -34,7 +34,7 @@ unit_test39:
   - pip3 install . 
   - pytest tests/
 
-unit_test39:
+component:
   stage: Unit Test
   image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
 

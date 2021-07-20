@@ -412,8 +412,7 @@ class AcceptanceTest(unittest.TestCase):
         sys.stdout = old_stdout
         
         print(output)
-        self.assertTrue("{'results': 'intermittently'}"
-         in output)
+        self.assertTrue("{'results': 'intermittently'}" in output)
     
     def test_reconnect(self):
         provider = EmulatorProvider()

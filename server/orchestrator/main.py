@@ -27,7 +27,6 @@ kube_client = KubeClient()
 #TODO: Implement logic for when there is not SSO attached.
 #      It's probable that some folks won't want it?
 
-#TODO: Export to environment variables, not hard-coded strs.
 app.config["SECRET_KEY"] = os.getenv("SSO_SECRET_KEY")
 app.config["SESSION_TYPE"] = os.getenv("SSO_SESSION_TYPE")
 TOKEN_URL = os.getenv("SSO_TOKEN_URL")
@@ -45,6 +44,7 @@ POD_ERROR = "Error"
 POD_SUCCESS = "Succeeded"
 POD_UNKNOWN = "Unknown"
 POD_PENDING = "Pending"
+USED = "USED"
 
 STATUS_PRECEDENCE = [COMPLETED, FAILED, CANCELED, POD_ERROR, POD_SUCCESS, RUNNING, POD_PENDING, CREATING]
 
@@ -153,6 +153,23 @@ def programs():
 # 3. no way to associate with user like everything else
 @app.route('/program/<program_id>/data', methods=['GET'])
 def program_data(program_id):
+
+    # Check request for data token - ensure it matches the one we assigned?
+
+    form_data = flask.request.form
+
+    if not (form_data.get("job_id") and form_data.get("token")):
+        return ("Id and token not presented", 401)
+
+    job_id = form_data.get("job_id")
+    token = form_data.get("token")
+    db_token = db_service.fetch_job_token(job_id)
+    
+    if db_token != token and db_token != USED:
+        return ("Invalid Token", 401)
+
+    db_service.use_job_token(job_id)
+
     result = db_service.fetch_runtime_program_data(program_id)
 
     bytestream = io.BytesIO(result['data'])

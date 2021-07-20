@@ -43,8 +43,8 @@ component:
       alias: mysql
 
   variables: 
-    MYSQL_DATABASE: test
-    MYSQL_ROOT_PASSWORD: ""
+    MYSQL_DATABASE: $MYSQL_DB
+    MYSQL_ROOT_PASSWORD: $MYSQL_PASS
     DB_HOST: mysql
     DB_PORT: 3306
     DB_USER: root

@@ -40,6 +40,7 @@ component:
 
   services:
     - name: harbor.dell.com/dojo-harbor/mysql
+      alias: mysql
 
   variables: 
     MYSQL_DATABASE: test

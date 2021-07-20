@@ -8,7 +8,7 @@ import unittest
 from urllib.parse import urljoin
 import os, requests
 import json
-import pytest_mysql
+# import pytest_mysql
 from server.orchestrator.models import DBService, Job, User, RuntimeProgram, Message, db_service
 import pytest
 from datetime import datetime
@@ -46,10 +46,10 @@ RUNTIME_PROGRAM_METADATA = {
     "description": "Qiskit test program"
 }
 
-mysql_proc = pytest_mysql.factories.mysql_proc(port=3307)
+# mysql_proc = pytest_mysql.factories.mysql_proc(port=3307)
 
 
-def test_fetch_program_owner(mysql):
+def test_fetch_program_owner():
     db_service = DBService()
 
     rp = RuntimeProgram()
@@ -92,7 +92,7 @@ def test_fetch_job_owner(mysql):
 
     assert(db_service.fetch_job_owner("123") == 1)
 
-def test_see_programs(mysql):
+def test_see_programs():
     db_service = DBService()
 
     rp = RuntimeProgram()
@@ -130,7 +130,7 @@ def test_see_programs(mysql):
 
     assert(len(db_service.fetch_runtime_programs(1)) == 2)
 
-def test_use_job_token(mysql):
+def test_use_job_token():
     db_service = DBService()
 
     jb = Job()
@@ -147,7 +147,7 @@ def test_use_job_token(mysql):
 
     assert(db_service.fetch_job_token("123") == "USED")
 
-def test_fetch_messages_timestamp(mysql):
+def test_fetch_messages_timestamp():
     db_service = DBService()
 
     db_service.save_message("123", "this message")

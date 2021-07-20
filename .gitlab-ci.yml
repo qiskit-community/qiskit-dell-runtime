@@ -36,7 +36,7 @@ unit_test39:
 
 component:
   stage: Unit Test
-  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
+  image: "harbor.dell.com/dojo-harbor/qre/component_base
 
   variables: 
     DB_HOST: 127.0.0.1

@@ -36,6 +36,12 @@ push_test_image39: export PY_V=3.9
 push_test_image39: 
 	$(DOCKER_CMD) push $(DOCKER_BASE)/test-base:$(PY_V)
 
+build_component_image:
+	envsubst < ./docker/component_base/dockerfile | $(DOCKER_CMD) build -t $(DOCKER_BASE)/component-base -
+
+push_component_image: 
+	$(DOCKER_CMD) push $(DOCKER_BASE)/component-base
+
 # build_test_image38:
 # 	$(DOCKER_CMD) build ./test_base/ -t $(DOCKER_BASE)/test_base:$(PY_V)
 

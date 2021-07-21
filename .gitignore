@@ -11,3 +11,4 @@ build/
 qiskit_runtime_emulator.egg-info/
 dist/
 **/secrets.*
+examples/programs/vqe.py

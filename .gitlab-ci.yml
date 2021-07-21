@@ -160,7 +160,7 @@ deploy_to_test:
     - 'wget -O ionq_simulator.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/ionq_simulator.crt/raw?ref=master'
     - 'wget -O ionq_qpu.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/ionq_qpu.crt/raw?ref=master'
     - export QRE_CERTS_DIR=.
-    - make clean
+    - make clean || echo "Failure in clean"
     - make deploy
     - cd -
     - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test)

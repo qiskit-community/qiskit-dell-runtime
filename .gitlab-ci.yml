@@ -156,7 +156,7 @@ deploy_to_test:
     - cd server/deployments
     - source test.sh
     - cd ..
-    - make clean
+    - make clean || echo "Failure in clean"
     - make deploy
     - cd -
     - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test)

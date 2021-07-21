@@ -26,6 +26,7 @@ TOKEN = os.getenv("TOKEN")
 # TOKEN = None
 # Is this Dell SSO specific? Will each client need their own versions of these?
 scope_str = os.getenv("SSO_SCOPE")
+scope = None
 if scope_str:
     scope = [x.strip() for x in os.getenv("SSO_SCOPE").split(",")]
     

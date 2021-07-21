@@ -27,6 +27,7 @@ push:
 
 deploy: 
 	envsubst < ./deployments/qre.yaml | kubectl apply -f -
+	kubectl create secret -n qre-dev generic certs --from-file executor/backend_certs/ionq_qpu.crt --from-file executor/backend_certs/ionq_simulator.crt --from-file orchestrator/qrecerts.crt
 	envsubst < ./deployments/orch.yaml | kubectl apply -f -
 
 clean:

@@ -1,10 +1,47 @@
 from qiskit_emulator import EmulatorProvider
+from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
+import unittest
+from qiskit import QuantumCircuit, execute, transpile
+from qiskit_emulator import EmulatorProvider
+from qiskit.providers import JobStatus
 import unittest
 from urllib.parse import urljoin
 import os, requests
 import json
 
 ACCEPTANCE_URL = os.getenv('ACCEPTANCE_URL')
+
+RUNTIME_PROGRAM = """
+from qiskit.compiler import transpile, schedule
+
+
+def main(
+    backend,
+    user_messenger,
+    circuits,
+    **kwargs,
+):
+
+    user_messenger.publish({'results': 'intermittently'})
+
+    circuits = transpile(
+        circuits,
+    )
+
+    if not isinstance(circuits, list):
+        circuits = [circuits]
+    # Compute raw results
+    result = backend.run(circuits, **kwargs).result()
+
+    user_messenger.publish({'results': 'finally'})
+    user_messenger.publish(result.to_dict(), final=True)
+    print("job complete successfully")
+"""
+
+RUNTIME_PROGRAM_METADATA = {
+        "max_execution_time": 600,
+        "description": "Qiskit test program"
+}
 
 class BackendTest(unittest.TestCase):
     def test_circuit_runner(self):

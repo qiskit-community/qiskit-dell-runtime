@@ -7,6 +7,8 @@ from time import sleep
 import os
 import logging
 import json
+import requests
+from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 
@@ -453,3 +455,14 @@ class AcceptanceTest(unittest.TestCase):
 
         self.assertGreater(count, (0.45 * shots))
         self.assertLess(count, (0.55 * shots))
+
+    def test_data_security(self):
+        provider = EmulatorProvider()
+        provider.remote(ACCEPTANCE_URL)
+        program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
+
+        url = urljoin(ACCEPTANCE_URL, f'/program/{program_id}/data')
+        res = requests.get(url)
+        
+        self.assertEqual(res.text, "Id and token not presented")
+        self.assertEqual(res.status_code, 401)

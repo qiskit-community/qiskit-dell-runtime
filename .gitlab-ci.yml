@@ -34,27 +34,27 @@ unit_test39:
   - pip3 install . 
   - pytest tests/
 
-component:
-  stage: Unit Test
-  image: "harbor.dell.com/dojo-harbor/qre/component-base"
+# component:
+#   stage: Unit Test
+#   image: "harbor.dell.com/dojo-harbor/qre/component-base"
 
-  services:
-    - name: harbor.dell.com/dojo-harbor/mysql
-      alias: mysql
-      command: [ "--default-authentication-plugin=mysql_native_password" ]
+#   services:
+#     - name: harbor.dell.com/dojo-harbor/mysql
+#       alias: mysql
+#       command: [ "--default-authentication-plugin=mysql_native_password" ]
 
-  variables: 
-    MYSQL_DATABASE: $MYSQL_DB
-    MYSQL_ROOT_PASSWORD: $MYSQL_PASS
-    DB_HOST: mysql
-    DB_PORT: 3306
-    DB_USER: root
-    DB_PASSWORD: password
-    DB_NAME: test
+#   variables: 
+#     MYSQL_DATABASE: $MYSQL_DB
+#     MYSQL_ROOT_PASSWORD: $MYSQL_PASS
+#     DB_HOST: mysql
+#     DB_PORT: 3306
+#     DB_USER: root
+#     DB_PASSWORD: password
+#     DB_NAME: test
 
-  script:
-  - pip3 install . 
-  - pytest component_tests/
+#   script:
+#   - pip3 install . 
+#   - pytest component_tests/
 
 build_base_test:
   stage: Build Base Test

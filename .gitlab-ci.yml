@@ -145,6 +145,8 @@ deploy_to_test:
   stage: Deploy to Test
   image: "harbor.dell.com/dojo-harbor/qre/deploy"
 
+#TODO: Move certs to qre-secrets and use wget to grab instead of having in dir
+
   script:
     - mkdir -p ~/.kube
     - apt install wget

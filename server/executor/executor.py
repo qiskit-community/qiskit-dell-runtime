@@ -43,7 +43,7 @@ def main_method():
         else:
             backend = provider.get_backend(name = backend_name)
         here = os.path.dirname(os.path.realpath(__file__))
-        cert_path=os.path.join(here,"backend_certs", backend_name+".crt")
+        cert_path=os.path.join("/etc/qre_certs", backend_name+".crt")
         if os.path.isfile(cert_path):
             os.environ["REQUESTS_CA_BUNDLE"]=cert_path
             

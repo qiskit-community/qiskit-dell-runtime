@@ -20,7 +20,6 @@ spec:
       serviceAccountName: qreorch
       containers:
         - name: qre-orchestrator
-          
           image: harbor.dell.com/dojo-harbor/${QRE_NS}/orchestrator
           env:
           - name: DB_HOST
@@ -45,6 +44,17 @@ spec:
             value: ${SSO_INFO_URL}                                              
           ports:
           - containerPort: 8080
+          volumeMounts:
+          - name: certs
+            mountPath: "/etc/qre_certs"
+            readOnly: true
+      volumes:
+      - name: certs
+        secret:
+          secretName: certs
+          items:
+          - key: qrecerts.crt
+            path: qrecerts.crt
       # imagePullSecrets:
       #   - name: ${image_secret}
 

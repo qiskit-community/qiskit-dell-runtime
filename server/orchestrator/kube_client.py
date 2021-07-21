@@ -19,6 +19,8 @@ spec:
     - name: {pod_name}
       image: harbor.dell.com/dojo-harbor/{namespace}/executor
       env:
+      - name: DATA_TOKEN
+        value: {data_token}
       - name: ORCH_HOST
         value: {orch_host}
       - name: PROGRAM_ID
@@ -28,6 +30,19 @@ spec:
       - name: INPUTS_STR
         value: |
           {inputs_str}
+      volumeMounts:
+      - name: certs
+        mountPath: "/etc/qre_certs"
+        readOnly: true
+  volumes:
+  - name: certs
+    secret:
+      secretName: certs
+      items:
+      - key: ionq_qpu.crt
+        path: ionq_qpu.crt
+      - key: ionq_simulator.crt
+        path: ionq_simulator.crt
   restartPolicy: Never
 """
 
@@ -46,8 +61,9 @@ class KubeClient():
         inputs_str = options["inputs_str"]
         job_id = options["job_id"]
         pod_name = options["pod_name"]
+        data_token = options['data_token']
         orch_host = "http://qre-orchestrator"
-        pod_yaml = YAML.format(pod_name=pod_name, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
+        pod_yaml = YAML.format(pod_name=pod_name, data_token=data_token, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
         pod_obj = yaml.safe_load(pod_yaml)
         self._api.create_namespaced_pod(body=pod_obj, namespace=self._namespace)
 

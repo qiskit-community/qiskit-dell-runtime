@@ -27,6 +27,7 @@ kube_client = KubeClient()
 #TODO: Implement logic for when there is not SSO attached.
 #      It's probable that some folks won't want it?
 
+os.environ["REQUESTS_CA_BUNDLE"] = "/etc/qre_certs/qrecerts.crt"
 app.config["SECRET_KEY"] = os.getenv("SSO_SECRET_KEY")
 app.config["SESSION_TYPE"] = os.getenv("SSO_SESSION_TYPE")
 TOKEN_URL = os.getenv("SSO_TOKEN_URL")
@@ -232,11 +233,13 @@ def run_program(program_id):
         if pod_name_dupe == None:
             return "Kubernetes error occurred", 500  
 
+    data_token = str(uuid.uuid4())[-24:]
     options = {
         "program_id": program_id,
         "inputs_str": inputs_str,
         "job_id": job_id,
-        "pod_name": pod_name
+        "pod_name": pod_name,
+        "data_token": data_token
     }
 
     db_job = Job()
@@ -244,6 +247,7 @@ def run_program(program_id):
     db_job.program_id = program_id
     db_job.job_status = CREATING
     db_job.pod_name = pod_name
+    db_job.data_token = data_token
     db_service.save_job(db_job)
 
     
@@ -326,6 +330,7 @@ def cancel_job(job_id):
             pod_name = db_service.fetch_pod_name(job_id)
             kube_client.cancel(pod_name)
             db_service.update_job_status(job_id, CANCELED)
+            db_service.use_job_token(job_id)
             return ("", 200)
         except:
             return ("Job no longer running", 204)

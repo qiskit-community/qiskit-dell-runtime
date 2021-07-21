@@ -32,6 +32,15 @@ class LocalSubProviderManager():
         if name not in self._backends_by_name:
             raise QiskitBackendNotFoundError("No backend matches criteria.")
         else:
+            if "ionq" in name:
+                if 'backend_token' in kwargs:
+                    backends = IonQProvider(token=kwargs['backend_token']).backends()
+                    backend_dict = {}
+                    for backend in backends:
+                        backend_dict[backend.name()] = backend
+                    return backend_dict[name]
+                else:
+                    raise Exception('token required with ionq')
             return self._backends_by_name[name]
 
 

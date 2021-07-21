@@ -148,15 +148,20 @@ if __name__ == "__main__":
 
     inputs = json.loads(params, cls=RuntimeDecoder)
     backend = None
+    provider = EmulatorProvider()
     if 'backend_name' in inputs:
         provider = EmulatorProvider()
         print(inputs)
         backend_name = inputs['backend_name']
         print("using backend: " + backend_name)
-        backend = provider.get_backend(name = backend_name)
+        if 'backend_token' in inputs:
+            print('backend with token!')
+            backend = provider.get_backend(name = backend_name, backend_token=inputs["backend_token"])
+        else:
+            backend = provider.get_backend(name = backend_name)
     else:
         print("using default backend: " + 'aer_simulator')
-        backend = Aer.get_backend('aer_simulator')
+        backend = provider.get_backend('aer_simulator')
 
     user_messenger = LocalUserMessengerClient({})
     try:

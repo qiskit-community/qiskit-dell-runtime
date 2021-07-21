@@ -4,9 +4,6 @@ from urllib.parse import urljoin
 import sys
 import subprocess
 import shutil
-import base64
-import json
-
 import logging
 import logging.config
 
@@ -15,6 +12,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 # res = (req.status_code, req.reason, req.text)
+data_token = os.environ['DATA_TOKEN']
 host = os.environ['ORCH_HOST']
 program_id = os.environ['PROGRAM_ID']
 inputs_str = os.environ['INPUTS_STR']
@@ -38,7 +36,7 @@ def write_program_params_file():
 
 def download_program_from_orchestrator():
     url = urljoin(host, f'/program/{program_id}/data')
-    req = requests.get(url)
+    req = requests.get(url, data={'job_id': job_id, 'token': data_token})
     if req.status_code != 200:
         raise (f'Error GET {url}: {req.status_code}')
 

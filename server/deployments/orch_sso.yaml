@@ -32,9 +32,9 @@ spec:
             value: "qre"
           - name: DB_NAME
             value: "qre"
-          - name: SSO_SECRET_KEY
+          - name: SESSION_SECRET_KEY
             value: ${SESSION_SECRET_KEY}
-          - name: SSO_SESSION_TYPE
+          - name: SESSION_TYPE
             value: ${SESSION_TYPE}
           - name: SSO_TOKEN_URL
             value: ${SSO_TOKEN_URL}

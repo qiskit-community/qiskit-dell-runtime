@@ -32,10 +32,16 @@ spec:
             value: "qre"
           - name: DB_NAME
             value: "qre"
-          - name: SESSION_SECRET_KEY
+          - name: SSO_SECRET_KEY
             value: ${SESSION_SECRET_KEY}
-          - name: SESSION_TYPE
-            value: ${SESSION_TYPE}                                             
+          - name: SSO_SESSION_TYPE
+            value: ${SESSION_TYPE}
+          - name: SSO_TOKEN_URL
+            value: ${SSO_TOKEN_URL}
+          - name: SSO_AUTH_URL
+            value: ${SSO_AUTH_URL}
+          - name: SSO_INFO_URL
+            value: ${SSO_INFO_URL}                                              
           ports:
           - containerPort: 8080
           volumeMounts:

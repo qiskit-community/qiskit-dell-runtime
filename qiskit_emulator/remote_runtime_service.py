@@ -451,4 +451,7 @@ class RemoteRuntimeService():
         if res[0] != 200:
             raise Exception(f"Error creating a new user: Code {res[0]}")
         new_id = res[2]
+        os.environ['QRE_ID'] = new_id
+        global QRE_ID
+        QRE_ID = new_id
         print(f"=======\n\nYour QRE ID is: {new_id}.\nSave this ID and run 'export QRE_ID=<your id>' to access your programs in future sessions.")

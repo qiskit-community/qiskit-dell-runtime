@@ -340,7 +340,7 @@ class AcceptanceTest(unittest.TestCase):
         provider.remote(ACCEPTANCE_URL)
 
         program_id = provider.runtime.upload_program(here + "/program.py", metadata=RUNTIME_PROGRAM_METADATA)
-        self.assertGreater(len(provider.runtime.programs()), 1)
+        self.assertGreaterEqual(len(provider.runtime.programs()), 1)
 
         runtime_program = provider.runtime.program(program_id)
         self.assertIsNotNone(runtime_program)

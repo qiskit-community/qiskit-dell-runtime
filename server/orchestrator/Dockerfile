@@ -10,6 +10,7 @@ RUN pip3 install -r /app/requirements.txt
 # COPY ./qrecerts.crt /etc/ssl/certs/qrecerts.pem
 # RUN update-ca-certificates
 COPY ./main.py /app/
+RUN cat /app/main.py
 COPY ./kube_client.py /app/
 COPY ./__init__.py /app/
 COPY ./logging_config.ini /app/

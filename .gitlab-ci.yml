@@ -113,7 +113,7 @@ build_orch_test:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
+    - docker build --build-arg QRE_NS=qre-test ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
 
@@ -137,7 +137,7 @@ build_exec_test:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-executor
+    - docker build --build-arg QRE_NS=qre-test ./server/executor -t harbor.dell.com/dojo-harbor/qre-test/qre-executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/qre-executor
 
@@ -221,7 +221,7 @@ build_orch:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre ./ -t harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+    - docker build --build-arg QRE_NS=qre ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre/qre-orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre/qre-orchestrator
 
@@ -245,7 +245,7 @@ build_exec:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre ./ -t harbor.dell.com/dojo-harbor/qre/qre-executor
+    - docker build --build-arg QRE_NS=qre ./server/executor -t harbor.dell.com/dojo-harbor/qre/qre-executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre/qre-executor
 

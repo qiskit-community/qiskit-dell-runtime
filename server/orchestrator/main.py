@@ -28,11 +28,12 @@ kube_client = KubeClient()
 #      It's probable that some folks won't want it?
 
 os.environ["REQUESTS_CA_BUNDLE"] = "/etc/qre_certs/qrecerts.crt"
-app.config["SECRET_KEY"] = os.getenv("SSO_SECRET_KEY")
-app.config["SESSION_TYPE"] = os.getenv("SSO_SESSION_TYPE")
+app.config["SECRET_KEY"] = os.getenv("SESSION_SECRET_KEY")
+app.config["SESSION_TYPE"] = os.getenv("SESSION_TYPE")
 TOKEN_URL = os.getenv("SSO_TOKEN_URL")
 AUTH_URL = os.getenv("SSO_AUTH_URL")
 INFO_URL = os.getenv("SSO_INFO_URL")
+SSO_ENABLED = (AUTH_URL != None)
 
 ACTIVE="Active"
 INACTIVE="Inactive"
@@ -220,7 +221,7 @@ def run_program(program_id):
         return "User is not authenticated", code
 
     if not (session["user_id"] == db_service.fetch_program_owner(program_id)):
-        return f"User is not authorized to delete program {program_id}", 401
+        return f"User is not authorized to run program {program_id}", 401
 
     inputs_str = flask.request.json
 
@@ -445,6 +446,35 @@ def is_authenticated():
         return "Not authenticated", 401
     return session.get("user_name"), 200
 
+@app.route("/sso_enabled", methods=["GET"])
+def sso_enabled():
+    return Response(json.dumps(SSO_ENABLED), 200, mimetype="application/json")
+
+@app.route("/new_user", methods=["GET"])
+def new_non_sso_user():
+    new_id = random_id()
+    session['user_name'] = new_id
+
+    new_user = User()
+    new_user.user_name = new_id
+    db_service.save_user(new_user)
+    user_id = db_service.fetch_user_id(new_id)
+
+    session['user_id'] = user_id
+    print(f"Created a new user {new_id}")
+
+    return new_id, 200
+
+@app.route("/existing_user/<uid>", methods=["GET"])
+def existing_non_sso_user(uid):
+    try:
+        user_id = db_service.fetch_user_id(uid)
+        session['user_id'] = user_id
+        session['user_name'] = uid
+        logger.debug(f"User {uid} created a new session")
+        return Response(json.dumps(True), 200, mimetype="application/json")
+    except Exception as e:
+        return Response(json.dumps(False), 200, mimetype="application/json")
 
 def update_pod_status(job_id):
     pod_name = db_service.fetch_pod_name(job_id)

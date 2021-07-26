@@ -22,6 +22,7 @@ logger.setLevel(logging.DEBUG)
 
 host = os.environ['ORCH_HOST']
 job_id = os.environ['JOB_ID']
+message_token = os.environ['MESSAGE_TOKEN']
 
 
 def main_method():

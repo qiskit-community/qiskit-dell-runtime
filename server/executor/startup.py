@@ -38,7 +38,7 @@ def download_program_from_orchestrator():
     url = urljoin(host, f'/program/{program_id}/data')
     req = requests.get(url, data={'job_id': job_id, 'token': data_token})
     if req.status_code != 200:
-        raise (f'Error GET {url}: {req.status_code}')
+        raise Exception(f'Error GET {url}: {req.status_code}')
 
     logger.debug('received program data ' + program_path)
     

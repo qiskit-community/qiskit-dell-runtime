@@ -5,7 +5,7 @@ all: build_base_qiskit_image build_base_qre_image build_orchestrator_image build
 
 ddev: all push redeploy
 
-full_restart: clean all push deploy
+full_restart: clean all push deploy_no_sso
 
 build_base_qiskit_image:
 	$(DOCKER_CMD) build ./qiskit_base/ -t $(DOCKER_BASE)/qiskit
@@ -25,7 +25,12 @@ push:
 	$(DOCKER_CMD) push $(DOCKER_BASE)/orchestrator
 	$(DOCKER_CMD) push $(DOCKER_BASE)/executor
 
-deploy: 
+deploy_with_sso: 
+	envsubst < ./deployments/qre.yaml | kubectl apply -f -
+	kubectl create secret -n $(QRE_NS) generic certs --from-file $(QRE_CERTS_DIR)/ionq_qpu.crt --from-file $(QRE_CERTS_DIR)/ionq_simulator.crt --from-file $(QRE_CERTS_DIR)/qrecerts.crt
+	envsubst < ./deployments/orch_sso.yaml | kubectl apply -f -
+
+deploy_no_sso: 
 	envsubst < ./deployments/qre.yaml | kubectl apply -f -
 	kubectl create secret -n $(QRE_NS) generic certs --from-file $(QRE_CERTS_DIR)/ionq_qpu.crt --from-file $(QRE_CERTS_DIR)/ionq_simulator.crt --from-file $(QRE_CERTS_DIR)/qrecerts.crt
 	envsubst < ./deployments/orch.yaml | kubectl apply -f -

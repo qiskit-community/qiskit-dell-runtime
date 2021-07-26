@@ -24,9 +24,6 @@ emulator_provider = EmulatorProvider()
 db_service = DBService()
 kube_client = KubeClient()
 
-#TODO: Implement logic for when there is not SSO attached.
-#      It's probable that some folks won't want it?
-
 os.environ["REQUESTS_CA_BUNDLE"] = "/etc/qre_certs/qrecerts.crt"
 app.config["SECRET_KEY"] = os.getenv("SESSION_SECRET_KEY")
 app.config["SESSION_TYPE"] = os.getenv("SESSION_TYPE")
@@ -105,7 +102,6 @@ def upload_runtime_program():
 @app.route('/program/<program_id>/update', methods=['POST'])
 def update_runtime_program(program_id):
 
-    #TODO: Refactor into function
     user_name, code = is_authenticated()
     if code != 200:
         return "User is not authenticated", code

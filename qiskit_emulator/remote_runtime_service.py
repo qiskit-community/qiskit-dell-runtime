@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 DIR = "DIR"
 STRING = "STRING"
 TOKEN = os.getenv("TOKEN")
+QRE_ID = os.getenv("QRE_ID")
 
 # Is this Dell SSO specific? Will each client need their own versions of these?
 scope_str = os.getenv("SSO_SCOPE")
@@ -40,21 +41,34 @@ class RemoteRuntimeService():
         status_response = self._get("/status")
         if not (status_response[0] == 200):
             raise Exception("Wrong status code from host: {}".format(self.host))
-        if  not TOKEN:
-            access_token = self.get_new_token()
-        else: 
-            access_token = TOKEN
 
-        try:
-            resp = self.login_with_token(access_token)
-            if not resp[0] == 200: 
+        sso_enabled = json.loads(self._get("/sso_enabled")[2])
+        if not sso_enabled:
+            if not QRE_ID:
+                self.new_non_sso_user()
+            else:
+                res = self._get(f"/existing_user/{QRE_ID}")
+                if res[0] >= 300:
+                    raise Exception(f"Error logging in existing user: Code {res[0]}")
+                elif json.loads(res[2]) != True:
+                    print(f"User {QRE_ID} not found. Creating new user!")
+                    self.new_non_sso_user()
+        else:
+            if  not TOKEN:
                 access_token = self.get_new_token()
+            else: 
+                access_token = TOKEN
+
+            try:
                 resp = self.login_with_token(access_token)
-                if not resp[0] == 200:
-                    raise Exception("Unable to Authenticate with SSO")
-        except Exception as e:
-            print('Hit exception', e)
-            # return False
+                if not resp[0] == 200: 
+                    access_token = self.get_new_token()
+                    resp = self.login_with_token(access_token)
+                    if not resp[0] == 200:
+                        raise Exception("Unable to Authenticate with SSO")
+            except Exception as e:
+                print('Hit exception', e)
+                # return False
         
 
         self._programs = {}
@@ -431,3 +445,13 @@ class RemoteRuntimeService():
         #print(f'dell sso token response: {token}')
 
         return token["access_token"]
+
+    def new_non_sso_user(self):
+        res = self._get("/new_user")
+        if res[0] != 200:
+            raise Exception(f"Error creating a new user: Code {res[0]}")
+        new_id = res[2]
+        os.environ['QRE_ID'] = new_id
+        global QRE_ID
+        QRE_ID = new_id
+        print(f"=======\n\nYour QRE ID is: {new_id}.\nSave this ID and run 'export QRE_ID=<your id>' to access your programs in future sessions.")

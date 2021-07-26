@@ -113,9 +113,9 @@ build_orch_test:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre-test ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
+    - docker build --build-arg QRE_NS=qre-test ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre-test/orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
-    - docker push harbor.dell.com/dojo-harbor/qre-test/qre-orchestrator
+    - docker push harbor.dell.com/dojo-harbor/qre-test/orchestrator
 
 build_exec_test:
   stage: Build Orch Exec Test
@@ -137,9 +137,9 @@ build_exec_test:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre-test ./server/executor -t harbor.dell.com/dojo-harbor/qre-test/qre-executor
+    - docker build --build-arg QRE_NS=qre-test ./server/executor -t harbor.dell.com/dojo-harbor/qre-test/executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
-    - docker push harbor.dell.com/dojo-harbor/qre-test/qre-executor
+    - docker push harbor.dell.com/dojo-harbor/qre-test/executor
 
 deploy_to_test:
   stage: Deploy to Test
@@ -161,7 +161,7 @@ deploy_to_test:
     - 'wget -O ionq_qpu.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/ionq_qpu.crt/raw?ref=master'
     - export QRE_CERTS_DIR=.
     - make clean || echo "Failure in clean"
-    - make deploy
+    - make deploy_no_sso
     - cd -
     - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test)
 
@@ -221,9 +221,9 @@ build_orch:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+    - docker build --build-arg QRE_NS=qre ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre/orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
-    - docker push harbor.dell.com/dojo-harbor/qre/qre-orchestrator
+    - docker push harbor.dell.com/dojo-harbor/qre/orchestrator
 
 build_exec:
   stage: Build Orch Exec
@@ -245,7 +245,7 @@ build_exec:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre ./server/executor -t harbor.dell.com/dojo-harbor/qre/qre-executor
+    - docker build --build-arg QRE_NS=qre ./server/executor -t harbor.dell.com/dojo-harbor/qre/executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
-    - docker push harbor.dell.com/dojo-harbor/qre/qre-executor
+    - docker push harbor.dell.com/dojo-harbor/qre/executor
 

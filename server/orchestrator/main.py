@@ -231,12 +231,14 @@ def run_program(program_id):
             return "Kubernetes error occurred", 500  
 
     data_token = str(uuid.uuid4())[-24:]
+    msg_token = str(uuid.uuid4())[-24:]
     options = {
         "program_id": program_id,
         "inputs_str": inputs_str,
         "job_id": job_id,
         "pod_name": pod_name,
-        "data_token": data_token
+        "data_token": data_token,
+        "msg_token": msg_token
     }
 
     db_job = Job()
@@ -245,6 +247,7 @@ def run_program(program_id):
     db_job.job_status = CREATING
     db_job.pod_name = pod_name
     db_job.data_token = data_token
+    db_job.msg_token = msg_token
     db_service.save_job(db_job)
 
     
@@ -334,8 +337,32 @@ def cancel_job(job_id):
 
 # TODO check for runtime to make sure only executor 
 # for this specific job can call this URL 
+
+@app.route('/register_messenger/<job_id>', methods=['GET'])
+def register_messenger(job_id):
+    logger.debug(f"GET register_messenger/{job_id}")
+    token = flask.request.form.get('token')
+
+    if not token:
+        return ("Token Required for Registering Messenger", 401)
+
+    db_token = db_service.fetch_msg_token(job_id)
+
+    if db_token != token and db_token != USED:
+        return ("Invalid Token", 401)
+
+    db_service.use_msg_token(job_id)
+
+    session['user_name'] = job_id
+
+    return ("Registered Successfully", 200)
+
+
 @app.route('/job/<job_id>/message', methods=['POST'])
 def add_message(job_id):
+    if session['user_name'] != job_id:
+        return (f"User is not authorized to send messages for job {job_id}", 401)
+
     data = flask.request.data
     db_service.save_message(job_id, data)
     return ("", 200)

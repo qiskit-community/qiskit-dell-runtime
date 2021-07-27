@@ -92,6 +92,8 @@ build_base_test:
     - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-base
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/qre-base
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/qre-base harbor.dell.com/dojo-harbor/qre-test-sso/qre-base
+    - docker push harbor.dell.com/dojo-harbor/qre-test-sso/qre-base
 
 build_orch_test:
   stage: Build Orch Exec Test
@@ -116,6 +118,9 @@ build_orch_test:
     - docker build --build-arg QRE_NS=qre-test ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre-test/orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/orchestrator
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/orchestrator harbor.dell.com/dojo-harbor/qre-test-sso/orchestrator
+    - docker push harbor.dell.com/dojo-harbor/qre-test-sso/orchestrator
+
 
 build_exec_test:
   stage: Build Orch Exec Test
@@ -140,6 +145,8 @@ build_exec_test:
     - docker build --build-arg QRE_NS=qre-test ./server/executor -t harbor.dell.com/dojo-harbor/qre-test/executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/executor
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/executor harbor.dell.com/dojo-harbor/qre-test-sso/executor
+    - docker push harbor.dell.com/dojo-harbor/qre-test-sso/executor
 
 deploy_to_test:
   stage: Deploy to Test

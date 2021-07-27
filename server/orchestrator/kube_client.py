@@ -21,6 +21,8 @@ spec:
       env:
       - name: DATA_TOKEN
         value: {data_token}
+      - name: MESSAGE_TOKEN
+        value: {msg_token}
       - name: ORCH_HOST
         value: {orch_host}
       - name: PROGRAM_ID
@@ -62,8 +64,9 @@ class KubeClient():
         job_id = options["job_id"]
         pod_name = options["pod_name"]
         data_token = options['data_token']
+        msg_token = options['msg_token']
         orch_host = "http://qre-orchestrator"
-        pod_yaml = YAML.format(pod_name=pod_name, data_token=data_token, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
+        pod_yaml = YAML.format(pod_name=pod_name, msg_token=msg_token, data_token=data_token, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
         pod_obj = yaml.safe_load(pod_yaml)
         self._api.create_namespaced_pod(body=pod_obj, namespace=self._namespace)
 

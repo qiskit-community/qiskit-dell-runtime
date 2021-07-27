@@ -26,13 +26,19 @@ push:
 	$(DOCKER_CMD) push $(DOCKER_BASE)/executor
 
 deploy_with_sso: 
-	envsubst < ./deployments/qre.yaml | kubectl apply -f -
-	kubectl create secret -n $(QRE_NS) generic certs --from-file $(QRE_CERTS_DIR)/ionq_qpu.crt --from-file $(QRE_CERTS_DIR)/ionq_simulator.crt --from-file $(QRE_CERTS_DIR)/qrecerts.crt
+	envsubst < ./deployments/qre.yaml | \
+	sed "s/IONQQPU/`cat $(QRE_CERTS_DIR)/ionq_qpu.crt|base64 -w0`/g" | \
+	sed "s/IONQSIMULATOR/`cat $(QRE_CERTS_DIR)/ionq_simulator.crt|base64 -w0`/g" | \
+	sed "s/QRECERTS/`cat $(QRE_CERTS_DIR)/qrecerts.crt|base64 -w0`/g" | \
+	kubectl apply -f -
 	envsubst < ./deployments/orch_sso.yaml | kubectl apply -f -
 
 deploy_no_sso: 
-	envsubst < ./deployments/qre.yaml | kubectl apply -f -
-	kubectl create secret -n $(QRE_NS) generic certs --from-file $(QRE_CERTS_DIR)/ionq_qpu.crt --from-file $(QRE_CERTS_DIR)/ionq_simulator.crt --from-file $(QRE_CERTS_DIR)/qrecerts.crt
+	envsubst < ./deployments/qre.yaml | \
+	sed "s/IONQQPU/`cat $(QRE_CERTS_DIR)/ionq_qpu.crt|base64 -w0`/g" | \
+	sed "s/IONQSIMULATOR/`cat $(QRE_CERTS_DIR)/ionq_simulator.crt|base64 -w0`/g" | \
+	sed "s/QRECERTS/`cat $(QRE_CERTS_DIR)/qrecerts.crt|base64 -w0`/g" | \
+	kubectl apply -f -
 	envsubst < ./deployments/orch.yaml | kubectl apply -f -
 
 clean:

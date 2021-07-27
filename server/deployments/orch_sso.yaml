@@ -29,7 +29,10 @@ spec:
           - name: DB_USER
             value: "qre"
           - name: DB_PASSWORD
-            value: "qre"
+            valueFrom:
+              secretKeyRef:
+                name: user-pw
+                key: password
           - name: DB_NAME
             value: "qre"
           - name: SESSION_SECRET_KEY

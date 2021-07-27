@@ -92,6 +92,8 @@ build_base_test:
     - docker build --build-arg QRE_NS=qre-test ./ -t harbor.dell.com/dojo-harbor/qre-test/qre-base
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/qre-base
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/qre-base harbor.dell.com/dojo-harbor/qre-test-sso/qre-base
+    - docker push harbor.dell.com/dojo-harbor/qre-test-sso/qre-base
 
 build_orch_test:
   stage: Build Orch Exec Test
@@ -116,6 +118,9 @@ build_orch_test:
     - docker build --build-arg QRE_NS=qre-test ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre-test/orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/orchestrator
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/orchestrator harbor.dell.com/dojo-harbor/qre-test-sso/orchestrator
+    - docker push harbor.dell.com/dojo-harbor/qre-test-sso/orchestrator
+
 
 build_exec_test:
   stage: Build Orch Exec Test
@@ -140,13 +145,13 @@ build_exec_test:
     - docker build --build-arg QRE_NS=qre-test ./server/executor -t harbor.dell.com/dojo-harbor/qre-test/executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre-test/executor
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/executor harbor.dell.com/dojo-harbor/qre-test-sso/executor
+    - docker push harbor.dell.com/dojo-harbor/qre-test-sso/executor
 
 deploy_to_test:
   stage: Deploy to Test
   image: "harbor.dell.com/dojo-harbor/qre/deploy"
-
-#TODO: Move certs to qre-secrets and use wget to grab instead of having in dir
-
+  
   script:
     - mkdir -p ~/.kube
     - apt install wget
@@ -165,6 +170,29 @@ deploy_to_test:
     - cd -
     - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test)
 
+deploy_to_test_sso:
+  stage: Deploy to Test
+  image: "harbor.dell.com/dojo-harbor/qre/deploy"
+  
+  script:
+    - mkdir -p ~/.kube
+    - apt install wget
+    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=master'
+    - ls -a
+    - cp kube_config.yaml ~/.kube/config
+    - cd server/deployments
+    - source test.sh
+    - cd ..
+    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=master'
+    - 'wget -O ionq_simulator.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/ionq_simulator.crt/raw?ref=master'
+    - 'wget -O ionq_qpu.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/ionq_qpu.crt/raw?ref=master'
+    - export QRE_CERTS_DIR=.
+    - export QRE_NS=qre-test-sso
+    - make clean || echo "Failure in clean"
+    - make deploy_with_sso
+    - cd -
+    - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test-sso)
+
 acceptance_test:
   stage: Acceptance Test
   image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
@@ -175,6 +203,19 @@ acceptance_test:
     - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
     - source token.sh
     - export ACCEPTANCE_URL=http://qre-test.oro-sandbox-small1.k8s.cec.lab.emc.com
+    - pytest acceptance_tests/
+  
+
+acceptance_test_sso:
+  stage: Acceptance Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
+
+  script:
+    - python3 --version
+    - pip3 install .
+    - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
+    - source token.sh
+    - export ACCEPTANCE_URL=http://qre-test-sso.oro-sandbox-small1.k8s.cec.lab.emc.com
     - pytest acceptance_tests/
   
 

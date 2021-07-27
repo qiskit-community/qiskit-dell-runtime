@@ -422,8 +422,6 @@ class RemoteRuntimeService():
             login_info["auth_url"]
         )
         print(f"Opening webpage {authorization_url}\n")
-
-        #TODO: figure out whether this can be done CLI
         
         webbrowser.open_new(authorization_url)
 

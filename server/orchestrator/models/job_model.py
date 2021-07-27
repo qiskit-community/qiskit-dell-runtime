@@ -18,3 +18,4 @@ class Job(Base):
     pod_name = Column(String(64))
     pod_status = Column(String(64))
     data_token = Column(String(64))
+    msg_token = Column(String(64))

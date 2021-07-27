@@ -19,9 +19,6 @@ class LocalUserMessengerClient(UserMessenger):
             encoder: Type[json.JSONEncoder] = RuntimeEncoder,
             final: bool = False
     ) -> None:
-        # TODO: use provided (if any) encoder
-        # if encoder is not None:
-        #     str_messenge = encoder.dumps()
 
         jsonMessage = {
             "message": message,

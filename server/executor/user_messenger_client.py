@@ -13,6 +13,8 @@ class RemoteUserMessengerClient(UserMessenger):
         self._session = requests.Session()
         url = urljoin(self.host, f'/register_messenger/{self.job_id}')
         res = self._session.get(url, data={'token': os.environ["MESSAGE_TOKEN"]})
+        if res.status_code != 200:
+            raise Exception(f"failure in messenger registration: {res.text}")
 
     def publish(
             self,

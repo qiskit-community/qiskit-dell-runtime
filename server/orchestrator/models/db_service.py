@@ -224,4 +224,22 @@ class DBService():
         finally:
             session.close()
 
+    def fetch_msg_token(self, job_id):
+        try:
+            session = Session()
+            fields = ['msg_token']
+            job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
+            return job.msg_token
+        finally:
+            session.close()
+
+    def use_msg_token(self, job_id):
+        try:
+            session = Session()
+            job = session.query(Job).filter_by(job_id=job_id).one()
+            setattr(job, "msg_token", "USED")
+            session.commit()
+        finally:
+            session.close()
+
 

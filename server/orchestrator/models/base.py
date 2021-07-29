@@ -10,7 +10,7 @@ db_user = os.environ['DB_USER']
 db_password = os.environ['DB_PASSWORD']
 db_name = os.environ['DB_NAME']
 
-db_string = f"mysql+mysqldb://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+db_string = f"{db_host}://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 engine = create_engine(db_string)
 Session = sessionmaker(bind=engine)
 session = Session()

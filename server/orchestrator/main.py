@@ -366,7 +366,7 @@ def add_message(job_id):
     if session['user_name'] != job_id:
         return (f"User is not authorized to send messages for job {job_id}", 401)
 
-    data = flask.request.data
+    data = json.dumps(flask.request.json)
     db_service.save_message(job_id, data)
     return ("", 200)
 

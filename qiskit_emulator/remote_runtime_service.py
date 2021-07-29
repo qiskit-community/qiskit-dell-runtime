@@ -23,7 +23,7 @@ STRING = "STRING"
 TOKEN = os.getenv("TOKEN")
 QRE_ID = os.getenv("QRE_ID")
 
-# Is this Dell SSO specific? Will each client need their own versions of these?
+#TODO: Move scope, client ID, client secret to orchestrator and send on /login hit
 scope_str = os.getenv("SSO_SCOPE")
 scope = None
 if scope_str:

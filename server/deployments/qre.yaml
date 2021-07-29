@@ -136,6 +136,8 @@ spec:
             secretKeyRef:
               name: root-pw
               key: password
+        - name: "${DB_UPPER}_DB"
+          value: ${DB_DATABASE}
         - name: "${DB_UPPER}_DATABASE"
           value: ${DB_DATABASE}
         - name: "${DB_UPPER}_USER"

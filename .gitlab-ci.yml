@@ -189,6 +189,26 @@ deploy_to_test_sso:
     - cd -
     - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test-sso)
 
+deploy_to_test_postgres:
+  stage: Deploy to Test
+  image: "harbor.dell.com/dojo-harbor/qre/deploy"
+  
+  script:
+    - mkdir -p ~/.kube
+    - apt install wget
+    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=master'
+    - ls -a
+    - cp kube_config.yaml ~/.kube/config
+    - cd server/deployments
+    - source test_postgres.sh
+    - cd ..
+    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=master'
+    - export QRE_CERTS_DIR=.
+    - make clean || echo "Failure in clean"
+    - make deploy_no_sso
+    - cd -
+    - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test-sso)
+
 acceptance_test:
   stage: Acceptance Test
   image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
@@ -196,8 +216,6 @@ acceptance_test:
   script:
     - python3 --version
     - pip3 install .
-    - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
-    - source token.sh
     - export SERVER_URL=http://qre-test.oro-sandbox-small1.k8s.cec.lab.emc.com
     - pytest acceptance_tests/
   
@@ -212,6 +230,16 @@ acceptance_test_sso:
     - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
     - source token.sh
     - export SERVER_URL=http://qre-test-sso.oro-sandbox-small1.k8s.cec.lab.emc.com
+    - pytest acceptance_tests/
+
+acceptance_test_postgres:
+  stage: Acceptance Test
+  image: "harbor.dell.com/dojo-harbor/qre/test-base:3.9"
+
+  script:
+    - python3 --version
+    - pip3 install .
+    - export SERVER_URL=http://qre-test-ps.oro-sandbox-small1.k8s.cec.lab.emc.com
     - pytest acceptance_tests/
   
 
@@ -234,7 +262,7 @@ build_base:
     DOCKER_TLS_CERTDIR: ""
 
   script:
-    - docker build --build-arg QRE_NS=qre ./ -t harbor.dell.com/dojo-harbor/qre/qre-base
+    - docker build --build-arg QRE_NS=qre --build-arg DOCKER_REPO=harbor.dell.com/dojo-harbor ./ -t harbor.dell.com/dojo-harbor/qre/qre-base
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre/qre-base
 
@@ -258,7 +286,7 @@ build_orch:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre/orchestrator
+    - docker build --build-arg QRE_NS=qre --build-arg DOCKER_REPO=harbor.dell.com/dojo-harbor ./server/orchestrator -t harbor.dell.com/dojo-harbor/qre/orchestrator
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre/orchestrator
 
@@ -282,7 +310,7 @@ build_exec:
 
   script:
     - echo $PATH
-    - docker build --build-arg QRE_NS=qre ./server/executor -t harbor.dell.com/dojo-harbor/qre/executor
+    - docker build --build-arg QRE_NS=qre --build-arg DOCKER_REPO=harbor.dell.com/dojo-harbor ./server/executor -t harbor.dell.com/dojo-harbor/qre/executor
     - docker login -u ${HARBOR_USERNAME} -p ${HARBOR_PASSWORD} harbor.dell.com
     - docker push harbor.dell.com/dojo-harbor/qre/executor
 

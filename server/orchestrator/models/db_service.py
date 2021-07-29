@@ -153,7 +153,7 @@ class DBService():
             new_messages = []
             for msg in all_messages:
                 if not timestamp or timestamp < msg.creation_date:
-                    new_messages.append({"data": msg.data, "timestamp": str(msg.creation_date)})
+                    new_messages.append({"data": json.loads(msg.data), "timestamp": str(msg.creation_date)})
             return new_messages
         finally:
             session.close()

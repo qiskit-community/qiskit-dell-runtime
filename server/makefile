@@ -1,5 +1,5 @@
 DOCKER_CMD=docker
-DOCKER_BASE=harbor.dell.com/dojo-harbor/$(QRE_NS)
+DOCKER_BASE=$(DOCKER_REPO)/$(QRE_NS)
 
 all: build_base_qiskit_image build_base_qre_image build_orchestrator_image build_executor_image 
 
@@ -8,16 +8,16 @@ ddev: all push redeploy
 full_restart: clean all push deploy_no_sso
 
 build_base_qiskit_image:
-	$(DOCKER_CMD) build ./qiskit_base/ -t $(DOCKER_BASE)/qiskit
+	$(DOCKER_CMD) build ./qiskit_base/ --build-arg DOCKER_REPO=$(DOCKER_REPO) -t $(DOCKER_BASE)/qiskit
 
 build_base_qre_image:
-	$(DOCKER_CMD) build --build-arg QRE_NS=$(QRE_NS) ../ -t $(DOCKER_BASE)/qre-base
+	$(DOCKER_CMD) build --build-arg QRE_NS=$(QRE_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ../ -t $(DOCKER_BASE)/qre-base
 
 build_orchestrator_image:
-	$(DOCKER_CMD) build --build-arg QRE_NS=$(QRE_NS) ./orchestrator/ -t $(DOCKER_BASE)/orchestrator
+	$(DOCKER_CMD) build --build-arg QRE_NS=$(QRE_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ./orchestrator/ -t $(DOCKER_BASE)/orchestrator
 
 build_executor_image:
-	$(DOCKER_CMD) build --build-arg QRE_NS=$(QRE_NS) ./executor/ -t $(DOCKER_BASE)/executor
+	$(DOCKER_CMD) build --build-arg QRE_NS=$(QRE_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ./executor/ -t $(DOCKER_BASE)/executor
 
 push:
 	$(DOCKER_CMD) push $(DOCKER_BASE)/qiskit

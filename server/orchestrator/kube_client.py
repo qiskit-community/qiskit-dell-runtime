@@ -17,7 +17,7 @@ metadata:
 spec:
   containers:
     - name: {pod_name}
-      image: harbor.dell.com/dojo-harbor/{namespace}/executor
+      image: {image_repo}/{namespace}/executor
       env:
       - name: DATA_TOKEN
         value: {data_token}
@@ -65,8 +65,9 @@ class KubeClient():
         pod_name = options["pod_name"]
         data_token = options['data_token']
         msg_token = options['msg_token']
+        image_repo = options['image_repo']
         orch_host = "http://qre-orchestrator"
-        pod_yaml = YAML.format(pod_name=pod_name, msg_token=msg_token, data_token=data_token, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
+        pod_yaml = YAML.format(pod_name=pod_name, image_repo=image_repo, msg_token=msg_token, data_token=data_token, namespace=self._namespace, inputs_str=inputs_str, orch_host=orch_host, program_id=program_id, job_id=job_id)
         pod_obj = yaml.safe_load(pod_yaml)
         self._api.create_namespaced_pod(body=pod_obj, namespace=self._namespace)
 

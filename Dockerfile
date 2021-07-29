@@ -1,6 +1,7 @@
 ARG QRE_NS
+ARG DOCKER_REPO
 
-FROM harbor.dell.com/dojo-harbor/$QRE_NS/qiskit
+FROM $DOCKER_REPO/$QRE_NS/qiskit
 
 RUN mkdir -p /var/qre/qiskit_emulator
 

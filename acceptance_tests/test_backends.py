@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 import os, requests
 import json
 
-ACCEPTANCE_URL = os.getenv('ACCEPTANCE_URL')
+SERVER_URL = os.getenv('SERVER_URL')
 
 RUNTIME_PROGRAM = """
 from qiskit.compiler import transpile, schedule
@@ -46,13 +46,13 @@ RUNTIME_PROGRAM_METADATA = {
 class BackendTest(unittest.TestCase):
     def test_circuit_runner(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         backends = provider.runtime.backends()
         self.assertGreater(len(backends), 1)
 
     def test_run_with_backend(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -67,11 +67,11 @@ class BackendTest(unittest.TestCase):
         }
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        self.assertEqual(job.host, ACCEPTANCE_URL) 
+        self.assertEqual(job.host, SERVER_URL) 
 
     # def test_ionq_results(self):
     #     provider = EmulatorProvider()
-    #     provider.remote(ACCEPTANCE_URL)
+    #     provider.remote(SERVER_URL)
     #     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 

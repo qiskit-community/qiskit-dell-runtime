@@ -61,12 +61,12 @@ RUNTIME_PROGRAM_METADATA = {
 
 PROGRAM_PREFIX = 'qiskit-test'
 
-ACCEPTANCE_URL = os.getenv('ACCEPTANCE_URL')
+SERVER_URL = os.getenv('SERVER_URL')
 
 class AcceptanceTest(unittest.TestCase):
     def test_circuit_runner(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         # program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         
     def test_remote_fail(self):
@@ -80,7 +80,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_upload(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         proglist = provider.runtime.programs()
         self.assertIsNotNone(proglist[program_id])
@@ -92,7 +92,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_view_program(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         runtime_program = provider.runtime.program(program_id)
@@ -101,7 +101,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_view_program_refresh(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         prog_list = provider.runtime.programs(refresh=False)
 
@@ -118,7 +118,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_run_program(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -132,11 +132,11 @@ class AcceptanceTest(unittest.TestCase):
         }
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        self.assertEqual(job.host, ACCEPTANCE_URL)
+        self.assertEqual(job.host, SERVER_URL)
     
     def test_get_results(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -171,7 +171,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_delete_program(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         prog_list = provider.runtime.programs(refresh=False)
 
@@ -187,7 +187,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_update_program(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         new_meta = {'description': 'Qiskit Test Update', 'max_execution_time': RUNTIME_PROGRAM_METADATA['max_execution_time']}
@@ -203,7 +203,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_intermittent_results(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -233,7 +233,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_get_status(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -257,7 +257,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_get_failed_status(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(FAIL_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         qc = QuantumCircuit(2, 2)
@@ -281,7 +281,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_cancel_job(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -303,7 +303,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(status, "Canceled")
     def test_pprint_programs(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -337,7 +337,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertIsNotNone(provider.runtime)
 
         here = os.path.dirname(os.path.realpath(__file__))
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
 
         program_id = provider.runtime.upload_program(here + "/program.py", metadata=RUNTIME_PROGRAM_METADATA)
         self.assertGreaterEqual(len(provider.runtime.programs()), 1)
@@ -364,7 +364,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_reserved_names(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
 
         try:
             here = os.path.dirname(os.path.realpath(__file__))
@@ -377,7 +377,7 @@ class AcceptanceTest(unittest.TestCase):
         
         provider = EmulatorProvider()
 
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         here = os.path.dirname(os.path.realpath(__file__))
         program_id = provider.runtime.upload_program(here + "/qkad", metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -389,7 +389,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_callback_function(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -418,7 +418,7 @@ class AcceptanceTest(unittest.TestCase):
     
     def test_reconnect(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -435,7 +435,7 @@ class AcceptanceTest(unittest.TestCase):
 
         # delete session and sign back in via SSO
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
@@ -458,10 +458,10 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_data_security(self):
         provider = EmulatorProvider()
-        provider.remote(ACCEPTANCE_URL)
+        provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
-        url = urljoin(ACCEPTANCE_URL, f'/program/{program_id}/data')
+        url = urljoin(SERVER_URL, f'/program/{program_id}/data')
         res = requests.get(url)
         
         self.assertEqual(res.text, "Id and token not presented")

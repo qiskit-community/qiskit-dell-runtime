@@ -172,7 +172,7 @@ jobs:
       run:
         path: qiskit-runtime-emulator/ci/main/tasks/run-acceptance.sh
     params:
-      ACCEPTANCE_URL: {{acceptance_url}}
+      SERVER_URL: {{acceptance_url}}
 
 - name: release
   serial: true

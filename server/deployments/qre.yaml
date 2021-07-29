@@ -117,9 +117,10 @@ spec:
       labels:
         app: mysql
     spec:
+    #TODO: remove before open sourcing - specific fix for our setup.
       nodeName: k8s-w-3-oro-sandbox-small1
       containers:
-      - image: harbor.dell.com/dojo-harbor/qre/mysql:5.6
+      - image: ${DOCKER_REPO}/${MYSQL_IMAGE}
         name: mysql
         env:
           # Use secret in real usage

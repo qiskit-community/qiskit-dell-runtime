@@ -3,6 +3,7 @@ flask_session
 requests
 sqlalchemy
 mysqlclient 
+psycopg2
 kubernetes
 qiskit-ibmq-provider>=0.13.0
 waitress

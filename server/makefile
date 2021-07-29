@@ -27,16 +27,12 @@ push:
 
 deploy_with_sso: 
 	envsubst < ./deployments/qre.yaml | \
-	sed "s/IONQQPU/`cat $(QRE_CERTS_DIR)/ionq_qpu.crt|base64 -w0`/g" | \
-	sed "s/IONQSIMULATOR/`cat $(QRE_CERTS_DIR)/ionq_simulator.crt|base64 -w0`/g" | \
 	sed "s/QRECERTS/`cat $(QRE_CERTS_DIR)/qrecerts.crt|base64 -w0`/g" | \
 	kubectl apply -f -
 	envsubst < ./deployments/orch_sso.yaml | kubectl apply -f -
 
 deploy_no_sso: 
 	envsubst < ./deployments/qre.yaml | \
-	sed "s/IONQQPU/`cat $(QRE_CERTS_DIR)/ionq_qpu.crt|base64 -w0`/g" | \
-	sed "s/IONQSIMULATOR/`cat $(QRE_CERTS_DIR)/ionq_simulator.crt|base64 -w0`/g" | \
 	sed "s/QRECERTS/`cat $(QRE_CERTS_DIR)/qrecerts.crt|base64 -w0`/g" | \
 	kubectl apply -f -
 	envsubst < ./deployments/orch.yaml | kubectl apply -f -

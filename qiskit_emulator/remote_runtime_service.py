@@ -32,6 +32,8 @@ if scope_str:
 client_id = os.getenv("SSO_CLIENT_ID")
 client_secret = os.getenv("SSO_CLIENT_SECRET")
 access_token = ""
+
+#TODO: set session timeout
 session = requests.Session()
 
 class RemoteRuntimeService():
@@ -54,7 +56,7 @@ class RemoteRuntimeService():
                     print(f"User {QRE_ID} not found. Creating new user!")
                     self.new_non_sso_user()
         else:
-            if  not TOKEN:
+            if not TOKEN:
                 access_token = self.get_new_token()
             else: 
                 access_token = TOKEN

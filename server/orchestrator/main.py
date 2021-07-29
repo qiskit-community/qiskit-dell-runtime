@@ -55,6 +55,8 @@ logger = logging.getLogger(__name__)
 
 pending_logins = {}
 
+#TODO: Set a session timeout for user.
+
 Session(app)
 
 def random_id():
@@ -337,8 +339,7 @@ def cancel_job(job_id):
         except:
             return ("Job no longer running", 204)
 
-# TODO check for runtime to make sure only executor 
-# for this specific job can call this URL 
+# TODO check if possible to allow URLs to be hit only from inside namespace
 
 @app.route('/register_messenger/<job_id>', methods=['GET'])
 def register_messenger(job_id):

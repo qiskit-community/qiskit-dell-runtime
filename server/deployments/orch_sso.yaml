@@ -27,7 +27,7 @@ spec:
           - name: DB_HOST
             value: ${DB_TYPE}
           - name: DB_PORT
-            value: ${DB_PORT}
+            value: "${DB_PORT}"
           - name: DB_USER
             value: ${DB_USER}
           - name: DB_PASSWORD

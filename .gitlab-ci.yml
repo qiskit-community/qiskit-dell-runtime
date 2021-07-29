@@ -94,6 +94,8 @@ build_base_test:
     - docker push harbor.dell.com/dojo-harbor/qre-test/qre-base
     - docker tag harbor.dell.com/dojo-harbor/qre-test/qre-base harbor.dell.com/dojo-harbor/qre-test-sso/qre-base
     - docker push harbor.dell.com/dojo-harbor/qre-test-sso/qre-base
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/qre-base harbor.dell.com/dojo-harbor/qre-test-ps/qre-base
+    - docker push harbor.dell.com/dojo-harbor/qre-test-ps/qre-base
 
 build_orch_test:
   stage: Build Orch Exec Test
@@ -120,6 +122,8 @@ build_orch_test:
     - docker push harbor.dell.com/dojo-harbor/qre-test/orchestrator
     - docker tag harbor.dell.com/dojo-harbor/qre-test/orchestrator harbor.dell.com/dojo-harbor/qre-test-sso/orchestrator
     - docker push harbor.dell.com/dojo-harbor/qre-test-sso/orchestrator
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/orchestrator harbor.dell.com/dojo-harbor/qre-test-ps/orchestrator
+    - docker push harbor.dell.com/dojo-harbor/qre-test-ps/orchestrator
 
 
 build_exec_test:
@@ -147,6 +151,8 @@ build_exec_test:
     - docker push harbor.dell.com/dojo-harbor/qre-test/executor
     - docker tag harbor.dell.com/dojo-harbor/qre-test/executor harbor.dell.com/dojo-harbor/qre-test-sso/executor
     - docker push harbor.dell.com/dojo-harbor/qre-test-sso/executor
+    - docker tag harbor.dell.com/dojo-harbor/qre-test/executor harbor.dell.com/dojo-harbor/qre-test-ps/executor
+    - docker push harbor.dell.com/dojo-harbor/qre-test-ps/executor
 
 deploy_to_test:
   stage: Deploy to Test

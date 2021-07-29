@@ -59,7 +59,7 @@ RUNTIME_PROGRAM_METADATA = {
 
 # In[33]:
 
-provider.remote(os.getenv("ACCEPTANCE_URL"))
+provider.remote(os.getenv("SERVER_URL"))
 here = os.path.dirname(os.path.realpath(__file__))
 
 program_id = provider.runtime.upload_program(here + "/qkad", metadata=RUNTIME_PROGRAM_METADATA)

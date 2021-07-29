@@ -9,12 +9,12 @@ RUNTIME_PROGRAM_METADATA = {
 
 # PROGRAM_PREFIX = 'qiskit-test'
 
-ACCEPTANCE_URL = os.getenv("ACCEPTANCE_URL")
+SERVER_URL = os.getenv("SERVER_URL")
 
 def main():
     provider = EmulatorProvider()
     here = os.path.dirname(os.path.realpath(__file__))
-    provider.remote(ACCEPTANCE_URL)
+    provider.remote(SERVER_URL)
     program_id = provider.runtime.upload_program(here + "/dirtest", metadata=RUNTIME_PROGRAM_METADATA)
     
     qc = QuantumCircuit(2, 2)

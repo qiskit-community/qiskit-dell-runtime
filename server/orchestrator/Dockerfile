@@ -1,6 +1,7 @@
 ARG QRE_NS
+ARG DOCKER_REPO
 
-FROM harbor.dell.com/dojo-harbor/$QRE_NS/qre-base
+FROM $DOCKER_REPO/$QRE_NS/qre-base
 
 RUN apt-get update && apt-get install -y python3-flask default-libmysqlclient-dev build-essential
 RUN mkdir /app

@@ -13,7 +13,7 @@ from server.orchestrator.models import DBService, Job, User, RuntimeProgram, Mes
 import pytest
 from datetime import datetime
 from time import sleep
-ACCEPTANCE_URL = os.getenv('ACCEPTANCE_URL')
+SERVER_URL = os.getenv('SERVER_URL')
 RUNTIME_PROGRAM = """
 from qiskit.compiler import transpile, schedule
 

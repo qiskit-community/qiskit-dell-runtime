@@ -202,7 +202,7 @@ acceptance_test:
     - pip3 install .
     - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
     - source token.sh
-    - export ACCEPTANCE_URL=http://qre-test.oro-sandbox-small1.k8s.cec.lab.emc.com
+    - export SERVER_URL=http://qre-test.oro-sandbox-small1.k8s.cec.lab.emc.com
     - pytest acceptance_tests/
   
 
@@ -215,7 +215,7 @@ acceptance_test_sso:
     - pip3 install .
     - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
     - source token.sh
-    - export ACCEPTANCE_URL=http://qre-test-sso.oro-sandbox-small1.k8s.cec.lab.emc.com
+    - export SERVER_URL=http://qre-test-sso.oro-sandbox-small1.k8s.cec.lab.emc.com
     - pytest acceptance_tests/
   
 

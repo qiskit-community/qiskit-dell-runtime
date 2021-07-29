@@ -25,11 +25,12 @@ db_service = DBService()
 kube_client = KubeClient()
 
 os.environ["REQUESTS_CA_BUNDLE"] = "/etc/qre_certs/qrecerts.crt"
-app.config["SECRET_KEY"] = os.getenv("SESSION_SECRET_KEY")
-app.config["SESSION_TYPE"] = os.getenv("SESSION_TYPE")
+app.config["SECRET_KEY"] = os.urandom(24)
+app.config["SESSION_TYPE"] = "filesystem"
 TOKEN_URL = os.getenv("SSO_TOKEN_URL")
 AUTH_URL = os.getenv("SSO_AUTH_URL")
 INFO_URL = os.getenv("SSO_INFO_URL")
+DOCKER_REPO = os.getenv("DOCKER_REPO")
 SSO_ENABLED = (AUTH_URL != None)
 
 ACTIVE="Active"
@@ -238,7 +239,8 @@ def run_program(program_id):
         "job_id": job_id,
         "pod_name": pod_name,
         "data_token": data_token,
-        "msg_token": msg_token
+        "msg_token": msg_token,
+        "image_repo": DOCKER_REPO
     }
 
     db_job = Job()

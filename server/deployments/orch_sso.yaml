@@ -20,8 +20,10 @@ spec:
       serviceAccountName: qreorch
       containers:
         - name: qre-orchestrator
-          image: harbor.dell.com/dojo-harbor/${QRE_NS}/orchestrator
+          image: ${DOCKER_REPO}/${QRE_NS}/orchestrator
           env:
+          - name: DOCKER_REPO
+            value: ${DOCKER_REPO}
           - name: DB_HOST
             value: "mysql"
           - name: DB_PORT
@@ -35,10 +37,6 @@ spec:
                 key: password
           - name: DB_NAME
             value: "qre"
-          - name: SESSION_SECRET_KEY
-            value: ${SESSION_SECRET_KEY}
-          - name: SESSION_TYPE
-            value: ${SESSION_TYPE}
           - name: SSO_TOKEN_URL
             value: ${SSO_TOKEN_URL}
           - name: SSO_AUTH_URL
@@ -88,7 +86,7 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - host: ${QRE_NS}.oro-sandbox-small1.k8s.cec.lab.emc.com
+  - host: ${QRE_NS}.${KUBE_LOCATION}
     http:
       paths:
       - path: /

@@ -45,7 +45,7 @@ RUNTIME_PROGRAM_METADATA = {
 }
 
 PROGRAM_PREFIX = 'qiskit-test'
-REMOTE_RUNTIME = os.getenv("ACCEPTANCE_URL") 
+REMOTE_RUNTIME = os.getenv("SERVER_URL") 
 def main():
     print("Starting...")
     logging.basicConfig(level=logging.DEBUG)

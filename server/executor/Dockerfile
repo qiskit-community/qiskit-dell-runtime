@@ -1,6 +1,7 @@
 ARG QRE_NS
+ARG DOCKER_REPO
 
-FROM harbor.dell.com/dojo-harbor/$QRE_NS/qre-base
+FROM $DOCKER_REPO/$QRE_NS/qre-base
 
 COPY ./requirements.txt /var/qiskit-runtime/
 RUN pip3 install -r /var/qiskit-runtime/requirements.txt

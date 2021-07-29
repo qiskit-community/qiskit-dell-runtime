@@ -395,7 +395,7 @@ RUNTIME_PROGRAM_METADATA = {
 
 # In[33]:
 
-provider.remote(os.getenv("ACCEPTANCE_URL"))
+provider.remote(os.getenv("SERVER_URL"))
 program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 

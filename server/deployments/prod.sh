@@ -1,14 +1,21 @@
 export QRE_NS=qre
 
-export DOCKER_REPO=<docker repository>
-export MYSQL_IMAGE=<mysql image location in repo>
+export DOCKER_REPO=harbor.dell.com/dojo-harbor
 
-export KUBE_LOCATION=<cluster IP/URL>
+export DB_IMAGE=qre/mysql:5.6
+export DB_TYPE=mysql
+export DB_TYPE=${DB_TYPE,,}
+export DB_UPPER=${DB_TYPE^^}
+export DB_DATABASE=qre
+export DB_USER=qre
+export DB_PORT=3306
+
+export KUBE_LOCATION=oro-sandbox-small1.k8s.cec.lab.emc.com
 export SERVER_URL="http://$QRE_NS.$KUBE_LOCATION"
 
-export SSO_TOKEN_URL=<sso token url>
-export SSO_AUTH_URL=<sso auth url>
-export SSO_INFO_URL=<sso user info url>
+export SSO_TOKEN_URL="https://appsso.login.scfd.isus.emc.com/oauth/token"
+export SSO_AUTH_URL="https://appsso.login.scfd.isus.emc.com/oauth/authorize"
+export SSO_INFO_URL="https://appsso.login.scfd.isus.emc.com/userinfo"
 
-export REQUESTS_CA_BUNDLE=<path to certificates>
-export QRE_CERTS_DIR=<path to directory of required certificates (backends, SSO, etc)>
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+export QRE_CERTS_DIR=/home/geoff/workspace/qre-secrets

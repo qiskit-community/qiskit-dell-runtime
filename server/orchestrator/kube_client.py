@@ -32,19 +32,6 @@ spec:
       - name: INPUTS_STR
         value: |
           {inputs_str}
-      volumeMounts:
-      - name: certs
-        mountPath: "/etc/qre_certs"
-        readOnly: true
-  volumes:
-  - name: certs
-    secret:
-      secretName: certs
-      items:
-      - key: ionq_qpu.crt
-        path: ionq_qpu.crt
-      - key: ionq_simulator.crt
-        path: ionq_simulator.crt
   restartPolicy: Never
 """
 

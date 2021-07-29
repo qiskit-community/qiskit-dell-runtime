@@ -25,18 +25,18 @@ spec:
           - name: DOCKER_REPO
             value: ${DOCKER_REPO}
           - name: DB_HOST
-            value: "mysql"
+            value: ${DB_TYPE}
           - name: DB_PORT
-            value: "3306"
+            value: "${DB_PORT}"
           - name: DB_USER
-            value: "qre"
+            value: ${DB_USER}
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: user-pw
                 key: password
           - name: DB_NAME
-            value: "qre"                                          
+            value: ${DB_DATABASE}                                    
           ports:
           - containerPort: 8080
           volumeMounts:

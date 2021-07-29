@@ -6,8 +6,8 @@ export DB_IMAGE=qre/mysql:5.6
 export DB_TYPE=mysql
 export DB_TYPE=${DB_TYPE,,}
 export DB_UPPER=${DB_TYPE^^}
-export ${DB_TYPE^^}_DATABASE=qre
-export ${DB_TYPE^^}_USER=qre
+export DB_DATABASE=qre
+export DB_USER=qre
 export DB_PORT=3306
 
 export KUBE_LOCATION=oro-sandbox-small1.k8s.cec.lab.emc.com

@@ -213,7 +213,7 @@ deploy_to_test_postgres:
     - make clean || echo "Failure in clean"
     - make deploy_no_sso
     - cd -
-    - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test-sso)
+    - kubectl wait --for=condition=Ready pods --timeout=60s --all -n $(echo qre-test-ps)
 
 acceptance_test:
   stage: Acceptance Test

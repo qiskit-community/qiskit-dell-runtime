@@ -30,6 +30,9 @@ app.config["SESSION_TYPE"] = "filesystem"
 TOKEN_URL = os.getenv("SSO_TOKEN_URL")
 AUTH_URL = os.getenv("SSO_AUTH_URL")
 INFO_URL = os.getenv("SSO_INFO_URL")
+SSO_SCOPE = os.getenv("SSO_SCOPE")
+SSO_CLIENT_ID = os.getenv("SSO_CLIENT_ID")
+SSO_CLIENT_SECRET = os.getenv("SSO_CLIENT_SECRET")
 DOCKER_REPO = os.getenv("DOCKER_REPO")
 SSO_ENABLED = (AUTH_URL != None)
 
@@ -410,19 +413,19 @@ def delete_message(job_id):
     return Response(None, 200)
 
 
-@app.route("/callback/<attempt_id>", methods=["GET", "POST"])
-def callback(attempt_id):
+@app.route("/callback", methods=["GET", "POST"])
+def callback():
+    state = flask.request.args.get("state")
     logger.debug("Hit Callback")
-    pending_logins[attempt_id] = "https" + flask.request.url[4:]
-    
+    pending_logins[state] = "https" + flask.request.url[4:]
     return "<html><head><script>window.close();</script></head></html>"
 
-@app.route("/tokeninfo/<attempt_id>", methods=["GET", "POST"])
-def get_token_info(attempt_id):
+@app.route("/tokeninfo/<state>", methods=["GET", "POST"])
+def get_token_info(state):
     logger.debug("Hit Get Token Info")
-    if pending_logins[attempt_id] is not None:
-        urls = json.dumps({"cb_url": pending_logins[attempt_id], "token_url": TOKEN_URL})
-        del pending_logins[attempt_id]
+    if pending_logins[state] is not None:
+        urls = json.dumps({"cb_url": pending_logins[state], "token_url": TOKEN_URL})
+        del pending_logins[state]
         return Response(urls, 200, mimetype="application/binary")
     else:
         return Response(None, 204)
@@ -430,10 +433,8 @@ def get_token_info(attempt_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     logger.debug("Hit Login")
-    id = random_id()
-    pending_logins[id] = None
     # Eventually this will pull SSO login link from env vars
-    return Response(json.dumps({"auth_url": AUTH_URL, "id": id}), 200, mimetype="application/binary")
+    return Response(json.dumps({"auth_url": AUTH_URL, "scope":SSO_SCOPE, "client_id":SSO_CLIENT_ID, "client_secret":SSO_CLIENT_SECRET}), 200, mimetype="application/binary")
 
 
 
@@ -451,6 +452,7 @@ def authenticate():
     if "error" in json_resp.keys():
         return "Invalid Token", 401
 
+    #TODO: update logic for other IDPs that don't provide specifically "user name"
     username = json_resp["user_name"]
     session["user_name"] = username
 

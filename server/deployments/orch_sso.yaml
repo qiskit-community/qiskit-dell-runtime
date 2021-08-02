@@ -42,7 +42,13 @@ spec:
           - name: SSO_AUTH_URL
             value: ${SSO_AUTH_URL}
           - name: SSO_INFO_URL
-            value: ${SSO_INFO_URL}                                              
+            value: ${SSO_INFO_URL}   
+          - name: SSO_SCOPE
+            value: ${SSO_SCOPE} 
+          - name: SSO_CLIENT_ID
+            value: ${SSO_CLIENT_ID} 
+          - name: SSO_CLIENT_SECRET
+            value: ${SSO_CLIENT_SECRET}                                                                                
           ports:
           - containerPort: 8080
 

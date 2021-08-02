@@ -23,16 +23,6 @@ STRING = "STRING"
 TOKEN = os.getenv("TOKEN")
 QRE_ID = os.getenv("QRE_ID")
 
-#TODO: Move scope, client ID, client secret to orchestrator and send on /login hit
-scope_str = os.getenv("SSO_SCOPE")
-scope = None
-if scope_str:
-    scope = [x.strip() for x in os.getenv("SSO_SCOPE").split(",")]
-    
-client_id = os.getenv("SSO_CLIENT_ID")
-client_secret = os.getenv("SSO_CLIENT_SECRET")
-access_token = ""
-
 #TODO: set session timeout
 session = requests.Session()
 
@@ -415,7 +405,10 @@ class RemoteRuntimeService():
     def get_new_token(self):
         res = self._get("/login")
         login_info = json.loads(res[2])
-        redirect_uri = urljoin(self.host, f"/callback/{login_info['id']}")
+        client_id = login_info['client_id']
+        client_secret = login_info['client_secret']
+        scope = [x.strip() for x in login_info["scope"].split(',')]
+        redirect_uri = urljoin(self.host, f"/callback")
         global oauth 
         oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
 
@@ -429,7 +422,7 @@ class RemoteRuntimeService():
 
         urls = {}
         while not urls:
-            res = self._get(f"/tokeninfo/{login_info['id']}")
+            res = self._get(f"/tokeninfo/{state}")
             if res[0] == 200:
                 urls = json.loads(res[2])
             else:

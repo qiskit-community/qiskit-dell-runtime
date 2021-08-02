@@ -117,6 +117,7 @@ spec:
       labels:
         app: mysql
     spec:
+      # TODO: remove this before open-source
       nodeName: k8s-w-3-oro-sandbox-small1
       containers:
       - image: harbor.dell.com/dojo-harbor/qre/mysql:5.6
@@ -246,5 +247,3 @@ spec:
 #               value: "0"
 #             - name: KAFKA_CREATE_TOPICS
 #               value: sample.topic:1:1
-
-

@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: qre-orchestrator
-  namespace: ${QRE_NS}    
+  namespace: ${QRE_NS}
 spec:
   selector:
     matchLabels:

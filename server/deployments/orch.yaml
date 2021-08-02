@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: qre-orchestrator
-  namespace: ${QRE_NS}    
+  namespace: ${QRE_NS}
 spec:
   selector:
     matchLabels:
@@ -20,6 +20,7 @@ spec:
       serviceAccountName: qreorch
       containers:
         - name: qre-orchestrator
+          # TODO: To be updated with public container image registry URL
           image: harbor.dell.com/dojo-harbor/${QRE_NS}/orchestrator
           env:
           - name: DB_HOST
@@ -38,7 +39,7 @@ spec:
           - name: SESSION_SECRET_KEY
             value: ${SESSION_SECRET_KEY}
           - name: SESSION_TYPE
-            value: ${SESSION_TYPE}                                             
+            value: ${SESSION_TYPE}
           ports:
           - containerPort: 8080
           volumeMounts:

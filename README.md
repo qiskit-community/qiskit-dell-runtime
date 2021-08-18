@@ -4,7 +4,7 @@ Qiskit Runtime Emulator is a [Qiskit Runtime]() platform that can execute classi
 Various simulation, emulation and quantum hardware can be integrated with this platform. Developers can abstract their source code with Qiskit, so that execution can be ported across execution environments with minimum effort. 
 
 ## Architecture
-This platform provides both server-side provider and 
+This platform provides both client-side provider and server-side components. 
 
 ![Qiskit Runtime Architecture](images/arch.png)
 ### Client-side Provider
@@ -18,10 +18,10 @@ At runtime, when a job is started by user, a new pod will be created to execute 
 For deployment installation, please visit this [link](doc/install.md). 
 
 ### Database Configuration
-All user-uploaded code and execution parameters will be stored in a database. By 
+All user-uploaded code and execution parameters will be stored in a database. By default, this platform comes with a [mysql](https://www.mysql.com/) deployment. If users would like to customize database to another database service, please view these installations for database configuration. 
 
 ### SSO
-SSO integration is off by default, so that users can easily set up a sandbox environment. There is integration
+SSO integration is off by default, so that users can easily set up a sandbox environment. There is existing integration hooks built into the platform for easy integration with various SSO systems. 
 
 ### Multi-Backend Support
 By default, the quantum execution will be processed by [Qiskit Aer] simulation engine. Users can modify the quantum backend by specifying `backend-name` in the job input parameter. Custom code adjustment can be made to support multiple [qiskit backends](), including other emulation, simulation and QPU backends. 

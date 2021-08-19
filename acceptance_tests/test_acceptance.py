@@ -1,7 +1,7 @@
 from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 from qiskit.providers import JobStatus
 from time import sleep
 import os
@@ -65,21 +65,21 @@ SERVER_URL = os.getenv('SERVER_URL')
 
 class AcceptanceTest(unittest.TestCase):
     def test_circuit_runner(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         # program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         
     def test_remote_fail(self):
         exc = False
         try:
-            provider = EmulatorProvider()
+            provider = DellHybridProvider()
             provider.remote("http://thisurldoesntexist.com")
         except Exception:
             exc = True
         self.assertTrue(exc)
 
     def test_upload(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         proglist = provider.runtime.programs()
@@ -91,7 +91,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertTrue(findProgId)
 
     def test_view_program(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -100,7 +100,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(runtime_program.program_id, program_id)
 
     def test_view_program_refresh(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         prog_list = provider.runtime.programs(refresh=False)
@@ -117,7 +117,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertGreater(len(newnew_prog_list), len(prog_list))
 
     def test_run_program(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -135,7 +135,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(job.host, SERVER_URL)
     
     def test_get_results(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -170,7 +170,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertLess(count, (0.55 * shots))
 
     def test_delete_program(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         prog_list = provider.runtime.programs(refresh=False)
@@ -186,7 +186,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertGreater(len(prog_list), len(new_prog_list))
 
     def test_update_program(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -202,7 +202,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual('Test Update', program2.name)
 
     def test_intermittent_results(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -232,7 +232,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(0, len(messages))
 
     def test_get_status(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -256,7 +256,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(status, "Completed")
 
     def test_get_failed_status(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(FAIL_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -280,7 +280,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertEqual(status, "Failed")
 
     def test_cancel_job(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -302,7 +302,7 @@ class AcceptanceTest(unittest.TestCase):
         status = job.status()
         self.assertEqual(status, "Canceled")
     def test_pprint_programs(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
@@ -332,7 +332,7 @@ class AcceptanceTest(unittest.TestCase):
             self.fail("should pass")
 
     def test_upload_file(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -363,7 +363,7 @@ class AcceptanceTest(unittest.TestCase):
             self.fail("should pass")
 
     def test_reserved_names(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
 
         try:
@@ -375,7 +375,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def test_large_directory(self):
         
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
 
         provider.remote(SERVER_URL)
         here = os.path.dirname(os.path.realpath(__file__))
@@ -388,7 +388,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertTrue("aligned_kernel_matrix" in res)
 
     def test_callback_function(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -417,7 +417,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertTrue("{'results': 'intermittently'}" in output)
     
     def test_reconnect(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -434,7 +434,7 @@ class AcceptanceTest(unittest.TestCase):
         del(provider)
 
         # delete session and sign back in via SSO
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
@@ -457,7 +457,7 @@ class AcceptanceTest(unittest.TestCase):
         self.assertLess(count, (0.55 * shots))
 
     def test_data_security(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
@@ -466,3 +466,37 @@ class AcceptanceTest(unittest.TestCase):
         
         self.assertEqual(res.text, "Id and token not presented")
         self.assertEqual(res.status_code, 401)
+
+    def test_block_nonsso_on_sso_server(self):
+        res = requests.get(urljoin(SERVER_URL, '/sso_enabled'))
+        sso_enabled = json.loads(res.text)
+        if sso_enabled:
+            url = urljoin(SERVER_URL, '/new_user')
+            res = requests.get(url)
+            self.assertEqual(res.status_code, 401)
+
+            url = urljoin(SERVER_URL, '/existing_user/2187121124')
+            res = requests.get(url)
+            self.assertEqual(res.status_code, 401) 
+
+    def test_block_sso_on_nonsso_server(self):
+        res = requests.get(urljoin(SERVER_URL, '/sso_enabled'))
+        sso_enabled = json.loads(res.text)
+        if not sso_enabled:
+            url = urljoin(SERVER_URL, '/login')
+            res = requests.get(url)
+            self.assertEqual(res.status_code, 401)
+
+            url = urljoin(SERVER_URL, '/authenticate')
+            res = requests.post(url)
+            self.assertEqual(res.status_code, 401)
+
+
+            url = urljoin(SERVER_URL, '/tokeninfo/109129612')
+            res = requests.get(url)
+            self.assertEqual(res.status_code, 401)
+
+
+            url = urljoin(SERVER_URL, '/callback')
+            res = requests.get(url)
+            self.assertEqual(res.status_code, 401)

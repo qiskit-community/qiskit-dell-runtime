@@ -11,7 +11,7 @@ from user_messenger_client import RemoteUserMessengerClient
 import json
 import os
 from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import BackendProvider
 
 import logging
 import logging.config
@@ -36,7 +36,7 @@ def main_method():
 
     backend = None
     if 'backend_name' in inputs:
-        provider = EmulatorProvider()
+        provider = BackendProvider()
         print(inputs)
         backend_name = inputs['backend_name']
         if 'backend_token' in inputs:

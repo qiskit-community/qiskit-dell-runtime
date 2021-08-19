@@ -36,7 +36,7 @@ To deploy the Dell Qiskit Runtime Server, perform the following steps beginning 
 
 At this point the deployment will be created in a new namespace named `qre`. You can view the status of the database and orchestrator pods using `kubectl get pods -n qre`.
 
-When both pods are `Running` the deployment is ready to be used via the `EmulatorProvider`'s remote runtime interface.
+When both pods are `Running` the deployment is ready to be used via the `DellHybridProvider`'s remote runtime interface.
 
 If you need to remove your deployment, you can run `make clean` from the `server` directory assuming that the environnment variables set in `server/deployments/prod.sh` are still active in your shell.
 

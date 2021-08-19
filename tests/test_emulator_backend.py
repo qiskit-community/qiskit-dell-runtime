@@ -1,9 +1,9 @@
 import unittest
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import BackendProvider
 
 class ProviderTest(unittest.TestCase):
     def test_get_backend(self):
-        provider = EmulatorProvider()
+        provider = BackendProvider()
         self.assertGreater(len(provider.backends()), 1)
 
         backend = provider.get_backend(name="aer_simulator")
@@ -11,7 +11,7 @@ class ProviderTest(unittest.TestCase):
 
     def test_backend_configuration(self):
         # ENSURE it matches with https://qiskit.org/documentation/stubs/qiskit.providers.models.BackendConfiguration.html
-        provider = EmulatorProvider()
+        provider = BackendProvider()
         self.assertGreater(len(provider.backends()), 1)
 
         backend = provider.get_backend(name="aer_simulator")
@@ -67,13 +67,6 @@ class ProviderTest(unittest.TestCase):
         
         # TODO: add tags dt dtm processor_type later
 
-    # def test_backend_frequency(self):
-    #     provider = EmulatorProvider()
-    #     self.assertEqual(1, len(provider.backends()))
 
-    #     backend = provider.get_backend(name="emulator")
-    #     self.assertIsNotNone(backend)
-
-    #     self.assertIsNone(backend.faulty_gates())
 
         

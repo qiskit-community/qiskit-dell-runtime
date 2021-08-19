@@ -1,8 +1,6 @@
-from qiskit_emulator import EmulatorProvider
 from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
-from qiskit_emulator import EmulatorProvider
 from qiskit.providers import JobStatus
 import unittest
 from urllib.parse import urljoin

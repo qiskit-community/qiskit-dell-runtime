@@ -1,5 +1,4 @@
 import unittest
-from qiskit_emulator import EmulatorProvider, EmulatorRuntimeJob
 import os
 import json
 import logging

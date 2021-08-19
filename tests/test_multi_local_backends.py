@@ -1,4 +1,4 @@
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
 from time import sleep
@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 class MultiLocalBackendTest(unittest.TestCase):
 
     def test_get_results_emulator_backend(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         qc = QuantumCircuit(2, 2)
@@ -86,7 +86,7 @@ class MultiLocalBackendTest(unittest.TestCase):
         self.assertLess(count, (0.55 * shots))
 
     def test_get_results_aer_backend(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         qc = QuantumCircuit(2, 2)

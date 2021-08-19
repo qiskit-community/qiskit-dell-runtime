@@ -1,8 +1,7 @@
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
-from qiskit_emulator import EmulatorProvider
 from qiskit.providers import JobStatus
 import unittest
 from urllib.parse import urljoin
@@ -45,13 +44,13 @@ RUNTIME_PROGRAM_METADATA = {
 
 class BackendTest(unittest.TestCase):
     def test_circuit_runner(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         backends = provider.runtime.backends()
         self.assertGreater(len(backends), 1)
 
     def test_run_with_backend(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         provider.remote(SERVER_URL)
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 

@@ -2,7 +2,7 @@ from qiskit.opflow import Z, I
 from qiskit.circuit.library import EfficientSU2
 import numpy as np
 from qiskit.algorithms.optimizers import SPSA
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 import os
 from time import sleep
 from datetime import datetime, timedelta
@@ -50,7 +50,7 @@ vqe_inputs = {
     'shots': 1024,
 }
 
-provider = EmulatorProvider()
+provider = DellHybridProvider()
 provider.remote(os.getenv("SERVER_URL"))
 
 program_id = provider.runtime.upload_program("vqe.py")

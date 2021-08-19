@@ -1,4 +1,4 @@
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 import unittest
 from qiskit_emulator import LocalUserMessengerClient
 from qiskit_emulator import EmulatorRuntimeJob, EmulationExecutor
@@ -97,7 +97,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Canceled")
 
     def test_intermittent_results(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -127,7 +127,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
 
             
     def test_get_results(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -159,7 +159,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
     
 
     def test_get_status(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -190,7 +190,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Completed")
 
     def test_get_failed_status(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(FAIL_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         qc = QuantumCircuit(2, 2)
@@ -216,7 +216,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Failed")
 
     def test_cancel_job(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -240,7 +240,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Canceled")
 
     def test_callback_function(self):
-        provider = EmulatorProvider()
+        provider = DellHybridProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 

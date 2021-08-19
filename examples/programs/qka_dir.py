@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # In[2]:
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 from qiskit import QuantumCircuit
 import pandas as pd
 from time import sleep
@@ -40,15 +40,8 @@ import json
 
 
 
-provider = EmulatorProvider()
+provider = DellHybridProvider()
 
-
-# In[26]:
-
-
-# In[31]:
-
-# In[32]:
 
 
 RUNTIME_PROGRAM_METADATA = {
@@ -57,18 +50,12 @@ RUNTIME_PROGRAM_METADATA = {
 }
 
 
-# In[33]:
-
 provider.remote(os.getenv("SERVER_URL"))
 here = os.path.dirname(os.path.realpath(__file__))
 
 program_id = provider.runtime.upload_program(here + "/qkad", metadata=RUNTIME_PROGRAM_METADATA)
 
-
-# In[34]:
-
-# runtime_program = provider.runtime.program(program_id)
-job = provider.runtime.run(program_id, options=None, inputs={'garbage': 'nonsense'})
+job = provider.runtime.run(program_id, options=None, inputs={})
 
 res = job.result(timeout=1000)
 print(res)

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # In[2]:
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 from qiskit import QuantumCircuit
 import pandas as pd
 from time import sleep
@@ -11,7 +11,7 @@ import os
 
 df = pd.read_csv(os.path.dirname(os.path.abspath(__file__)) + '/aux_file/dataset_graph7.csv',sep=',', header=None) # alterative problem: dataset_graph10.csv
 data = df.values
-provider = EmulatorProvider()
+provider = DellHybridProvider()
 
 
 # In[26]:

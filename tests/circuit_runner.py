@@ -1,4 +1,4 @@
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 from qiskit import QuantumCircuit
 
 RUNTIME_PROGRAM = """
@@ -43,7 +43,7 @@ RUNTIME_PROGRAM_METADATA = {
 # PROGRAM_PREFIX = 'qiskit-test'
 
 def main():
-    provider = EmulatorProvider()
+    provider = DellHybridProvider()
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
     
     qc = QuantumCircuit(2, 2)

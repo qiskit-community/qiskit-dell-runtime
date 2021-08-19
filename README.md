@@ -1,5 +1,5 @@
 # Hybrid Emulation Platform
-Qiskit Runtime Emulator is a [Qiskit Runtime]() platform that can execute classical-quantum code on both local and on-premise environments. With this platform, hybrid classical-quantum code bundle can be developed and executed. Powered by Qiskit Runtime API, this execution model provides close-integration of classical and quantum execution. 
+Dell Hybrid Platform is a [Qiskit Runtime]() platform that can execute classical-quantum code on both local and on-premise environments. With this platform, hybrid classical-quantum code bundle can be developed and executed. Powered by Qiskit Runtime API, this execution model provides close-integration of classical and quantum execution. 
 
 Various simulation, emulation and quantum hardware can be integrated with this platform. Developers can abstract their source code with Qiskit, so that execution can be ported across execution environments with minimum effort. 
 
@@ -8,10 +8,10 @@ This platform provides both client-side provider and server-side components.
 
 ![Qiskit Runtime Architecture](images/arch.png)
 ### Client-side Provider
-Users would need to install the `qiskit-emulation-provider` on client devices. The provider is defaulted to local execution and can be used out of the box. This provider can also be used to connect with platform running on a server-side, so that users can control server and execute jobs by using the same API. 
+Users would need to install the `DellHybridProvider` on client devices. The provider is defaulted to local execution and can be used out of the box. This provider can also be used to connect with platform running on a server-side, so that users can control server and execute jobs by using the same API. 
 
 ### Server-side Components
-This platform has a minimalist design to create a light-weighted execution environment for server-side components. It contains an `orchestrator` long-running microservice that listens to requests for `qiskit-emulation-provider`. 
+This platform has a minimalist design to create a light-weighted execution environment for server-side components. It contains an `orchestrator` long-running microservice that listens to requests from `DellHybridProvider`. 
 
 At runtime, when a job is started by user, a new pod will be created to execute both classical and vQPU workload. 
 
@@ -36,14 +36,24 @@ Emulations for different use cases are under-development, and we are looking for
 ## Documentation Links:
 - [Introduction](doc/intro.md)
 - [Installation Guide](doc/install.md)
-  - [Custom Database Configuration]()
-- [Usage]()
-- [Examples]()
+  - [Requirements]()
+  - [Client Quick Start Guide]()
+  - [Server Quick Start Guide]()
+  - [Configuring Custom SSO]()
+  - [Configuring Custom Database]()
+- [Usage](doc/usage.ipynb)
+  - [Local Execution Setup]()
+  - [Remote Execution Setup]()
+  - [Program Upload]()
+  - [Execution]()
+    - [Obtaining Results]()
+  - [(Optional) Callback Function]()
+  - [(Optional) Backend Selection]()
+- [Examples](doc/examples.ipynb)
   - [Local Execution]()
   - [Remote Execution]()
   - [QKA]()
   - [VQE]()
-  - [Custom Backend]()
 
 
 For any questions or feedback, please contact [v.fong@dell.com](mailto:v.fong@dell.com)

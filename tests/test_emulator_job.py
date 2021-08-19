@@ -1,12 +1,12 @@
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import BackendProvider
 from qiskit.providers import JobStatus
 from time import sleep
 
 class ProviderTest(unittest.TestCase):
     def test_job_submission(self):
-        provider = EmulatorProvider()
+        provider = BackendProvider()
         self.assertIsNotNone(provider)
         
         backend = provider.get_backend(name="aer_simulator")
@@ -32,7 +32,7 @@ class ProviderTest(unittest.TestCase):
 
 
     def test_execute(self):
-        provider = EmulatorProvider()
+        provider = BackendProvider()
         self.assertIsNotNone(provider)
         
         backend = provider.get_backend(name="aer_simulator")
@@ -54,7 +54,7 @@ class ProviderTest(unittest.TestCase):
         self.assertEqual(JobStatus.DONE, job.status())
 
     def test_get_counts(self):
-        provider = EmulatorProvider()
+        provider = BackendProvider()
         self.assertIsNotNone(provider)
         
         backend = provider.get_backend(name="aer_simulator")
@@ -74,20 +74,3 @@ class ProviderTest(unittest.TestCase):
         total = counts.get('11') + counts.get('00')
         self.assertEqual(total, 1024)
 
-    # def test_cancel(self):
-    #     provider = EmulatorProvider()
-    #     self.assertIsNotNone(provider)
-        
-    #     backend = provider.get_backend(name="emulator")
-    #     self.assertIsNotNone(backend)
-
-    #     circ = QuantumCircuit(2)
-    #     circ.h(0)
-    #     circ.cx(0, 1)
-    #     circ.measure_all()
-
-    #     # Transpile for simulator
-    #     job = backend.run(circ, shots=1000000)
-    #     sleep(0.001)
-    #     job.cancel()
-    #     self.assertEqual(job.status(), "")

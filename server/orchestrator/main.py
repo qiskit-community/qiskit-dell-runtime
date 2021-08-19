@@ -6,7 +6,7 @@ import logging
 import json
 from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import BackendProvider
 import requests
 import waitress
 
@@ -19,7 +19,7 @@ import shutil
 from kube_client import KubeClient
 from models import DBService, RuntimeProgram, Job, User
 
-emulator_provider = EmulatorProvider()
+backend_provider = BackendProvider()
 
 db_service = DBService()
 kube_client = KubeClient()
@@ -202,7 +202,7 @@ def get_status():
 
 @app.route('/backends', methods=['GET'])
 def get_backends():
-    backends = emulator_provider.runtime.backends()
+    backends = backend_provider.backends()
     result = []
     for backend in backends:
         backend_config = backend.configuration()
@@ -415,6 +415,8 @@ def delete_message(job_id):
 
 @app.route("/callback", methods=["GET", "POST"])
 def callback():
+    if (not SSO_ENABLED):
+        return ("Attempt to hit callback route on non-SSO-enabled server.", 401)
     state = flask.request.args.get("state")
     logger.debug("Hit Callback")
     pending_logins[state] = "https" + flask.request.url[4:]
@@ -422,6 +424,8 @@ def callback():
 
 @app.route("/tokeninfo/<state>", methods=["GET", "POST"])
 def get_token_info(state):
+    if (not SSO_ENABLED):
+        return ("Attempt to get token info on non-SSO-enabled server.", 401)
     logger.debug("Hit Get Token Info")
     if pending_logins[state] is not None:
         urls = json.dumps({"cb_url": pending_logins[state], "token_url": TOKEN_URL})
@@ -432,6 +436,9 @@ def get_token_info(state):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if (not SSO_ENABLED):
+        return ("Attempt to log in via SSO on non-SSO-enabled server.", 401)
+
     logger.debug("Hit Login")
     # Eventually this will pull SSO login link from env vars
     return Response(json.dumps({"auth_url": AUTH_URL, "scope":SSO_SCOPE, "client_id":SSO_CLIENT_ID, "client_secret":SSO_CLIENT_SECRET}), 200, mimetype="application/binary")
@@ -440,6 +447,8 @@ def login():
 
 @app.route("/authenticate", methods=["POST"])
 def authenticate():
+    if (not SSO_ENABLED):
+        return ("Attempt to authenticate via SSO on non-SSO-enabled server.", 401)
     logger.debug("Hit Authenticate")
     req_json = flask.request.json
     token = req_json["token"]
@@ -480,6 +489,8 @@ def sso_enabled():
 
 @app.route("/new_user", methods=["GET"])
 def new_non_sso_user():
+    if SSO_ENABLED:
+        return ("Attempt to subvert SSO on SSO-enabled server.", 401)
     new_id = random_id()
     session['user_name'] = new_id
 
@@ -495,6 +506,8 @@ def new_non_sso_user():
 
 @app.route("/existing_user/<uid>", methods=["GET"])
 def existing_non_sso_user(uid):
+    if SSO_ENABLED:
+        return ("Attempt to subvert SSO on SSO-enabled server.", 401)
     try:
         user_id = db_service.fetch_user_id(uid)
         session['user_id'] = user_id

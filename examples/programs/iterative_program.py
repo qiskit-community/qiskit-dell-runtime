@@ -1,4 +1,4 @@
-from qiskit_emulator import EmulatorProvider
+from qiskit_emulator import DellHybridProvider
 from qiskit import QuantumCircuit
 import logging
 import requests
@@ -39,7 +39,7 @@ def main():
     print("Starting...")
     logging.basicConfig(level=logging.DEBUG)
 
-    provider = EmulatorProvider()
+    provider = DellHybridProvider()
     # provider.remote(REMOTE_RUNTIME)
     program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
     print(f"PROGRAM ID: {program_id}")

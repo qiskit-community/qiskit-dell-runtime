@@ -256,7 +256,7 @@ resources:
   icon: github-circle
   source: &github-secrets
     uri: git@eos2git.cec.lab.emc.com:OCTO/qiskit-runtime-emulator.git
-    branch: master
+    branch: main
     private_key: {{github_secret}}
 
 - name: qre-secrets
@@ -264,7 +264,7 @@ resources:
   icon: github-circle
   source: 
     uri: git@eos2git.cec.lab.emc.com:DellEMC-Dojo/qre-secrets.git
-    branch: master
+    branch: main
     private_key: {{github_secret_secret}}
 
 # - name: qiskit-base-image

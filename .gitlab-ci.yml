@@ -161,13 +161,13 @@ deploy_to_test:
   script:
     - mkdir -p ~/.kube
     - apt install wget
-    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=master'
+    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=main'
     - ls -a
     - cp kube_config.yaml ~/.kube/config
     - cd server/deployments
     - source test.sh
     - cd ..
-    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=master'
+    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=main'
     - export QRE_CERTS_DIR=.
     - make clean || echo "Failure in clean"
     - make deploy_no_sso
@@ -181,13 +181,13 @@ deploy_to_test_sso:
   script:
     - mkdir -p ~/.kube
     - apt install wget
-    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=master'
+    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=main'
     - ls -a
     - cp kube_config.yaml ~/.kube/config
     - cd server/deployments
     - source test.sh
     - cd ..
-    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=master'
+    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=main'
     - export QRE_CERTS_DIR=.
     - export QRE_NS=qre-test-sso
     - make clean || echo "Failure in clean"
@@ -202,13 +202,13 @@ deploy_to_test_postgres:
   script:
     - mkdir -p ~/.kube
     - apt install wget
-    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=master'
+    - 'wget -O kube_config.yaml --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/kube_config.yaml/raw?ref=main'
     - ls -a
     - cp kube_config.yaml ~/.kube/config
     - cd server/deployments
     - source test_postgres.sh
     - cd ..
-    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=master'
+    - 'wget -O qrecerts.crt --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/qrecerts.crt/raw?ref=main'
     - export QRE_CERTS_DIR=.
     - make clean || echo "Failure in clean"
     - make deploy_no_sso
@@ -233,7 +233,7 @@ acceptance_test_sso:
   script:
     - python3 --version
     - pip3 install .
-    - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=master'
+    - 'wget -O token.sh --header "PRIVATE-TOKEN: ${SECRETS_TOKEN}" http://10.238.22.159:8600/api/v4/projects/10/repository/files/token.sh/raw?ref=main'
     - source token.sh
     - export SERVER_URL=http://qre-test-sso.oro-sandbox-small1.k8s.cec.lab.emc.com
     - pytest acceptance_tests/

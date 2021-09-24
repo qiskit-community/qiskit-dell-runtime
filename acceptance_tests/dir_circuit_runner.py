@@ -1,4 +1,4 @@
-from qiskit_emulator import DellHybridProvider
+from dell_runtime import DellRuntimeProvider
 from qiskit import QuantumCircuit
 import os
 
@@ -12,7 +12,7 @@ RUNTIME_PROGRAM_METADATA = {
 SERVER_URL = os.getenv("SERVER_URL")
 
 def main():
-    provider = DellHybridProvider()
+    provider = DellRuntimeProvider()
     here = os.path.dirname(os.path.realpath(__file__))
     provider.remote(SERVER_URL)
     program_id = provider.runtime.upload_program(here + "/dirtest", metadata=RUNTIME_PROGRAM_METADATA)

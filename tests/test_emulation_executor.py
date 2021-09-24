@@ -3,8 +3,8 @@ import os
 import json
 import logging
 
-# from ..qiskit_emulator.emulation_executor import EmulationExecutor
-from qiskit_emulator import EmulationExecutor
+# from ..dell_runtime.emulation_executor import EmulationExecutor
+from dell_runtime import EmulationExecutor
 
 RUNTIME_PROGRAM = """
 import random

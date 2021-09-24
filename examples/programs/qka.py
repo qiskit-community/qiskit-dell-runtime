@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # In[2]:
-from qiskit_emulator import DellHybridProvider
+from dell_runtime import DellRuntimeProvider
 from qiskit import QuantumCircuit
 import pandas as pd
 from time import sleep
@@ -11,7 +11,7 @@ import os
 
 df = pd.read_csv(os.path.dirname(os.path.abspath(__file__)) + '/aux_file/dataset_graph7.csv',sep=',', header=None) # alterative problem: dataset_graph10.csv
 data = df.values
-provider = DellHybridProvider()
+provider = DellRuntimeProvider()
 
 
 # In[26]:
@@ -395,7 +395,7 @@ RUNTIME_PROGRAM_METADATA = {
 
 # In[33]:
 
-provider.remote(os.getenv("SERVER_URL"))
+# provider.remote(os.getenv("SERVER_URL"))
 program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 

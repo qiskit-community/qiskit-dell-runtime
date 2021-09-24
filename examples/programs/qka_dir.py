@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # In[2]:
-from qiskit_emulator import DellHybridProvider
+from dell_runtime import DellRuntimeProvider
 from qiskit import QuantumCircuit
 import pandas as pd
 from time import sleep
@@ -40,7 +40,7 @@ import json
 
 
 
-provider = DellHybridProvider()
+provider = DellRuntimeProvider()
 
 
 

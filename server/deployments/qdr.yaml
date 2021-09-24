@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ${QRE_NS}
+  name: ${QDR_NS}
 
 ---
 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: qreorch
-  namespace: ${QRE_NS}
+  name: qdrorch
+  namespace: ${QDR_NS}
 
 ---
 
@@ -18,7 +18,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: ${QRE_NS}
+  namespace: ${QDR_NS}
   name: root-pw
   annotations:
     secret-generator.v1.mittwald.de/autogenerate: password
@@ -28,7 +28,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: ${QRE_NS}
+  namespace: ${QDR_NS}
   name: user-pw
   annotations:
     secret-generator.v1.mittwald.de/autogenerate: password
@@ -40,11 +40,11 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: ${QRE_NS}
+  namespace: ${QDR_NS}
   name: certs
 type: Opaque
 data:
-  qrecerts.crt: QRECERTS
+  qdrcerts.crt: QDRCERTS
 
 ---
 
@@ -53,8 +53,8 @@ data:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: ${QRE_NS}
-  name: qreorch
+  namespace: ${QDR_NS}
+  name: qdrorch
 rules:
 - apiGroups: ["*"]
   resources: ["*"]
@@ -65,15 +65,15 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: qreorch_binding
-  namespace: ${QRE_NS}
+  name: qdrorch_binding
+  namespace: ${QDR_NS}
 subjects:
 - kind: ServiceAccount
-  name: qreorch
+  name: qdrorch
   apiGroup: ""
 roleRef:
   kind: Role
-  name: qreorch
+  name: qdrorch
   apiGroup: ""
 
 ---
@@ -82,7 +82,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${DB_TYPE}-pvc
-  namespace: ${QRE_NS}
+  namespace: ${QDR_NS}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -98,7 +98,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ${DB_TYPE}
-  namespace: ${QRE_NS}
+  namespace: ${QDR_NS}
 spec:
   ports:
   - port: ${DB_PORT}
@@ -112,7 +112,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${DB_TYPE}
-  namespace: ${QRE_NS}
+  namespace: ${QDR_NS}
 spec:
   selector:
     matchLabels:
@@ -124,9 +124,8 @@ spec:
       labels:
         app: ${DB_TYPE}
     spec:
-    #TODO: remove before open sourcing - specific fix for our setup.
-      nodeName: k8s-w-3-oro-sandbox-small1
       containers:
+      # update if you are using a mysql image outside the one in dellemctrigr (mysql:5.6)
       - image: ${DOCKER_REPO}/${DB_IMAGE}
         name: ${DB_TYPE}
         env:

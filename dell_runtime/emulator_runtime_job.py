@@ -1,6 +1,6 @@
 """Qiskit emulator runtime job."""
 
-from qiskit_emulator.emulation_executor import EmulationExecutor
+from dell_runtime.emulation_executor import EmulationExecutor
 from typing import Any, Optional, Callable, Dict, Type
 import time
 import logging

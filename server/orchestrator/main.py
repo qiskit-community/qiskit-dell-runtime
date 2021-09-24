@@ -6,7 +6,7 @@ import logging
 import json
 from logging.config import fileConfig
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
-from qiskit_emulator import BackendProvider
+from dell_runtime import BackendProvider
 import requests
 import waitress
 
@@ -24,7 +24,7 @@ backend_provider = BackendProvider()
 db_service = DBService()
 kube_client = KubeClient()
 
-os.environ["REQUESTS_CA_BUNDLE"] = "/etc/qre_certs/qrecerts.crt"
+os.environ["REQUESTS_CA_BUNDLE"] = "/etc/qdr_certs/qdrcerts.crt"
 app.config["SECRET_KEY"] = os.urandom(24)
 app.config["SESSION_TYPE"] = "filesystem"
 TOKEN_URL = os.getenv("SSO_TOKEN_URL")
@@ -230,7 +230,7 @@ def run_program(program_id):
     job_id = random_id()
     pod_name_dupe = True
     while pod_name_dupe:
-        pod_name = "qre-" + str(uuid.uuid4())[-24:]
+        pod_name = "qdr-" + str(uuid.uuid4())[-24:]
         pod_name_dupe = kube_client.check_pod_existence(pod_name)
         logger.debug(f"pod {pod_name} exists: {pod_name_dupe}")
         if pod_name_dupe == None:
@@ -342,7 +342,6 @@ def cancel_job(job_id):
         except:
             return ("Job no longer running", 204)
 
-# TODO check if possible to allow URLs to be hit only from inside namespace
 
 @app.route('/register_messenger/<job_id>', methods=['GET'])
 def register_messenger(job_id):

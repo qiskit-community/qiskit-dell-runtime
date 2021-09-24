@@ -132,8 +132,8 @@ class EmulationExecutor():
 
 EXECUTOR_CODE = """
 from qiskit import Aer
-from qiskit_emulator import LocalUserMessengerClient
-from qiskit_emulator import BackendProvider
+from dell_runtime import LocalUserMessengerClient
+from dell_runtime import BackendProvider
 from program import main
 import sys
 import json

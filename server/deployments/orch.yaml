@@ -4,23 +4,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: qre-orchestrator
-  namespace: ${QRE_NS}
+  name: qdr-orchestrator
+  namespace: ${QDR_NS}
 spec:
   selector:
     matchLabels:
-      app: qre-orchestrator
+      app: qdr-orchestrator
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: qre-orchestrator
+        app: qdr-orchestrator
     spec:
-      serviceAccountName: qreorch
+      serviceAccountName: qdrorch
       containers:
-        - name: qre-orchestrator
-          image: ${DOCKER_REPO}/${QRE_NS}/orchestrator
+        - name: qdr-orchestrator
+          image: ${DOCKER_REPO}/qdr-orchestrator
           env:
           - name: DOCKER_REPO
             value: ${DOCKER_REPO}
@@ -39,51 +39,36 @@ spec:
             value: ${DB_DATABASE}                                    
           ports:
           - containerPort: 8080
-          volumeMounts:
-          - name: certs
-            mountPath: "/etc/qre_certs"
-            readOnly: true
-      volumes:
-      - name: certs
-        secret:
-          secretName: certs
-          items:
-          - key: qrecerts.crt
-            path: qrecerts.crt
-      # imagePullSecrets:
-      #   - name: ${image_secret}
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: qre-orchestrator
-  namespace: ${QRE_NS}
+  name: qdr-orchestrator
+  namespace: ${QDR_NS}
 spec:
-  # loadBalancerIP: 100.80.243.207
   ports:
   - port: 80
     targetPort: 8080
   selector:
-    app: qre-orchestrator
-  # type: LoadBalancer
+    app: qdr-orchestrator
 
 ---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: qre-ingress-orchestrator
-  namespace: ${QRE_NS}
+  name: qdr-ingress-orchestrator
+  namespace: ${QDR_NS}
   annotations:
     # use the shared ingress-nginx
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - host: ${QRE_NS}.${KUBE_LOCATION}
+  - host: ${QDR_NS}.${KUBE_LOCATION}
     http:
       paths:
       - path: /
         backend:
-          serviceName: qre-orchestrator
+          serviceName: qdr-orchestrator
           servicePort: 8080

@@ -1,5 +1,5 @@
-# Hybrid Emulation Platform
-Qiskit Runtime Emulator is a [Qiskit Runtime]() platform that can execute classical-quantum code on both local and on-premise environments. With this platform, hybrid classical-quantum code bundle can be developed and executed. Powered by Qiskit Runtime API, this execution model provides close-integration of classical and quantum execution. 
+# Qiskit Dell Runtime
+Qiskit Dell Runtime is a [Qiskit Runtime](https://github.com/Qiskit-Partners/qiskit-runtime) platform that can execute classical-quantum code on both local and on-premise environments. With this platform, hybrid classical-quantum code bundle can be developed and executed. Powered by Qiskit Runtime API, this execution model provides close-integration of classical and quantum execution. 
 
 Various simulation, emulation and quantum hardware can be integrated with this platform. Developers can abstract their source code with Qiskit, so that execution can be ported across execution environments with minimum effort. 
 
@@ -8,10 +8,10 @@ This platform provides both client-side provider and server-side components.
 
 ![Qiskit Runtime Architecture](../images/arch.png)
 ### Client-side Provider
-Users would need to install the `qiskit-emulation-provider` on client devices. The provider is defaulted to local execution and can be used out of the box. This provider can also be used to connect with platform running on a server-side, so that users can control server and execute jobs by using the same API. 
+Users would need to install the `DellRuntimeProvider` on client devices. The provider is defaulted to local execution and can be used out of the box. This provider can also be used to connect with platform running on a server-side, so that users can control server and execute jobs by using the same API. 
 
 ### Server-side Components
-This platform has a minimalist design to create a light-weighted execution environment for server-side components. It contains an `orchestrator` long-running microservice that listens to requests for `qiskit-emulation-provider`. 
+This platform has a minimalist design to create a light-weighted execution environment for server-side components. It contains an `orchestrator` long-running microservice that listens to requests from `DellRuntimeProvider`. 
 
 At runtime, when a job is started by user, a new pod will be created to execute both classical and vQPU workload. 
 
@@ -24,7 +24,7 @@ All user-uploaded code and execution parameters will be stored in a database. By
 SSO integration is off by default, so that users can easily set up a sandbox environment. There is existing integration hooks built into the platform for easy integration with various SSO systems. 
 
 ### Multi-Backend Support
-By default, the quantum execution will be processed by [Qiskit Aer] simulation engine. Users can modify the quantum backend by specifying `backend-name` in the job input parameter. Custom code adjustment can be made to support multiple [qiskit backends](), including other emulation, simulation and QPU backends. 
+By default, the quantum execution will be processed by [Qiskit Aer](https://github.com/Qiskit/qiskit-aer) simulation engine. Users can modify the quantum backend by specifying `backend-name` in the job input parameter. Custom code adjustment can be made to support multiple [Qiskit backends](https://qiskit.org/documentation/stubs/qiskit.providers.ibmq.IBMQBackend.html), including other emulation, simulation and QPU backends. 
 
 ## Emulation vs Simulation
 While simulation engines execute quantum circuits to measure probablistic outcome, emulation engines calculate outcome for algorithms with deterministic calculations. 

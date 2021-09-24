@@ -1,23 +1,23 @@
-ARG QRE_NS
+ARG QDR_NS
 ARG DOCKER_REPO
 
-FROM $DOCKER_REPO/$QRE_NS/qiskit
+FROM $DOCKER_REPO/$QDR_NS/qiskit
 
-RUN mkdir -p /var/qre/qiskit_emulator
+RUN mkdir -p /var/qdr/dell_runtime
 
-COPY requirements.txt /var/qre/
+COPY requirements.txt /var/qdr/
 
-RUN pip3 install -r /var/qre/requirements.txt
-COPY qiskit_emulator/ /var/qre/qiskit_emulator/
+RUN pip3 install -r /var/qdr/requirements.txt
+COPY dell_runtime/ /var/qdr/dell_runtime/
 
 
-COPY requirements-docs.txt /var/qre/
-COPY requirements-test.txt /var/qre/
+COPY requirements-docs.txt /var/qdr/
+COPY requirements-test.txt /var/qdr/
 
-COPY README.md /var/qre/
-COPY setup.cfg /var/qre/
-COPY setup.py /var/qre/
-RUN cd /var/qre/ && pip3 install . 
+COPY README.md /var/qdr/
+COPY setup.cfg /var/qdr/
+COPY setup.py /var/qdr/
+RUN cd /var/qdr/ && pip3 install . 
 
 
 

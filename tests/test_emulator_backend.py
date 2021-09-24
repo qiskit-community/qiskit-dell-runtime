@@ -1,5 +1,5 @@
 import unittest
-from qiskit_emulator import BackendProvider
+from dell_runtime import BackendProvider
 
 class ProviderTest(unittest.TestCase):
     def test_get_backend(self):

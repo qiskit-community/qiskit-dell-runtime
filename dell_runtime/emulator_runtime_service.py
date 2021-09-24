@@ -21,7 +21,7 @@ from .emulator_runtime_job import EmulatorRuntimeJob
 DIR = "DIR"
 STRING = "STRING"
 
-QRE_DIR = os.path.expanduser("~") + "/.qre"
+QDR_DIR = os.path.expanduser("~") + "/.qdr"
 from .backend_provider import BackendProvider
 
 class EmulatorRuntimeService():
@@ -83,21 +83,21 @@ class EmulatorRuntimeService():
 
         if os.path.isdir(data):
             logger.debug(f"Have directory: {data}")
-            if not os.path.isdir(QRE_DIR):
-                os.mkdir(QRE_DIR)
+            if not os.path.isdir(QDR_DIR):
+                os.mkdir(QDR_DIR)
             dirsplit = data.split("/")
             if dirsplit[-1] == "":
                 if not os.path.isfile(data + "program.py"):
                     raise Exception("program.py is required for directory upload")
                 if os.path.isfile(data + "executor.py") or os.path.isfile(data + "params.json"):
                     raise Exception("executor.py and params.json are unallowable names in directory")
-                zipname = QRE_DIR + "/" + dirsplit[-2]
+                zipname = QDR_DIR + "/" + dirsplit[-2]
             else:
                 if not os.path.isfile(data + "/program.py"):
                     raise Exception("program.py is required for directory upload")
                 if os.path.isfile(data + "/executor.py") or os.path.isfile(data + "/params.json"):
                     raise Exception("executor.py and params.json are unallowable names in directory")
-                zipname = QRE_DIR + "/" + dirsplit[-1]
+                zipname = QDR_DIR + "/" + dirsplit[-1]
 
             zipped = shutil.make_archive(zipname, "zip", data)
             logger.debug(f"made: {zipped}")
@@ -190,21 +190,21 @@ class EmulatorRuntimeService():
         if data:
             if os.path.isdir(data):
                 logger.debug(f"Have directory: {data}")
-                if not os.path.isdir(QRE_DIR):
-                    os.mkdir(QRE_DIR)
+                if not os.path.isdir(QDR_DIR):
+                    os.mkdir(QDR_DIR)
                 dirsplit = data.split("/")
                 if dirsplit[-1] == "":
                     if not os.path.isfile(data + "program.py"):
                         raise Exception("program.py is required for directory upload")
                     if os.path.isfile(data + "executor.py") or os.path.isfile(data + "params.json"):
                         raise Exception("executor.py and params.json are unallowable names in directory")
-                    zipname = QRE_DIR + "/" + dirsplit[-2]
+                    zipname = QDR_DIR + "/" + dirsplit[-2]
                 else:
                     if not os.path.isfile(data + "/program.py"):
                         raise Exception("program.py is required for directory upload")
                     if os.path.isfile(data + "/executor.py") or os.path.isfile(data + "/params.json"):
                         raise Exception("executor.py and params.json are unallowable names in directory")
-                    zipname = QRE_DIR + "/" + dirsplit[-1]
+                    zipname = QDR_DIR + "/" + dirsplit[-1]
 
                 zipped = shutil.make_archive(zipname, "zip", data)
                 logger.debug(f"made: {zipped}")
@@ -280,7 +280,6 @@ class EmulatorRuntimeService():
                 initial[key] = val
         
 
-        # TODO validate metadata format
         metadata_keys = ['name', 'max_execution_time', 'description', 'version',
                          'backend_requirements', 'parameters', 'return_values',
                          'interim_results']

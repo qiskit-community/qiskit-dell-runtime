@@ -1,5 +1,5 @@
 from .backend_provider import BackendProvider
-from .hybrid_provider import DellHybridProvider
+from .dell_runtime_provider import DellRuntimeProvider
 from .emulation_executor import EmulationExecutor
 from .local_user_messenger import LocalUserMessengerClient
 from .emulator_runtime_job import EmulatorRuntimeJob

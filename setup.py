@@ -16,12 +16,12 @@ with open(test_requirements_path) as _fp:
     TEST_REQUIREMENTS = _fp.readlines()
 
 setup(
-    name="qiskit_dell",
+    name="qiskit-dell-runtime",
     version="0.0.1",
     author="DellTechnologies",
     author_email="v.fong@dell.com",
     packages=find_packages(exclude=["*test*"]),
-    description="Qiskit provider for Runtime Emulator backends",
+    description="Dell provider for Qiskit Runtime backends",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="Apache 2.0",

@@ -1,7 +1,7 @@
-from qiskit_emulator import DellHybridProvider
+from dell_runtime import DellRuntimeProvider
 import unittest
-from qiskit_emulator import LocalUserMessengerClient
-from qiskit_emulator import EmulatorRuntimeJob, EmulationExecutor
+from dell_runtime import LocalUserMessengerClient
+from dell_runtime import EmulatorRuntimeJob, EmulationExecutor
 from qiskit import QuantumCircuit, execute, transpile
 from time import sleep
 import logging
@@ -97,7 +97,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Canceled")
 
     def test_intermittent_results(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -127,7 +127,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
 
             
     def test_get_results(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -159,7 +159,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
     
 
     def test_get_status(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -190,7 +190,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Completed")
 
     def test_get_failed_status(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(FAIL_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         qc = QuantumCircuit(2, 2)
@@ -216,7 +216,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Failed")
 
     def test_cancel_job(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 
@@ -240,7 +240,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         self.assertEqual(status, "Canceled")
 
     def test_callback_function(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
 

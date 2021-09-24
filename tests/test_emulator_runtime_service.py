@@ -1,5 +1,5 @@
 import unittest
-from qiskit_emulator import DellHybridProvider
+from dell_runtime import DellRuntimeProvider
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
 from qiskit.providers.ibmq.runtime.runtime_program import ProgramParameter, ProgramResult
 from qiskit import QuantumCircuit
@@ -50,7 +50,7 @@ RUNTIME_PROGRAM_METADATA = {
 
 class EmulatorRuntimeServiceTest(unittest.TestCase):
     def test_upload(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         proglist = provider.runtime.programs()
         self.assertIsNotNone(proglist[program_id])
@@ -60,12 +60,12 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         self.assertTrue(findProgId)
 
     def test_runtime_backends(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         backends = provider.runtime.backends()
         self.assertGreater(len(backends), 1)
 
     def test_view_program(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         runtime_program = provider.runtime.program(program_id)
@@ -74,7 +74,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
 
 
     def test_run_program(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -93,7 +93,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
 
 
     def test_programs(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -104,7 +104,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
 
     
     def test_update_program(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
 
         new_meta = {'description': 'Qiskit Test Update', 'max_execution_time': RUNTIME_PROGRAM_METADATA['max_execution_time']}
@@ -119,7 +119,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         self.assertEqual('Test Update', program2.name)
 
     def test_pprint_programs(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -139,12 +139,12 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         ))
 
     def test_has_service(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertTrue(provider.has_service('runtime'))
         self.assertFalse(provider.has_service('fake-service'))
 
     def test_metadata(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         
         pr_id = provider.runtime.upload_program("fake-program1", metadata=RUNTIME_PROGRAM_METADATA)
         program = provider.runtime.program(pr_id)
@@ -180,7 +180,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
             self.fail("should pass")
 
     def test_upload_file(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -208,7 +208,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
             self.fail("should pass")
 
     def test_reserved_names(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
         self.assertIsNotNone(provider.runtime)
 
@@ -220,7 +220,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
             self.assertTrue(True)
 
     def test_delete_program(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         program_id = provider.runtime.upload_program(RUNTIME_PROGRAM, metadata=RUNTIME_PROGRAM_METADATA)
         prog_list = provider.runtime.programs(refresh=False)
 

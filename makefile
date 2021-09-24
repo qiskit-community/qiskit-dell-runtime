@@ -1,5 +1,5 @@
 DOCKER_CMD=docker
-DOCKER_BASE=harbor.dell.com/dojo-harbor/qre
+DOCKER_BASE=harbor.dell.com/dojo-harbor/qdr
 
 test: acceptance unit
 

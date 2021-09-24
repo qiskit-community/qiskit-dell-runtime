@@ -1,4 +1,4 @@
-from qiskit_emulator.emulator_runtime_job import EmulatorRuntimeJob
+from dell_runtime.emulator_runtime_job import EmulatorRuntimeJob
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
 from qiskit.providers import JobStatus

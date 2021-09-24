@@ -5,7 +5,7 @@ from .emulator_runtime_service import EmulatorRuntimeService
 from .remote_runtime_service import RemoteRuntimeService
 from .local_sub_provider import LocalSubProviderManager
 
-class DellHybridProvider():
+class DellRuntimeProvider():
 
     def __init__(self):
         self.local_runtime = EmulatorRuntimeService(self)

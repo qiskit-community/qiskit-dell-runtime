@@ -1,6 +1,6 @@
 # import unittest
 # import time
-# from qiskit_emulator import LocalUserMessenger, LocalUserMessengerClient
+# from dell_runtime import LocalUserMessenger, LocalUserMessengerClient
 
 # class LocalUserMessengerTest(unittest.TestCase):
 #     def test_local_user_messenger(self):

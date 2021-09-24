@@ -1,9 +1,9 @@
 import unittest
-from qiskit_emulator import DellHybridProvider, BackendProvider
+from dell_runtime import DellRuntimeProvider, BackendProvider
 
 class ProviderTest(unittest.TestCase):
     def test_new_provider(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
         provider = BackendProvider()
         self.assertIsNotNone(provider)
@@ -15,14 +15,14 @@ class ProviderTest(unittest.TestCase):
         self.assertGreater(len(provider.backends()), 1)
 
     def test_runtime_supported(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
 
         self.assertTrue(provider.has_service('runtime'))
         self.assertFalse(provider.has_service('weird_service'))
 
     def test_has_runtime_attribute(self):
-        provider = DellHybridProvider()
+        provider = DellRuntimeProvider()
         self.assertIsNotNone(provider)
 
         self.assertIsNotNone(provider.runtime)

@@ -21,9 +21,8 @@ logger = logging.getLogger(__name__)
 DIR = "DIR"
 STRING = "STRING"
 TOKEN = os.getenv("TOKEN")
-QRE_ID = os.getenv("QRE_ID")
+QDR_ID = os.getenv("QDR_ID")
 
-#TODO: set session timeout
 session = requests.Session()
 
 class RemoteRuntimeService():
@@ -36,14 +35,14 @@ class RemoteRuntimeService():
 
         sso_enabled = json.loads(self._get("/sso_enabled")[2])
         if not sso_enabled:
-            if not QRE_ID:
+            if not QDR_ID:
                 self.new_non_sso_user()
             else:
-                res = self._get(f"/existing_user/{QRE_ID}")
+                res = self._get(f"/existing_user/{QDR_ID}")
                 if res[0] >= 300:
                     raise Exception(f"Error logging in existing user: Code {res[0]}")
                 elif json.loads(res[2]) != True:
-                    print(f"User {QRE_ID} not found. Creating new user!")
+                    print(f"User {QDR_ID} not found. Creating new user!")
                     self.new_non_sso_user()
         else:
             if not TOKEN:
@@ -444,7 +443,7 @@ class RemoteRuntimeService():
         if res[0] != 200:
             raise Exception(f"Error creating a new user: Code {res[0]}")
         new_id = res[2]
-        os.environ['QRE_ID'] = new_id
-        global QRE_ID
-        QRE_ID = new_id
-        print(f"=======\n\nYour QRE ID is: {new_id}.\nSave this ID and run 'export QRE_ID=<your id>' to access your programs in future sessions.")
+        os.environ['QDR_ID'] = new_id
+        global QDR_ID
+        QDR_ID = new_id
+        print(f"=======\n\nYour qdr ID is: {new_id}.\nSave this ID and run 'export QDR_ID=<your id>' to access your programs in future sessions.")

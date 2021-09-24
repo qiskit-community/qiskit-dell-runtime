@@ -1,4 +1,4 @@
-from qiskit_emulator.aerjob import AerJob
+from dell_runtime.aerjob import AerJob
 from qiskit.providers import BackendV1 as Backend
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.models.backendstatus import BackendStatus

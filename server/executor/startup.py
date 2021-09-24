@@ -20,11 +20,11 @@ job_id = os.environ['JOB_ID']
 COMPLETED = "Completed"
 FAILED = "Failed"
 
-qre_dir = "/var/qiskit-runtime"
-# qre_dir = "/root/workspace/qre-runtime-test"
-executor_path = os.path.join(qre_dir, 'executor.py')
-program_path = os.path.join(qre_dir, 'program.py')
-params_path = os.path.join(qre_dir, 'params.json')
+qdr_dir = "/var/qiskit-runtime"
+# qdr_dir = "/root/workspace/qdr-runtime-test"
+executor_path = os.path.join(qdr_dir, 'executor.py')
+program_path = os.path.join(qdr_dir, 'program.py')
+params_path = os.path.join(qdr_dir, 'params.json')
 
 STRING = "STRING"
 DIR = "DIR"
@@ -47,12 +47,12 @@ def download_program_from_orchestrator():
         logger.debug('received directory')
         
         logger.debug("to bytes")
-        tmpzip = os.path.join(qre_dir, "tmpzip.zip")
+        tmpzip = os.path.join(qdr_dir, "tmpzip.zip")
         with open(tmpzip, "wb+") as temp:
             temp.write(req.content)
         logger.debug(req.content)
         logger.debug(f'wrote bytes to zip {tmpzip}')
-        shutil.unpack_archive(tmpzip, extract_dir=qre_dir, format="zip")
+        shutil.unpack_archive(tmpzip, extract_dir=qdr_dir, format="zip")
         logger.debug('unpacked archive')
         os.remove(tmpzip)
         logger.debug("finished unpacking directory")

@@ -1,6 +1,6 @@
 import unittest
 from qiskit import QuantumCircuit, execute, transpile
-from qiskit_emulator import BackendProvider
+from dell_runtime import BackendProvider
 from qiskit.providers import JobStatus
 from time import sleep
 

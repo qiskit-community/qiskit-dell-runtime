@@ -1,14 +1,14 @@
-ARG QRE_NS
+ARG QDR_NS
 ARG DOCKER_REPO
 
-FROM $DOCKER_REPO/$QRE_NS/qre-base
+FROM $DOCKER_REPO/$QDR_NS/qdr-base
 
 RUN apt-get update && apt-get install -y python3-flask default-libmysqlclient-dev build-essential
 RUN mkdir /app
 COPY ./requirements.txt /app/
 RUN pip3 install -r /app/requirements.txt
-# COPY ./qrecerts.crt /usr/local/share/ca-certificates
-# COPY ./qrecerts.crt /etc/ssl/certs/qrecerts.pem
+# COPY ./qdrcerts.crt /usr/local/share/ca-certificates
+# COPY ./qdrcerts.crt /etc/ssl/certs/qdrcerts.pem
 # RUN update-ca-certificates
 COPY ./main.py /app/
 RUN cat /app/main.py

@@ -1,7 +1,7 @@
 ARG QDR_NS
 ARG DOCKER_REPO
 
-FROM $DOCKER_REPO/$QDR_NS/qiskit
+FROM $DOCKER_REPO/qdr-qiskit
 
 RUN mkdir -p /var/qdr/dell_runtime
 

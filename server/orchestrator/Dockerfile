@@ -1,7 +1,7 @@
 ARG QDR_NS
 ARG DOCKER_REPO
 
-FROM $DOCKER_REPO/$QDR_NS/qdr-base
+FROM $DOCKER_REPO/qdr-base
 
 RUN apt-get update && apt-get install -y python3-flask default-libmysqlclient-dev build-essential
 RUN mkdir /app

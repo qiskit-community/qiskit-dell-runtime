@@ -80,6 +80,43 @@ def main(
     raise Exception('test failure')
 """
 
+VQE_PROGRAM = """
+from qiskit import Aer
+from qiskit.opflow import X, Z, I
+from qiskit.utils import QuantumInstance, algorithm_globals
+from qiskit.algorithms import VQE
+from qiskit.algorithms.optimizers import SLSQP
+from qiskit.circuit.library import TwoLocal
+import json
+
+def result_to_jsonstr(res):
+    resd = {}
+    resd['eigenvalue'] = res.eigenvalue
+    resd['opt_time'] = res.optimizer_time
+    return json.dumps(resd)
+
+def main(backend, user_messenger, **kwargs):
+    H2_op = (-1.052373245772859 * I ^ I) + \
+            (0.39793742484318045 * I ^ Z) + \
+            (-0.39793742484318045 * Z ^ I) + \
+            (-0.01128010425623538 * Z ^ Z) + \
+            (0.18093119978423156 * X ^ X)
+
+#     seed = random.randint(0, 1000)
+#     print(seed)
+    seed = kwargs['seed']
+    algorithm_globals.random_seed = seed
+    qi = QuantumInstance(backend, seed_transpiler=seed, seed_simulator=seed, shots=kwargs['shots'])
+    ansatz = TwoLocal(rotation_blocks='ry', entanglement_blocks='cz')
+    slsqp = SLSQP(maxiter=1000)
+    vqe = VQE(ansatz, optimizer=slsqp, quantum_instance=qi, include_custom=kwargs['include_custom'])
+    result = vqe.compute_minimum_eigenvalue(operator=H2_op)
+
+    result = result_to_jsonstr(result)
+
+    user_messenger.publish(result, final=True)
+"""
+
 RUNTIME_PROGRAM_METADATA = {
     "max_execution_time": 600,
     "description": "Qiskit test program"
@@ -526,3 +563,31 @@ class AcceptanceTest(unittest.TestCase):
             url = urljoin(SERVER_URL, '/callback')
             res = requests.get(url)
             self.assertEqual(res.status_code, 401)
+
+    def test_vqe_emulation(self):
+        vqe_inputs = {
+            'shots': 2,
+            'seed': 10,
+            'include_custom': True
+        }
+
+        provider = DellRuntimeProvider()
+        provider.remote(os.getenv("SERVER_URL"))
+
+        program_id = provider.runtime.upload_program(VQE_PROGRAM)
+
+        job = provider.runtime.run(
+            program_id=program_id,
+            inputs=vqe_inputs,
+            options=None)
+            
+        result = job.result()
+
+        while not result:
+            sleep(0.5)
+            result = job.result()
+        
+        result = json.loads(job.result())
+
+        self.assertEqual(-1.8572748921516753, result['eigenvalue'])
+        self.assertLessEqual(result['opt_time'], 0.4)

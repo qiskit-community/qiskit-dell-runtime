@@ -31,7 +31,7 @@ While simulation engines execute quantum circuits to measure probablistic outcom
 
 **The Hybrid Emulation Platform can support both simulation and emulation,** depending on the backend used. 
 
-You can read about the VQE example provided in [our documentation](examples.ipynb) or in a [Qiskit Tutorial](https://qiskit.org/documentation/tutorials/algorithms/04_vqe_advanced.html) if you want to learn more about when it may be beneficial to use either emulation or simulation over the other.
+You can read about the VQE example provided in [our documentation](doc/examples.ipynb) or in a [Qiskit Tutorial](https://qiskit.org/documentation/tutorials/algorithms/04_vqe_advanced.html) if you want to learn more about when it may be beneficial to use either emulation or simulation over the other.
 
 Emulations for different use cases are under-development, and we are looking for feedback to better prioritize on use cases. If you have a use-case in mind, please contact us at [v.fong@dell.com](mailto:v.fong@dell.com).
 

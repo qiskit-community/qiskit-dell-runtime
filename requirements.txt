@@ -1,2 +1,2 @@
-qiskit>=0.26.0
+qiskit==0.31.0
 qiskit-ibmq-provider>=0.13.0

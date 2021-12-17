@@ -14,16 +14,16 @@ build_base_qdr_image:
 	$(DOCKER_CMD) build --build-arg QDR_NS=$(QDR_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ../ -t $(DOCKER_BASE)/qdr-base
 
 build_orchestrator_image:
-	$(DOCKER_CMD) build --build-arg QDR_NS=$(QDR_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ./orchestrator/ -t $(DOCKER_BASE)/orchestrator
+	$(DOCKER_CMD) build --build-arg QDR_NS=$(QDR_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ./orchestrator/ -t $(DOCKER_BASE)/qdr-orchestrator
 
 build_executor_image:
-	$(DOCKER_CMD) build --build-arg QDR_NS=$(QDR_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ./executor/ -t $(DOCKER_BASE)/executor
+	$(DOCKER_CMD) build --build-arg QDR_NS=$(QDR_NS) --build-arg DOCKER_REPO=$(DOCKER_REPO) ./executor/ -t $(DOCKER_BASE)/qdr-executor
 
 push:
 	$(DOCKER_CMD) push $(DOCKER_BASE)/qiskit
 	$(DOCKER_CMD) push $(DOCKER_BASE)/qdr-base
-	$(DOCKER_CMD) push $(DOCKER_BASE)/orchestrator
-	$(DOCKER_CMD) push $(DOCKER_BASE)/executor
+	$(DOCKER_CMD) push $(DOCKER_BASE)/qdr-orchestrator
+	$(DOCKER_CMD) push $(DOCKER_BASE)/qdr-executor
 
 deploy_with_sso: 
 	envsubst < ./deployments/qdr.yaml | \

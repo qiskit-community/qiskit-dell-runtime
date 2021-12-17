@@ -43,9 +43,10 @@ with open(test_requirements_path) as _fp:
 
 setup(
     name="qiskit-dell-runtime",
-    version="0.0.1",
+    version="0.1.1",
     author="DellTechnologies",
     author_email="v.fong@dell.com",
+    url="https://github.com/Qiskit-Partners/qiskit-dell-runtime/",
     packages=find_packages(exclude=["*test*"]),
     description="Dell provider for Qiskit Runtime backends",
     long_description=long_description,

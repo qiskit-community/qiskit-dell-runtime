@@ -1,7 +1,7 @@
 ARG QDR_NS
 ARG DOCKER_REPO
 
-FROM $DOCKER_REPO/qdr-base
+FROM $DOCKER_REPO/$QDR_NS/qdr-base
 
 COPY ./requirements.txt /var/qiskit-runtime/
 RUN pip3 install -r /var/qiskit-runtime/requirements.txt

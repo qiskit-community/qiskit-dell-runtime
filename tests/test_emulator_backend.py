@@ -51,7 +51,7 @@ class ProviderTest(unittest.TestCase):
         self.assertGreater(backend_config.n_qubits, 25)
 
         # TODO: Need to relook at this later
-        self.assertEqual(80, len(backend_config.basis_gates))
+        self.assertEqual(83, len(backend_config.basis_gates))
 
         self.assertTrue(backend_config.local)
         self.assertTrue(backend_config.simulator)

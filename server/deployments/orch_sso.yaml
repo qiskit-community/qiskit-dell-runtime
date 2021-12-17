@@ -20,7 +20,7 @@ spec:
       serviceAccountName: qdrorch
       containers:
         - name: qdr-orchestrator
-          image: ${DOCKER_REPO}/qdr-orchestrator
+          image: ${DOCKER_REPO}/${QDR_NS}/qdr-orchestrator
           env:
           - name: DOCKER_REPO
             value: ${DOCKER_REPO}

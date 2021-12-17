@@ -26,7 +26,6 @@
 
 from typing import List, Dict, Optional, Callable, Type, Union, NamedTuple, Any
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
-from qiskit.providers.ibmq.runtime.runtime_program import ProgramParameter, ProgramResult
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 from qiskit.providers import ProviderV1 as Provider
 import hashlib
@@ -37,6 +36,7 @@ import os
 import json
 import logging
 import shutil
+import copy
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -78,29 +78,16 @@ class EmulatorRuntimeService():
             self,
             data: Union[bytes, str],
             metadata: Optional[Union[Dict, str]] = None,
-            name: Optional[str] = None,
-            max_execution_time: Optional[int] = None,
-            description: Optional[str] = None,
-            version: Optional[float] = None,
-            backend_requirements: Optional[str] = None,
-            parameters: Optional[List[ProgramParameter]] = None,
-            return_values: Optional[List[ProgramResult]] = None,
-            interim_results: Optional[List[ProgramResult]] = None
     ) -> str:
+
+        metadata = copy.deepcopy(metadata)
+        # metadata = self._merge_metadata(metadata=metadata)
         # careful of hash collision
-        program_hash = hex(hash((data, name, version)))[-16:]
-        if name is None:
+        program_hash = hex(hash((data, None if 'name' not in metadata else metadata['name'], None if 'description' not in metadata else metadata['description'],)))[-16:]
+        if 'name' not in metadata:
             name = program_hash
-
-        program_metadata = self._merge_metadata(
-            initial={},
-            metadata=metadata,
-            name=name, max_execution_time=max_execution_time, description=description,
-            version=version, backend_requirements=backend_requirements,
-            parameters=parameters,
-            return_values=return_values, interim_results=interim_results)
-
-        program_metadata.pop('name', None)
+        else: 
+            name = metadata.pop('name')
 
         # data can be one of three things:
         # Filename -> read to string, send
@@ -135,12 +122,11 @@ class EmulatorRuntimeService():
             logger.debug(f"Have string: {data}")
             self._program_data[program_hash] = (data, STRING)
         
-        
         self._programs[program_hash] = RuntimeProgram(
             program_id = program_hash,
             creation_date= datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
             program_name = name,
-            **program_metadata
+            **metadata
         )
         return program_hash
 
@@ -185,33 +171,10 @@ class EmulatorRuntimeService():
             name: Optional[str] = None,
             max_execution_time: Optional[int] = None,
             description: Optional[str] = None,
-            version: Optional[float] = None,
-            backend_requirements: Optional[str] = None,
-            parameters: Optional[List[ProgramParameter]] = None,
-            return_values: Optional[List[ProgramResult]] = None,
-            interim_results: Optional[List[ProgramResult]] = None
+            spec: Optional[Dict] = None
     ):
-        program_metadata = self._merge_metadata(
-            initial={
-                'name':self._programs[program_id].name, 
-                'max_execution_time':self._programs[program_id].max_execution_time, 
-                'description':self._programs[program_id].description,
-                'version':self._programs[program_id].version, 
-                'backend_requirements':self._programs[program_id].backend_requirements,
-                'parameters':self._programs[program_id].parameters,
-                'return_values':self._programs[program_id].return_values, 
-                'interim_results':self._programs[program_id].interim_results,
-            },
-            metadata=metadata,
-            name=name, 
-            max_execution_time=max_execution_time, 
-            description=description,
-            version=version, 
-            backend_requirements=backend_requirements,
-            parameters=parameters,
-            return_values=return_values, 
-            interim_results=interim_results)
-        program_metadata.pop('name', None)
+        metadata = self._merge_metadata(metadata=metadata, name=name, max_execution_time=max_execution_time, description=description, spec=spec)
+        metadata.pop('name', None)
 
         if data:
             if os.path.isdir(data):
@@ -247,8 +210,8 @@ class EmulatorRuntimeService():
         self._programs[program_id] = RuntimeProgram(
             program_id = program_id,
             creation_date= self._programs[program_id].creation_date,
-            program_name = name if name else self._programs[program_id].name,
-            **program_metadata
+            program_name = self._programs[program_id].name if name is None else name,
+            **metadata
         )
 
         return True
@@ -276,40 +239,25 @@ class EmulatorRuntimeService():
     # copied from IBM runtime service
     def _merge_metadata(
             self,
-            initial: Dict,
-            metadata: Optional[Union[Dict, str]] = None,
+            metadata: Optional[Dict] = None,
             **kwargs: Any
     ) -> Dict:
         """Merge multiple copies of metadata.
         Args:
-            initial: The initial metadata. This may be mutated.
-            metadata: Name of the program metadata file or metadata dictionary.
+            metadata: Program metadata.
             **kwargs: Additional metadata fields to overwrite.
         Returns:
             Merged metadata.
         """
-        upd_metadata = {}
-        if metadata is not None:
-            if isinstance(metadata, str):
-                with open(metadata, 'r') as file:
-                    upd_metadata = json.load(file)
-            else:
-                upd_metadata = copy.deepcopy(metadata)
-
-        self._tuple_to_dict(initial)
-        initial.update(upd_metadata)
-
-
-        self._tuple_to_dict(kwargs)
-        for key, val in kwargs.items():
-            if val is not None:
-                initial[key] = val
-        
-
-        metadata_keys = ['name', 'max_execution_time', 'description', 'version',
-                         'backend_requirements', 'parameters', 'return_values',
-                         'interim_results']
-        return {key: val for key, val in initial.items() if key in metadata_keys}
+        merged = {}
+        metadata = metadata or {}
+        metadata_keys = ['name', 'max_execution_time', 'description', 'spec']
+        for key in metadata_keys:
+            if kwargs.get(key, None) is not None:
+                merged[key] = kwargs[key]
+            elif key in metadata.keys():
+                merged[key] = metadata[key]
+        return merged
 
     def _tuple_to_dict(self, metadata: Dict) -> None:
         """Convert fields in metadata from named tuples to dictionaries.

@@ -35,6 +35,7 @@ import logging
 import json
 import requests
 from urllib.parse import urljoin
+from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,7 @@ VQE_PROGRAM = """
 from qiskit import Aer
 from qiskit.opflow import X, Z, I
 from qiskit.utils import QuantumInstance, algorithm_globals
+from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
 from qiskit.algorithms import VQE
 from qiskit.algorithms.optimizers import SLSQP
 from qiskit.circuit.library import TwoLocal
@@ -93,7 +95,7 @@ def result_to_jsonstr(res):
     resd = {}
     resd['eigenvalue'] = res.eigenvalue
     resd['opt_time'] = res.optimizer_time
-    return json.dumps(resd)
+    return json.dumps(resd, cls=RuntimeEncoder)
 
 def main(backend, user_messenger, **kwargs):
     H2_op = (-1.052373245772859 * I ^ I) + \
@@ -581,13 +583,11 @@ class AcceptanceTest(unittest.TestCase):
             inputs=vqe_inputs,
             options=None)
             
-        result = job.result()
+        # result = job.result()
 
-        while not result:
-            sleep(0.5)
-            result = job.result()
+        result = job.result(timeout=100)
         
-        result = json.loads(job.result())
+        result = json.loads(job.result(), cls=RuntimeDecoder)
 
         self.assertEqual(-1.8572748921516753, result['eigenvalue'])
         self.assertLessEqual(result['opt_time'], 0.4)

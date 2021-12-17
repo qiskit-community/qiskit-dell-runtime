@@ -27,7 +27,6 @@
 import unittest
 from dell_runtime import DellRuntimeProvider
 from qiskit.providers.ibmq.runtime import RuntimeProgram, RuntimeJob, ResultDecoder
-from qiskit.providers.ibmq.runtime.runtime_program import ProgramParameter, ProgramResult
 from qiskit import QuantumCircuit
 import os
 
@@ -55,10 +54,8 @@ def main(backend, user_messenger, **kwargs):
 """
 
 RUNTIME_PROGRAM_METADATA = {
-    "name": "qiskit-test",
     "description": "Test program",
     "max_execution_time": 300,
-    "version": "0.1",
     "backend_requirements": {"min_num_qubits":  5},
     "parameters": [
         {"name": "param1", "description": "Some parameter.",
@@ -69,7 +66,8 @@ RUNTIME_PROGRAM_METADATA = {
     ],
     "interim_results": [
         {"name": "int_res", "description": "Some interim result", "type": "string"},
-    ]
+    ],
+    "name": "qiskit-test",
 }
 
 # PROGRAM_PREFIX = 'qiskit-test'
@@ -161,7 +159,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         self.assertTrue(output.startswith( 
         '''==================================================
 {}:
-  Name: {}'''.format(pr_id_1,pr_id_1)
+  Name: {}'''.format(pr_id_1,'qiskit-test')
         ))
 
     def test_has_service(self):
@@ -174,22 +172,12 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         
         pr_id = provider.runtime.upload_program("fake-program1", metadata=RUNTIME_PROGRAM_METADATA)
         program = provider.runtime.program(pr_id)
-        self.assertEqual(pr_id, program.name)
+        self.assertEqual('qiskit-test', program.name)
         self.assertEqual(RUNTIME_PROGRAM_METADATA['description'], program.description)
         self.assertEqual(RUNTIME_PROGRAM_METADATA['max_execution_time'],
                             program.max_execution_time)
-        self.assertEqual(RUNTIME_PROGRAM_METADATA["version"], program.version)
         self.assertEqual(RUNTIME_PROGRAM_METADATA['backend_requirements'],
                             program.backend_requirements)
-        self.assertEqual([ProgramParameter(**param) for param in
-                            RUNTIME_PROGRAM_METADATA['parameters']],
-                            program.parameters)
-        self.assertEqual([ProgramResult(**ret) for ret in
-                            RUNTIME_PROGRAM_METADATA['return_values']],
-                            program.return_values)
-        self.assertEqual([ProgramResult(**ret) for ret in
-                            RUNTIME_PROGRAM_METADATA['interim_results']],
-                            program.interim_results)
 
     def test_circuit_runner(self):
         from . import circuit_runner as cr

@@ -17,7 +17,7 @@ metadata:
 spec:
   containers:
     - name: {pod_name}
-      image: {image_repo}/{namespace}/executor
+      image: {image_repo}/{namespace}/qdr-executor
       env:
       - name: DATA_TOKEN
         value: {data_token}

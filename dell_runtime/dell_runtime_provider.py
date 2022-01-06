@@ -25,7 +25,6 @@
 
 
 import logging
-
 logger = logging.getLogger(__name__)
 from .emulator_runtime_service import EmulatorRuntimeService
 from .remote_runtime_service import RemoteRuntimeService

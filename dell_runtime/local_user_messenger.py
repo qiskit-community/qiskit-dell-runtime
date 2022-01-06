@@ -33,10 +33,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LocalUserMessengerClient(UserMessenger):
     def __init__(self, port):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        logger.debug(f"client connecting port {port}")
+        print(f"client connecting port {port}")
         self._sock.connect(('localhost', port))
 
     def publish(

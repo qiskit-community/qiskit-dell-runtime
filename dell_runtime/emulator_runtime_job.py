@@ -108,12 +108,12 @@ class EmulatorRuntimeJob:
         return (self._status == "Failed" or self._status == "Completed" or self._status == "Canceled")
 
     def local_poll_for_results(self,callback):
-        logging.debug(f"starting to listen to port {self.local_port}")
+        logger.debug(f"starting to listen to port {self.local_port}")
         self._sock.listen(1)
-        self._sock.settimeout(3)
+        self._sock.settimeout(120)
         try:
             conn, addr = self._sock.accept()
-            logging.debug(f"accepted client connection from {addr}")
+            logger.debug(f"accepted client connection from {addr}")
             with conn:
                 while self._finalResults == None and not self._kill and not self.job_completed():
                     data = conn.recv(16384)

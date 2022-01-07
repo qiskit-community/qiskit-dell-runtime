@@ -96,7 +96,7 @@ class MultiLocalBackendTest(unittest.TestCase):
         }
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        response = job.result(timeout=15)
+        response = job.result(timeout=120)
 
         results = response['results'][0]
 
@@ -126,7 +126,7 @@ class MultiLocalBackendTest(unittest.TestCase):
         }
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        response = job.result(timeout=15)
+        response = job.result(timeout=120)
 
         results = response['results'][0]
 

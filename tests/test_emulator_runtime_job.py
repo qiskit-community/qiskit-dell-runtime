@@ -139,7 +139,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         # runtime_program = provider.runtime.program(program_id)
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
         
-        result = job.result(timeout=15)
+        result = job.result(timeout=120)
         messages = job.get_unread_messages()
         logger.debug(f'unread messages {messages}')
             
@@ -167,7 +167,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         }
 
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
-        response = job.result(timeout=15)
+        response = job.result(timeout=120)
 
         results = response['results'][0]
 
@@ -203,7 +203,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         status = job.status()
         correct_status = status == "Creating" or status == "Running"
         self.assertTrue(correct_status)
-        job.result(timeout=15)
+        job.result(timeout=120)
         status = job.status()
 
         max_try = 50
@@ -232,7 +232,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         status = job.status()
         self.assertEqual(status, "Creating")
         
-        max_try = 50
+        max_try = 500
         attempt = 0
         while (status == "Creating" or status == "Running") and attempt < max_try:
             sleep(0.1)
@@ -286,7 +286,7 @@ class EmulatorRuntimeJobTest(unittest.TestCase):
         new_stdout = io.StringIO()
         sys.stdout = new_stdout
         job = provider.runtime.run(program_id, options=None, inputs=program_inputs,callback=print)
-        result =job.result(timeout=120)
+        result =job.result(timeout=600)
         output = new_stdout.getvalue()
         sys.stdout = old_stdout
         

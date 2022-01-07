@@ -1,7 +1,8 @@
 from dell_runtime import DellRuntimeProvider
 from qiskit import QuantumCircuit
 import os
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
 RUNTIME_PROGRAM = """
 # This code is part of qiskit-runtime.
 #
@@ -103,7 +104,7 @@ def main():
     
     job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
-    res = job.result(timeout=10)
+    res = job.result(timeout=120)
 
     print(f"res: {res}")
 

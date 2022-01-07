@@ -119,24 +119,27 @@ class EmulationExecutor():
         return self._temp_dir
 
     def _execute(self, statusvalue):
+        x_logger = logging.getLogger(__name__)
+
+
         statusvalue.value = STATUS_VALUES.index(RUNNING)
         try:
             executor_path = os.path.join(self._temp_dir, "executor.py")
             cmd = [sys.executable, executor_path]
-            logger.debug(f"starting {cmd}")
+            x_logger.debug(f"starting {cmd}")
             exec_result = subprocess.run(cmd, capture_output=True, text=True)
-            logger.debug(f"finished executing {cmd}")
-            logger.debug(f"stdout: {exec_result.stdout}")
-            logger.debug(f"stderr: {exec_result.stderr}")
+            x_logger.debug(f"finished executing {cmd}")
+            x_logger.debug(f"stdout: {exec_result.stdout}")
+            x_logger.debug(f"stderr: {exec_result.stderr}")
             exec_result.check_returncode()
             statusvalue.value = STATUS_VALUES.index(COMPLETED)
-            logger.debug(f"status: sent COMPLETED")
+            x_logger.debug(f"status: sent COMPLETED")
             self._post_run()
             sys.exit(0)
         except Exception as e:
             statusvalue.value = STATUS_VALUES.index(FAILED)
             self._post_run()
-            logger.debug(f"status: sent FAILED")
+            x_logger.debug(f"status: sent FAILED")
             sys.exit(1)
 
             
@@ -165,10 +168,13 @@ import sys
 import json
 import os
 from qiskit.providers.ibmq.runtime.utils import RuntimeDecoder
+import logging
+logger = logging.getLogger(__name__)
+
 
 if __name__ == "__main__":
     params = None
-    params_path = '{}'	
+    params_path = r'{}'	
     with open(params_path, 'r') as params_file:	
         params = params_file.read()
 
@@ -177,16 +183,16 @@ if __name__ == "__main__":
     provider = BackendProvider()
     if 'backend_name' in inputs:
         provider = BackendProvider()
-        print(inputs)
+        logger.debug(inputs)
         backend_name = inputs['backend_name']
-        print("using backend: " + backend_name)
+        logger.debug("using backend: " + backend_name)
         if 'backend_token' in inputs:
-            print('backend with token!')
+            logger.debug('backend with token!')
             backend = provider.get_backend(name = backend_name, backend_token=inputs["backend_token"])
         else:
             backend = provider.get_backend(name = backend_name)
     else:
-        print("using default backend: " + 'aer_simulator')
+        logger.debug("using default backend: " + 'aer_simulator')
         backend = provider.get_backend('aer_simulator')
 
     user_messenger = LocalUserMessengerClient({})
@@ -194,8 +200,8 @@ if __name__ == "__main__":
         main(backend, user_messenger=user_messenger, **inputs)
         
     except Exception as e:
-        print(e)
+        logger.debug(e)
         sys.exit(1)
-    print("exit")
+    logger.debug("exit")
   
 """

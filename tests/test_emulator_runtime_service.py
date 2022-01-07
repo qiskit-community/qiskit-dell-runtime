@@ -110,7 +110,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
         try:
             job = provider.runtime.run(program_id, options=None, inputs={"iterations": 2})
 
-            result = job.result(timeout=15)
+            result = job.result(timeout=120)
             self.assertIsNotNone(result)
         except Exception:
             self.fail("should pass")
@@ -216,7 +216,7 @@ class EmulatorRuntimeServiceTest(unittest.TestCase):
 
             job = provider.runtime.run(program_id, options=None, inputs=program_inputs)
 
-            result = job.result(timeout=15)
+            result = job.result(timeout=120)
             self.assertIsNotNone(result)
         except Exception:
             self.fail("should pass")

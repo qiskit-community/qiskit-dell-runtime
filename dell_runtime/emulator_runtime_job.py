@@ -110,7 +110,7 @@ class EmulatorRuntimeJob:
     def local_poll_for_results(self,callback):
         logger.debug(f"starting to listen to port {self.local_port}")
         self._sock.listen(1)
-        self._sock.settimeout(60)
+        self._sock.settimeout(120)
         try:
             conn, addr = self._sock.accept()
             logger.debug(f"accepted client connection from {addr}")

@@ -3,7 +3,12 @@ Qiskit Dell Runtime is a [Qiskit Runtime](https://github.com/Qiskit-Partners/qis
 
 Various simulation, emulation and quantum hardware can be integrated with this platform. Developers can abstract their source code with Qiskit, so that execution can be ported across execution environments with minimum effort. 
 
-At this time the Qiskit-Dell-Runtime has only been tested on Linux.
+At this time the Qiskit-Dell-Runtime has been tested on Linux and Windows.
+
+## Getting Started with Qiskit
+The Qiskit Dell Runtime is an platform for running hybrid classical-quantum algorithms in local and remote execution environments. To get started using the platform, it is recommended that you have some experience with Qiskit first.
+
+You can find plenty of tutorials and introductory materials provided by Qiskit [here](https://qiskit.org/learn/).
 
 ## Architecture
 This platform provides both client-side provider and server-side components. 

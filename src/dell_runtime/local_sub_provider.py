@@ -24,7 +24,7 @@
 # limitations under the License.
 
 
-from qiskit import Aer
+from qiskit_aer import Aer
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 # from qiskit import IBMQ
 
@@ -44,7 +44,7 @@ class LocalSubProviderManager():
         
         self._backends_by_name = {}
         for backend in self._backends:
-            self._backends_by_name[backend.name()] = backend
+            self._backends_by_name[backend.name] = backend
 
 
     def backends(self):

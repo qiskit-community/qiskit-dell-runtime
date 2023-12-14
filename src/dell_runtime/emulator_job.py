@@ -26,7 +26,8 @@
 
 from qiskit.providers import JobV1
 from qiskit.providers import JobStatus, JobError
-from qiskit import Aer, transpile
+from qiskit import transpile
+from qiskit_aer import Aer
 import functools
 
 def requires_submit(func):

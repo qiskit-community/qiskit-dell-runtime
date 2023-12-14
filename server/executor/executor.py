@@ -24,7 +24,7 @@
 # limitations under the License.
 
 
-from qiskit import Aer
+from qiskit_aer import Aer
 
 from program import main
 from urllib.parse import urljoin

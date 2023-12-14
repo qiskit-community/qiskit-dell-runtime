@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qiskit-dell-runtime"
+version = "0.1.5"
+authors = [
+  { name="Dell Technologies", email="ben_santaus@dell.com" },
+]
+description = "Dell provider for Qiskit Runtime backends"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+classifiers = [
+    "Environment :: Console",
+        "License :: OSI Approved :: Apache Software License",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "qiskit>=0.41.0",
+    "qiskit-aer>=0.13.1",
+    "qiskit-ibmq-provider>=0.13.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Qiskit-Partners/qiskit-dell-runtime/"

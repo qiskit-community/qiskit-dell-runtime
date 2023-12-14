@@ -83,7 +83,7 @@ class DBService():
     def fetch_job_owner(self, job_id):
         try:
             session = Session()
-            fields = ['program_id']
+            fields = [Job.program_id]
             job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
             logger.debug(f'program id of job {job_id} : {job.program_id}')
             return self.fetch_program_owner(job.program_id)
@@ -93,7 +93,7 @@ class DBService():
     def fetch_program_owner(self, program_id):
         try:
             session = Session()
-            fields = ['user_id']
+            fields = [RuntimeProgram.user_id]
             program = session.query(RuntimeProgram).filter_by(program_id=program_id).options(load_only(*fields)).one()
             logger.debug(f'user id of program {program_id} : {program.user_id}')
             return program.user_id
@@ -143,7 +143,7 @@ class DBService():
     def fetch_pod_name(self, job_id):
         try:
             session = Session()
-            fields = ['pod_name']
+            fields = [Job.pod_name]
             job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
             return job.pod_name
         finally:
@@ -152,7 +152,7 @@ class DBService():
     def fetch_user_id(self, username):
         try:
             session = Session()
-            fields = ['id']
+            fields = [User.id]
             user = session.query(User).filter_by(user_name=username).options(load_only(*fields)).one()
             return user.id
         except:
@@ -173,7 +173,7 @@ class DBService():
     def fetch_messages(self, job_id, timestamp):
         try:
             session = Session()
-            fields = ['data', 'creation_date']
+            fields = [Message.data, Message.creation_date]
             all_messages = session.query(Message).filter_by(job_id=job_id).options(load_only(*fields)).all()
             new_messages = []
             for msg in all_messages:
@@ -197,7 +197,7 @@ class DBService():
     def fetch_runtime_program_data(self, program_id):
         try:
             session = Session()
-            fields = ['data', 'data_type']
+            fields = [RuntimeProgram.data, RuntimeProgram.data_type]
             program = session.query(RuntimeProgram).filter_by(program_id=program_id).filter_by(status=ACTIVE).options(load_only(*fields)).one()
             resp = {"data": program.data, "data_type": program.data_type}
             return resp
@@ -209,7 +209,7 @@ class DBService():
         # programs = RuntimeProgram.query.all()
         try:
             session = Session()
-            fields = ['program_id', 'name', 'program_metadata']
+            fields = [RuntimeProgram.program_id, RuntimeProgram.name, RuntimeProgram.program_metadata]
             programs = session.query(RuntimeProgram).filter_by(status=ACTIVE).filter_by(user_id=user_id).options(load_only(*fields)).all()
             logger.debug(f"Found {len(programs)} programs")
             for program in programs:
@@ -225,7 +225,7 @@ class DBService():
     def fetch_status(self, job_id):
         try:
             session = Session()
-            fields = ['job_status', 'pod_status']
+            fields = [Job.job_status, Job.pod_status]
             job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
             return {'job_status': job.job_status, 'pod_status': job.pod_status}
         finally:
@@ -234,7 +234,7 @@ class DBService():
     def fetch_job_token(self, job_id):
         try:
             session = Session()
-            fields = ['data_token']
+            fields = [Job.data_token]
             job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
             return job.data_token
         finally:
@@ -252,7 +252,7 @@ class DBService():
     def fetch_msg_token(self, job_id):
         try:
             session = Session()
-            fields = ['msg_token']
+            fields = [Job.msg_token]
             job = session.query(Job).filter_by(job_id=job_id).options(load_only(*fields)).one()
             return job.msg_token
         finally:

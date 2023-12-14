@@ -31,7 +31,7 @@ from qiskit.providers.models.backendstatus import BackendStatus
 from qiskit.providers import Options
 import concurrent.futures
 from qiskit.compiler import assemble
-from qiskit import Aer
+from qiskit_aer import Aer
 from datetime import datetime
 
 # from . import emulator_job
@@ -113,7 +113,7 @@ class EmulatorBackend(Backend):
         # pending_jobs (int) – The number of pending jobs on the backend
         # status_msg (str) – The status msg for the backend
         return BackendStatus(
-            backend_name=self.name(),
+            backend_name=self.name,
             backend_version="1",
             operational=True,
             pending_jobs=0,
